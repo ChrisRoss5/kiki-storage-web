@@ -1,0 +1,39 @@
+<script setup lang="ts"></script>
+
+<template>
+  <router-view v-slot="{ Component, route }">
+    <Transition :name="route.meta.transition">
+      <component
+        :is="Component"
+        class="transition duration-500 absolute top-0 left-0 right-0 bottom-0"
+      />
+    </Transition>
+  </router-view>
+</template>
+
+<style>
+#app {
+  overflow: hidden;
+}
+
+.scale-out-enter-from,
+.scale-out-leave-to,
+.scale-in-enter-from,
+.scale-in-leave-to {
+  opacity: 0;
+  position: absolute;
+}
+
+.scale-out-enter-from {
+  transform: scale(1.1);
+}
+.scale-out-leave-to {
+  transform: scale(0.9);
+}
+.scale-in-enter-from {
+  transform: scale(0.9);
+}
+.scale-in-leave-to {
+  transform: scale(1.1);
+}
+</style>
