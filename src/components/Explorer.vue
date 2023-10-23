@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import ExplorerNavbar from "./ExplorerNavbar.vue";
 import ExplorerBody from "./ExplorerBody.vue";
@@ -10,10 +10,12 @@ const router = useRouter();
 const table = ref<InstanceType<typeof ExplorerBody> | null>(null);
 
 const items = reactive<(File | Folder)[]>([]);
-const folderPath = ref<Folder[]>([]);
+const folderPaths = ref<string[]>([]);
+const currentPath = computed(() => folderPaths.value.at(-1) || "");
 
 function addFolder(name: string) {
-  items.push({ name, dateAdded: new Date() });
+  const path = currentPath.value ? `${currentPath.value}/${name}` : name;
+  items.push({ name, dateAdded: new Date(), path: currentPath.value });
 }
 
 function handleItemDblClicked(item: Item) {
