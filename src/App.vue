@@ -1,14 +1,14 @@
 <script setup lang="ts"></script>
 
 <template>
-  <router-view v-slot="{ Component, route }">
+  <RouterView v-slot="{ Component, route }">
     <Transition :name="route.meta.transition">
       <component
         :is="Component"
         class="transition duration-500 absolute top-0 left-0 right-0 bottom-0"
       />
     </Transition>
-  </router-view>
+  </RouterView>
 </template>
 
 <style>

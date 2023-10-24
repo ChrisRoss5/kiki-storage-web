@@ -1,53 +1,46 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
 import Modal from "./Modal.vue";
-import { isDuplicateName } from "@/utils";
+import { checkName } from "@/utils";
 
-const errorModal = ref<InstanceType<typeof Modal> | null>(null);
-const router = useRouter();
+const modal = ref<InstanceType<typeof Modal> | null>(null);
 
 const props = defineProps<{
   items: (File | Folder)[];
-  folderPath: string[];
+  folderPaths: string[];
 }>();
 const emit = defineEmits<{
-  (e: "addFolder", name: string): void;
+  (e: "addFolder", name: string): void; // nosonar
 }>();
 
 const newFolderName = ref("");
 
-function handleFolderAdd() {
-  if (isDuplicateName(newFolderName.value, "folder", props.items))
-    return errorModal.value?.open();
-  emit("addFolder", newFolderName.value);
+function handleAddFolderClick() {
+  const name = newFolderName.value;
+  const { isValid, message } = checkName(name, "folder", props.items);
+  if (!isValid) return modal.value?.showError(message);
+  emit("addFolder", name);
   newFolderName.value = "";
 }
 </script>
 
 <template>
   <div class="flex items-center gap-5">
-    <div class="text-2xl">
-      <div @click="router.push('/')">
+    <div class="flex items-center flex-wrap text-2xl">
+      <RouterLink to="/">
         <span class="material-symbols-outlined"> cloud </span>
         Personal drive
-      </div>
-      <template v-if="folderPath.length">
+      </RouterLink>
+      <template v-for="path in folderPaths">
         <span class="material-symbols-outlined"> chevron_right </span>
-        <span v-for="folder in folderPath">
-          {{ folder }}
-          <span
-            v-show="folder != folderPath.at(-1)"
-            class="material-symbols-outlined"
-          >
-            chevron_right
-          </span>
-        </span>
+        <RouterLink :to="`/${path}`" class="whitespace-pre">
+          {{ path.slice(path.lastIndexOf("/") + 1) }}
+        </RouterLink>
       </template>
     </div>
     <div class="dsy-join">
       <input
-        v-model="newFolderName"
+        v-model.trim="newFolderName"
         type="text"
         placeholder="Add a new folder"
         class="dsy-join-item dsy-input dsy-input-primary outline-none"
@@ -55,18 +48,16 @@ function handleFolderAdd() {
       <button
         class="dsy-join-item dsy-btn dsy-btn-primary"
         :class="{ 'dsy-btn-disabled': !newFolderName }"
-        @click="handleFolderAdd"
+        @click="handleAddFolderClick"
       >
         <span class="material-symbols-outlined"> add </span>
       </button>
     </div>
-    <button class="dsy-btn dsy-btn-primary">
-      <span class="material-symbols-outlined"> cloud_upload </span>
-    </button>
-    <Modal :is-error="true" ref="errorModal">
-      A folder named "{{ newFolderName }}" already exists!
-    </Modal>
+    <div class="dsy-tooltip" data-tip="Upload files">
+      <button class="dsy-btn dsy-btn-primary">
+        <span class="material-symbols-outlined"> cloud_upload </span>
+      </button>
+    </div>
+    <Modal ref="modal" />
   </div>
 </template>
-
-<style scoped></style>

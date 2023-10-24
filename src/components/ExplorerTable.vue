@@ -8,7 +8,7 @@ defineProps<{ items: (File | Folder)[] }>();
 defineExpose({ selectedItems, deselectAll });
 
 const emit = defineEmits<{
-  (e: "itemDblClicked", item: File | Folder): void;
+  (e: "itemDblClicked", item: File | Folder): void; // nosonar
 }>();
 
 function handleRowClick(item: File | Folder, e: MouseEvent) {
@@ -26,8 +26,9 @@ function deselectAll() {
 
 <template>
   <table class="dsy-table place-self-start">
+    <caption class="sr-only">Explorer table</caption>
     <thead>
-      <th width="99%">Name</th>
+      <th class="w-full">Name</th>
       <th>Size</th>
       <th>Type</th>
       <th>Date added</th>
@@ -46,7 +47,7 @@ function deselectAll() {
             class="fiv-viv text-xl mr-3"
             :class="isFile(item) ? `fiv-icon-${item.type}` : 'fiv-icon-folder'"
           ></span>
-          {{ item.name }}
+          <span class="whitespace-pre"> {{ item.name }}</span>
         </td>
         <td>{{ isFile(item) ? item.size : "" }}</td>
         <td>{{ isFile(item) ? item.type : "Folder" }}</td>
@@ -55,5 +56,3 @@ function deselectAll() {
     </tbody>
   </table>
 </template>
-
-<style scoped></style>

@@ -1,51 +1,75 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
-import ExplorerNavbar from "./ExplorerNavbar.vue";
-import ExplorerBody from "./ExplorerBody.vue";
+import {  isFolder } from "@/utils";
+import { computed, reactive, ref, watchEffect } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import ExplorerTable from "./ExplorerTable.vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
-import { isFolder } from "@/utils";
+import ExplorerNavbar from "./ExplorerNavbar.vue";
+import Modal from "./Modal.vue";
 
 const router = useRouter();
-const table = ref<InstanceType<typeof ExplorerBody> | null>(null);
+const route = useRoute();
+const explorerTable = ref<InstanceType<typeof ExplorerTable> | null>(null);
+const modal = ref<InstanceType<typeof Modal> | null>(null);  // todo
 
 const items = reactive<(File | Folder)[]>([]);
 const folderPaths = ref<string[]>([]);
-const currentPath = computed(() => folderPaths.value.at(-1) || "");
+const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
+
+watchEffect(() => {
+  /* const response = await fetch(
+    `https://jsonplaceholder.typicode.com/todos/${todoId.value}`
+    )
+    data.value = await response.json() */
+  let newPath = decodeURIComponent(route.path.replace(/\/+/g, "/"));
+  if (newPath.startsWith("/")) newPath = newPath.slice(1);
+  if (newPath.endsWith("/")) newPath = newPath.slice(0, -1);
+  if (newPath) {
+    const pathSplit = newPath.split("/");
+    folderPaths.value = pathSplit.map((_, i) =>
+      pathSplit.slice(0, i + 1).join("/")
+    );
+  } else folderPaths.value = [];
+  items.length = 0;
+});
 
 function addFolder(name: string) {
-  const path = currentPath.value ? `${currentPath.value}/${name}` : name;
   items.push({ name, dateAdded: new Date(), path: currentPath.value });
 }
 
 function handleItemDblClicked(item: Item) {
-  if (isFolder(item)) router.push(item.name);
+  if (isFolder(item))
+    router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
   else console.log("open file");
 }
 </script>
 
 <template>
   <div class="flex-1 flex flex-col mx-5 mb-5 gap-5">
-    <ExplorerNavbar :items="items" @add-folder="addFolder" />
-    <div id="main" class="flex-1 flex" @click.self="table?.deselectAll">
-      <ExplorerBody
+    <ExplorerNavbar
+      :items="items"
+      :folderPaths="folderPaths"
+      @add-folder="addFolder"
+    />
+    <div class="flex-1 flex" @click.self="explorerTable?.deselectAll">
+      <ExplorerTable
         v-if="items.length"
         :items="items"
-        ref="table"
+        ref="explorerTable"
         @item-dbl-clicked="handleItemDblClicked"
       />
       <div
         v-else
-        class="flex-1 flex-center border-2 border-gray-500 border-dashed rounded-2xl"
+        class="flex-1 flex-center flex-col gap-3 border-2 border-gray-500 border-dashed rounded-2xl"
       >
-        <div class="flex flex-col items-center gap-5">
-          <span class="material-symbols-outlined"> draft </span>
-          <div class="text-2xl">Drop files or create a new folder</div>
-        </div>
+        <span class="material-symbols-outlined"> draft </span>
+        <div class="text-2xl">Drop files or create a new folder</div>
       </div>
     </div>
-    <ExplorerFooter :items="items" :selectedItems="table?.selectedItems" />
+    <ExplorerFooter
+      :items="items"
+      :selectedItems="explorerTable?.selectedItems"
+    />
+    <Modal ref="modal" />
   </div>
 </template>
-
-<style scoped></style>

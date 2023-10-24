@@ -25,5 +25,3 @@ const selectedItemsSize = computed(() => {
     </template>
   </div>
 </template>
-
-<style scoped></style>

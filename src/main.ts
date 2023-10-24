@@ -8,7 +8,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 
 const routes = [
   { path: "/login", component: Login, meta: { transition: "scale-out" } },
-  { path: "/", component: Home, meta: { transition: "scale-in" } },
+  { path: "/:pathMatch(.*)*", component: Home, meta: { transition: "scale-in" } },
 ];
 
 const router = createRouter({

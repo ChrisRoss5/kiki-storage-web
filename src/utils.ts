@@ -6,12 +6,21 @@ export function isFolder(item: Folder | File): item is Folder {
   return !isFile(item);
 }
 
-export function isDuplicateName(
+export function checkName(
   name: string,
   type: "file" | "folder",
   items: Item[]
-): boolean {
-  return type == "file"
-    ? items.filter(isFile).some((f) => f.name === name)
-    : items.filter(isFolder).some((f) => f.name === name);
+): { isValid: boolean; message?: string } {
+  let message = "";
+  if (
+    type == "file"
+      ? items.filter(isFile).some((f) => f.name == name)
+      : items.filter(isFolder).some((f) => f.name == name)
+  )
+    message = `This destination already contains a ${type} named '${name}'.`;
+  else if (/[\\/:*?"<>|]/.test(name))
+    message =
+      `A ${type} name can't contain any of the following characters: ` +
+      "\\ / : * ? \" < > |";
+  return { isValid: !message, message };
 }
