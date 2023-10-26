@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.flex-center {
-  @apply flex items-center justify-center;
-}
-
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -16,6 +12,11 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  @media (prefers-color-scheme: dark) {
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #121212;
+  }
 }
 
 a {
@@ -23,20 +24,15 @@ a {
   text-decoration: inherit;
   cursor: pointer;
 }
-
 body {
   margin: 0;
   overflow: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #121212;
-  }
-}
-
 .material-symbols-outlined {
   vertical-align: middle;
   user-select: none;
+}
+.flex-center {
+  @apply flex items-center justify-center;
 }

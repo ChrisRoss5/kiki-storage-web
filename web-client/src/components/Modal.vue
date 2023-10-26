@@ -1,38 +1,23 @@
 <script setup lang="ts">
-import { ref } from "vue";
-
-defineExpose({ show, showError });
+import { state } from "@/scripts/modal";
+import { ref, watch } from "vue";
 
 const dialog = ref<HTMLDialogElement | null>(null);
 
-const message = ref("");
-const isError = ref(false);
-
-function show(_message = "") {
-  message.value = _message;
-  isError.value = false;
-  dialog.value?.showModal();
-}
-
-function showError(_message = "") {
-  message.value = _message;
-  isError.value = true;
-  dialog.value?.showModal();
-}
+watch(
+  () => state.trigger,
+  () => dialog.value?.showModal()
+);
 </script>
 
 <template>
   <dialog ref="dialog" class="dsy-modal">
     <div class="dsy-modal-box">
-      <div v-if="isError" class="dsy-alert dsy-alert-error">
+      <div v-if="state.isError" class="dsy-alert dsy-alert-error">
         <span class="material-symbols-outlined"> cancel </span>
-        <div v-if="message">{{ message }}</div>
-        <slot v-else></slot>
+        <div>{{ state.message }}</div>
       </div>
-      <template v-else>
-        <div v-if="message">{{ message }}</div>
-        <slot v-else></slot>
-      </template>
+      <div v-else>{{ state.message }}</div>
       <div class="dsy-modal-action">
         <form method="dialog">
           <button class="dsy-btn">Close</button>

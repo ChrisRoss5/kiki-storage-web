@@ -1,4 +1,6 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Modal from "@/components/Modal.vue";
+</script>
 
 <template>
   <RouterView v-slot="{ Component, route }">
@@ -9,6 +11,7 @@
       />
     </Transition>
   </RouterView>
+  <Modal />
 </template>
 
 <style>

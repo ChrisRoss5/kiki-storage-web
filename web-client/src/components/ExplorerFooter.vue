@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { isFolder } from "@/utils";
 import { computed } from "vue";
 
 const props = defineProps<{
-  items: (File | Folder)[];
-  selectedItems?: (File | Folder)[];
+  items: Item[];
+  selectedItems?: Item[];
 }>();
 
 const selectedItemsSize = computed(() => {
   const items = props.selectedItems;
-  if (!items?.length || items.some(isFolder)) return "";
-  return items.reduce((acc, i) => acc + (i as File).size, 0);
+  if (!items?.length || items.some(i => i.isFolder)) return "";
+  return items.reduce((acc, i) => acc + i.size!, 0);
 });
 </script>
 

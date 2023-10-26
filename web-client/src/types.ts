@@ -1,15 +1,13 @@
 interface Item {
   name: string;
   dateAdded: Date;
+  dateModified: Date;
   path: string;
+  isFolder: boolean;
+  size?: number;
 }
 
-interface File extends Item {
-  size: number;
-  type: string;
-}
-
-interface Folder extends Item {
-  files?: File[];
-  folders?: Folder[];
+interface FetchResult {
+  count: number;
+  error?: string;
 }

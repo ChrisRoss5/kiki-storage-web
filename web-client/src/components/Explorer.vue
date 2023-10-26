@@ -1,26 +1,22 @@
 <script setup lang="ts">
-import {  isFolder } from "@/utils";
-import { computed, reactive, ref, watchEffect } from "vue";
+import { api } from "@/scripts/api";
+import { computed, ref, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import ExplorerTable from "./ExplorerTable.vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerNavbar from "./ExplorerNavbar.vue";
-import Modal from "./Modal.vue";
+import ExplorerTable from "./ExplorerTable.vue";
+import * as utils from "@/scripts/utils";
+import { showError } from "@/scripts/modal";
 
 const router = useRouter();
 const route = useRoute();
 const explorerTable = ref<InstanceType<typeof ExplorerTable> | null>(null);
-const modal = ref<InstanceType<typeof Modal> | null>(null);  // todo
 
-const items = reactive<(File | Folder)[]>([]);
+const items = ref<Item[]>([]);
 const folderPaths = ref<string[]>([]);
 const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
 
-watchEffect(() => {
-  /* const response = await fetch(
-    `https://jsonplaceholder.typicode.com/todos/${todoId.value}`
-    )
-    data.value = await response.json() */
+watchEffect(async () => {
   let newPath = decodeURIComponent(route.path.replace(/\/+/g, "/"));
   if (newPath.startsWith("/")) newPath = newPath.slice(1);
   if (newPath.endsWith("/")) newPath = newPath.slice(0, -1);
@@ -30,17 +26,47 @@ watchEffect(() => {
       pathSplit.slice(0, i + 1).join("/")
     );
   } else folderPaths.value = [];
-  items.length = 0;
+  items.value = await api.getItems(newPath);
+  explorerTable.value?.deselectAll();
 });
 
-function addFolder(name: string) {
-  items.push({ name, dateAdded: new Date(), path: currentPath.value });
+async function addFolder(name: string) {
+  const item = {
+    name,
+    dateAdded: new Date(),
+    dateModified: new Date(),
+    path: currentPath.value,
+    isFolder: true,
+  };
+  items.value.push(item);
+  await api.createItem(item);
+}
+
+async function addFiles(files: FileList, path?: string) {
+  path ??= currentPath.value;
+  const newItems = utils.convertFilesToItems(files, path);
+  if (!newItems.length)
+    return showError("No valid files were selected.");
+  const scopedItems =
+    path == currentPath.value ? items.value : await api.getItems(path);
+  for (const { name } of newItems) {
+    const { isValid, message } = utils.checkName(name, "file", scopedItems);
+    if (!isValid) return showError(message);
+  }
+  if (!newItems.length) return;
+  if (path == currentPath.value) items.value.push(...newItems);
+  await api.createItems(newItems);
 }
 
 function handleItemDblClicked(item: Item) {
-  if (isFolder(item))
+  if (item.isFolder)
     router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
   else console.log("open file");
+}
+
+function handleDrop(e: DragEvent, path?: string) {
+  utils.clearDragOverStyle(e);
+  if (e.dataTransfer) addFiles(e.dataTransfer.files, path);
 }
 </script>
 
@@ -49,18 +75,29 @@ function handleItemDblClicked(item: Item) {
     <ExplorerNavbar
       :items="items"
       :folderPaths="folderPaths"
-      @add-folder="addFolder"
+      :add-folder="addFolder"
+      :add-files="addFiles"
+      :handle-drop="handleDrop"
     />
-    <div class="flex-1 flex" @click.self="explorerTable?.deselectAll">
+    <div
+      id="explorer-container"
+      class="flex-1 flex [&.dragover_tr:not(.folder)]:pointer-events-none"
+      @click="explorerTable?.deselectAll"
+      @drop.stop.prevent="handleDrop"
+      @dragover.stop.prevent="utils.setDragOverStyle"
+      @dragleave.stop.prevent="utils.clearDragOverStyle"
+      @dragend.stop.prevent="utils.clearDragOverStyle"
+    >
       <ExplorerTable
+        ref="explorerTable"
         v-if="items.length"
         :items="items"
-        ref="explorerTable"
-        @item-dbl-clicked="handleItemDblClicked"
+        :handleItemDblClicked="handleItemDblClicked"
+        :handle-drop="handleDrop"
       />
       <div
         v-else
-        class="flex-1 flex-center flex-col gap-3 border-2 border-gray-500 border-dashed rounded-2xl"
+        class="flex-1 flex-center flex-col gap-3 border-2 border-gray-500 border-dashed rounded-2xl pointer-events-none select-none"
       >
         <span class="material-symbols-outlined"> draft </span>
         <div class="text-2xl">Drop files or create a new folder</div>
@@ -70,6 +107,5 @@ function handleItemDblClicked(item: Item) {
       :items="items"
       :selectedItems="explorerTable?.selectedItems"
     />
-    <Modal ref="modal" />
   </div>
 </template>

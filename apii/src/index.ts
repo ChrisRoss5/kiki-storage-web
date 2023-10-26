@@ -1,148 +1,65 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import express from "express";
+import cors from "cors";
 
 const prisma = new PrismaClient();
 const app = express();
 
+app.use(cors())
 app.use(express.json());
 
-app.post(`/signup`, async (req, res) => {
-  const { name, email, posts } = req.body;
-
-  const postData = posts?.map((post: Prisma.PostCreateInput) => {
-    return { title: post?.title, content: post?.content };
-  });
-
-  const result = await prisma.user.create({
-    data: {
-      name,
-      email,
-      posts: {
-        create: postData,
-      },
-    },
-  });
-  res.json(result);
-});
-
-app.post(`/post`, async (req, res) => {
-  const { title, content, authorEmail } = req.body;
-  const result = await prisma.post.create({
-    data: {
-      title,
-      content,
-      author: { connect: { email: authorEmail } },
-    },
-  });
-  res.json(result);
-});
-
-app.put("/post/:id/views", async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const post = await prisma.post.update({
-      where: { id: Number(id) },
-      data: {
-        viewCount: {
-          increment: 1,
-        },
-      },
-    });
-
-    res.json(post);
-  } catch (error) {
-    res.json({ error: `Post with ID ${id} does not exist in the database` });
-  }
-});
-
-app.put("/publish/:id", async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const postData = await prisma.post.findUnique({
-      where: { id: Number(id) },
-      select: {
-        published: true,
-      },
-    });
-
-    const updatedPost = await prisma.post.update({
-      where: { id: Number(id) || undefined },
-      data: { published: !postData?.published },
-    });
-    res.json(updatedPost);
-  } catch (error) {
-    res.json({ error: `Post with ID ${id} does not exist in the database` });
-  }
-});
-
-app.delete(`/post/:id`, async (req, res) => {
-  const { id } = req.params;
-  const post = await prisma.post.delete({
+app.get("/getItems", async (req, res) => {
+  const result = await prisma.item.findMany({
     where: {
-      id: Number(id),
+      path: req.query.path as string,
     },
   });
-  res.json(post);
+  res.json(result);
 });
 
-app.get("/users", async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
+app.post("/createItems", async (req, res) => {
+  const result = await prisma.item.createMany({ data: req.body });
+  res.json(result);
 });
 
-app.get("/user/:id/drafts", async (req, res) => {
-  const { id } = req.params;
+app.put(`/renameItem`, async (req, res) => {
+  const { isFolder, path, oldName, newName } = req.body;
+  let count = 0;
+  if (isFolder) {
+    const oldPathLength = `${path}/${oldName}`.length;
+    count += await prisma.$executeRaw`
+        UPDATE Item SET
+          path = STUFF(path, 1, ${oldPathLength}, ${path}/${newName})
+          WHERE "path" LIKE ${path}/${oldName}%`;
+  }
+  count += +!!(await prisma.item.update({
+    where: {
+      name_path: { name: oldName, path },
+    },
+    data: { name: newName },
+  }));
+  res.json({ count } satisfies Prisma.BatchPayload);
+});
 
-  const drafts = await prisma.user
-    .findUnique({
+app.delete(`/deleteItems`, async (req, res) => {
+  let count = 0;
+  for (const { isFolder, path, name } of req.body) {
+    if (isFolder) {
+      count += (
+        await prisma.item.deleteMany({
+          where: {
+            path: { startsWith: `${path}/${name}` },
+          },
+        })
+      ).count;
+    }
+    count += +!!(await prisma.item.delete({
       where: {
-        id: Number(id),
+        name_path: { name, path },
       },
-    })
-    .posts({
-      where: { published: false },
-    });
-
-  res.json(drafts);
-});
-
-app.get(`/post/:id`, async (req, res) => {
-  const { id }: { id?: string } = req.params;
-
-  const post = await prisma.post.findUnique({
-    where: { id: Number(id) },
-  });
-  res.json(post);
-});
-
-app.get("/feed", async (req, res) => {
-  const { searchString, skip, take, orderBy } = req.query;
-
-  const or: Prisma.PostWhereInput = searchString
-    ? {
-        OR: [
-          { title: { contains: searchString as string } },
-          { content: { contains: searchString as string } },
-        ],
-      }
-    : {};
-
-  const posts = await prisma.post.findMany({
-    where: {
-      published: true,
-      ...or,
-    },
-    include: { author: true },
-    take: Number(take) || undefined,
-    skip: Number(skip) || undefined,
-    orderBy: {
-      updatedAt: orderBy as Prisma.SortOrder,
-    },
-  });
-
-  res.json(posts);
+    }));
+  }
+  res.json({ count } satisfies Prisma.BatchPayload);
 });
 
 const server = app.listen(3000, () =>
