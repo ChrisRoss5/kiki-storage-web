@@ -10,11 +10,9 @@ import ExplorerTable from "./ExplorerTable.vue";
 
 const router = useRouter();
 const route = useRoute();
-const explorerTable = ref<InstanceType<typeof ExplorerTable> | null>(null);
 
 const items = ref<Item[]>([]);
-const itemsSelected = ref<Item[]>([]);
-const itemsLoading = ref<Item[]>([]);
+utils.initSelectAllListener(items);
 
 const folderPaths = ref<string[]>([]);
 const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
@@ -30,8 +28,9 @@ watchEffect(async () => {
     );
   } else folderPaths.value = [];
   items.value = await api.getItems(newPath);
-  explorerTable.value?.deselectAll();
+  utils.deselectAll(items.value);
 });
+
 
 async function addFolder(name: string) {
   const item = {
@@ -76,7 +75,7 @@ function handleDrop(e: DragEvent, path?: string) {
   <div class="flex-1 flex flex-col mx-5 mb-5 gap-5">
     <ExplorerNavbar
       :items="items"
-      :folderPaths="folderPaths"
+      :folder-paths="folderPaths"
       :add-folder="addFolder"
       :add-files="addFiles"
       :handle-drop="handleDrop"
@@ -84,15 +83,14 @@ function handleDrop(e: DragEvent, path?: string) {
     <div
       id="explorer-container"
       class="flex-1 flex [&.dragover_tr:not(.folder)]:pointer-events-none"
-      @click="explorerTable?.deselectAll"
       @drop.stop.prevent="handleDrop"
       @dragover.stop.prevent="utils.setDragOverStyle"
       @dragleave.stop.prevent="utils.clearDragOverStyle"
       @dragend.stop.prevent="utils.clearDragOverStyle"
-      @keyup.esc="explorerTable?.deselectAll"
+      @keyup.esc="utils.deselectAll(items)"
+      @click="utils.deselectAll(items)"
     >
       <ExplorerTable
-        ref="explorerTable"
         v-if="items.length"
         :items="items"
         :handleItemOpen="handleItemOpen"
@@ -106,9 +104,6 @@ function handleDrop(e: DragEvent, path?: string) {
         <div class="text-2xl">Drop files or create a new folder</div>
       </div>
     </div>
-    <ExplorerFooter
-      :items="items"
-      :selectedItems="explorerTable?.selectedItems"
-    />
+    <ExplorerFooter :items="items" />
   </div>
 </template>

@@ -1,3 +1,5 @@
+import { Ref } from "vue";
+
 export function checkName(
   name: string,
   type: "file" | "folder",
@@ -69,6 +71,34 @@ export function clearDragOverStyle(e: DragEvent) {
     target;
   target.classList.remove("dragover");
   target.style.background = "";
+}
+
+export function initSelectAllListener(items: Ref<Item[]>) {
+  document.addEventListener("keydown", (e) => {
+    if (
+      e.key == "a" &&
+      e.ctrlKey &&
+      !(
+        document.activeElement?.tagName == "INPUT" ||
+        document.activeElement?.tagName == "TEXTAREA" ||
+        (document.activeElement as HTMLElement).isContentEditable
+      )
+    ) {
+      document.body.style.userSelect = "none";
+      e.preventDefault();
+      console.log("select all");
+      selectAll(items.value);
+      document.body.style.userSelect = "";
+    }
+  });
+}
+
+export function selectAll(items: Item[]) {
+  items.forEach((i) => (i.isSelected = true));
+}
+
+export function deselectAll(items: Item[]) {
+  items.forEach((i) => (i.isSelected = false));
 }
 
 /* EXPERIMENTAL; UNUSED; NON-STANDARD */

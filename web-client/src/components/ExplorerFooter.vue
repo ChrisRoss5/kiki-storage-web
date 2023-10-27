@@ -1,19 +1,26 @@
 <script setup lang="ts">
+import { api } from "@/scripts/api";
 import { computed } from "vue";
 
 const props = defineProps<{
   items: Item[];
-  selectedItems?: Item[];
 }>();
 
+const selectedItems = computed(() => props.items.filter((i) => i.isSelected));
 const selectedItemsSize = computed(() => {
-  const items = props.selectedItems;
-  if (!items?.length || items.some((i) => i.isFolder)) return "";
-  return items.reduce((acc, i) => acc + i.size!, 0);
+  if (
+    !selectedItems.value?.length ||
+    selectedItems.value.some((i) => i.isFolder)
+  )
+    return "";
+  return selectedItems.value.reduce((acc, i) => acc + i.size!, 0);
 });
 
 function deleteItems() {
-  
+  api.deleteItems(selectedItems.value);
+  for (const item of selectedItems.value) {
+    props.items.splice(props.items.indexOf(item), 1);
+  }
 }
 </script>
 
@@ -55,9 +62,10 @@ function deleteItems() {
           <span class="material-symbols-outlined"> drive_file_move </span>
         </div>
         <div
+          v-show="selectedItems.length == 1"
           class="dsy-tooltip p-4 cursor-pointer hover:bg-gray-500/20"
           data-tip="Rename"
-          @click=""
+          @click="selectedItems[0].isRenaming = true"
           v-wave
         >
           <span class="material-symbols-outlined"> edit </span>
