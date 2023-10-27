@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { api } from "@/scripts/api";
+import { showError } from "@/scripts/modal";
+import * as utils from "@/scripts/utils";
 import { computed, ref, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerNavbar from "./ExplorerNavbar.vue";
 import ExplorerTable from "./ExplorerTable.vue";
-import * as utils from "@/scripts/utils";
-import { showError } from "@/scripts/modal";
 
 const router = useRouter();
 const route = useRoute();
 const explorerTable = ref<InstanceType<typeof ExplorerTable> | null>(null);
 
 const items = ref<Item[]>([]);
+const itemsSelected = ref<Item[]>([]);
+const itemsLoading = ref<Item[]>([]);
+
 const folderPaths = ref<string[]>([]);
 const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
 
@@ -45,8 +48,7 @@ async function addFolder(name: string) {
 async function addFiles(files: FileList, path?: string) {
   path ??= currentPath.value;
   const newItems = utils.convertFilesToItems(files, path);
-  if (!newItems.length)
-    return showError("No valid files were selected.");
+  if (!newItems.length) return showError("No valid files were selected.");
   const scopedItems =
     path == currentPath.value ? items.value : await api.getItems(path);
   for (const { name } of newItems) {
@@ -58,7 +60,7 @@ async function addFiles(files: FileList, path?: string) {
   await api.createItems(newItems);
 }
 
-function handleItemDblClicked(item: Item) {
+function handleItemOpen(item: Item) {
   if (item.isFolder)
     router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
   else console.log("open file");
@@ -87,12 +89,13 @@ function handleDrop(e: DragEvent, path?: string) {
       @dragover.stop.prevent="utils.setDragOverStyle"
       @dragleave.stop.prevent="utils.clearDragOverStyle"
       @dragend.stop.prevent="utils.clearDragOverStyle"
+      @keyup.esc="explorerTable?.deselectAll"
     >
       <ExplorerTable
         ref="explorerTable"
         v-if="items.length"
         :items="items"
-        :handleItemDblClicked="handleItemDblClicked"
+        :handleItemOpen="handleItemOpen"
         :handle-drop="handleDrop"
       />
       <div

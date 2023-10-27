@@ -15,6 +15,7 @@ const newFolderName = ref("");
 
 function handleAddFolderClick() {
   const name = newFolderName.value;
+  if (!name) return;
   const { isValid, message } = utils.checkName(name, "folder", props.items);
   if (!isValid) return showError(message);
   props.addFolder(name);
@@ -68,12 +69,19 @@ function handleFileUpload(e: Event) {
         class="dsy-join-item dsy-btn dsy-btn-primary"
         :class="{ 'dsy-btn-disabled': !newFolderName }"
         @click="handleAddFolderClick"
+        v-wave
       >
         <span class="material-symbols-outlined"> add </span>
       </button>
     </div>
     <div class="dsy-tooltip" data-tip="Upload files">
-      <label class="dsy-btn dsy-btn-primary">
+      <label
+        class="dsy-btn dsy-btn-primary"
+        tabindex="0"
+        @keyup.enter="($event) => (
+          ($event.target as HTMLElement).firstElementChild as HTMLElement).click()"
+        v-wave
+      >
         <input type="file" class="hidden" multiple @change="handleFileUpload" />
         <span class="material-symbols-outlined"> cloud_upload </span>
       </label>

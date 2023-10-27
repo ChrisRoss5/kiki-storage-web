@@ -5,7 +5,7 @@ const selectedItems = ref<Item[]>([]);
 
 defineProps<{
   items: Item[];
-  handleItemDblClicked: (item: Item) => void;
+  handleItemOpen: (item: Item) => void;
   handleDrop: (e: DragEvent, path?: string) => void;
 }>();
 defineExpose({ selectedItems, deselectAll });
@@ -19,7 +19,7 @@ function getItemExtension(item: Item) {
   return split.length > 1 ? split.at(-1) : "";
 }
 
-function handleRowClick(item: Item, e: MouseEvent) {
+function handleRowSelect(item: Item, e: MouseEvent | KeyboardEvent) {
   if (e.ctrlKey)
     if (selectedItems.value.includes(item))
       selectedItems.value = selectedItems.value.filter((i) => i != item);
@@ -49,8 +49,11 @@ function handleRowClick(item: Item, e: MouseEvent) {
           folder: item.isFolder,
         }"
         @drop.stop.prevent="handleDrop($event, `${item.path}/${item.name}`)"
-        @click.stop="handleRowClick(item, $event)"
-        @dblclick.stop="handleItemDblClicked(item)"
+        @click.stop="handleRowSelect(item, $event)"
+        @dblclick.stop="handleItemOpen(item)"
+        @keyup.space="handleRowSelect(item, $event)"
+        @keyup.enter="handleItemOpen(item)"
+        tabindex="0"
       >
         <td class="rounded-l-lg">
           <span
