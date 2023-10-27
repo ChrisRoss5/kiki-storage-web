@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { api } from "@/scripts/api";
+import api from "@/scripts/api";
 import { computed } from "vue";
-import { showConfirm } from "@/scripts/modal";
+import modal from "@/scripts/modal";
 
 const props = defineProps<{
   items: Item[];
@@ -20,7 +20,7 @@ const selectedItemsSize = computed(() => {
 async function deleteItems() {
   const plural = selectedItems.value.length > 1;
   const toDelete = plural ? `${selectedItems.value.length} items` : "one item";
-  if (!(await showConfirm(`Are you sure you want to delete ${toDelete}?`)))
+  if (!(await modal.confirm(`Are you sure you want to delete ${toDelete}?`)))
     return;
   api.deleteItems(selectedItems.value);
   for (const item of selectedItems.value) {

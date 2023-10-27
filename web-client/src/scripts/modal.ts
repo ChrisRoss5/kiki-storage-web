@@ -1,38 +1,31 @@
-import { reactive, watch } from "vue";
+import { reactive } from "vue";
 
-export const defaultState = {
-  trigger: 0,
+const initialState = {
+  isOpen: false,
   message: "",
   isError: false,
-  isConfirmation: false,
-  isConfirmed: null as boolean | null,
-}
+  handleConfirmation: null as
+    | null
+    | ((value: boolean | PromiseLike<boolean>) => void),
+};
 
-export const state = reactive(defaultState);
-
-export function show(_message = "") {
-  state.message = _message;
-  state.trigger++;
-}
-
-export function showError(_message = "") {
-  state.message = _message;
-  state.isError = true;
-  state.trigger++;
-}
-
-export function showConfirm(_message = "") {
-  state.message = _message;
-  state.isConfirmation = true;
-  state.trigger++;
-  return new Promise((resolve) => {
-    watch(() => state.isConfirmed, () => {
-      console.log("confirmed");
-      resolve(state.isConfirmed);
+export default {
+  state: reactive({ ...initialState }),
+  show: function (_message = "") {
+    this.state.isOpen = true;
+    this.state.message = _message;
+  },
+  showError: function (_message = "") {
+    this.state.isError = true;
+    this.show(_message);
+  },
+  confirm: async function (_message = "") {
+    this.show(_message);
+    return new Promise<boolean>((resolve) => {
+      this.state.handleConfirmation = resolve;
     });
-  });
-}
-
-export function reset() {
-  Object.assign(state, defaultState);
-}
+  },
+  close: function () {
+    Object.assign(this.state, initialState);
+  },
+};

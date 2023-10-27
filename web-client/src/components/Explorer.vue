@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { api } from "@/scripts/api";
-import { showError } from "@/scripts/modal";
+import api from "@/scripts/api";
 import * as utils from "@/scripts/utils";
 import { computed, ref, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerNavbar from "./ExplorerNavbar.vue";
 import ExplorerTable from "./ExplorerTable.vue";
+import modal from "@/scripts/modal";
 
 const router = useRouter();
 const route = useRoute();
@@ -47,12 +47,12 @@ async function addFolder(name: string) {
 async function addFiles(files: FileList, path?: string) {
   path ??= currentPath.value;
   const newItems = utils.convertFilesToItems(files, path);
-  if (!newItems.length) return showError("No valid files were selected.");
+  if (!newItems.length) return modal.showError("No valid files were selected.");
   const scopedItems =
     path == currentPath.value ? items.value : await api.getItems(path);
   for (const { name } of newItems) {
     const { isValid, message } = utils.checkName(name, "file", scopedItems);
-    if (!isValid) return showError(message);
+    if (!isValid) return modal.showError(message);
   }
   if (!newItems.length) return;
   if (path == currentPath.value) items.value.push(...newItems);
@@ -82,7 +82,7 @@ function handleDrop(e: DragEvent, path?: string) {
     />
     <div
       id="explorer-container"
-      class="flex-1 flex [&.dragover_tr:not(.folder)]:pointer-events-none"
+      class="flex-1 flex rounded-2xl [&.dragover_tr:not(.folder)]:pointer-events-none"
       @drop.stop.prevent="handleDrop"
       @dragover.stop.prevent="utils.setDragOverStyle"
       @dragleave.stop.prevent="utils.clearDragOverStyle"

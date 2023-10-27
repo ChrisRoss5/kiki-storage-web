@@ -74,7 +74,7 @@ export function clearDragOverStyle(e: DragEvent) {
 }
 
 export function initClickListener(items: Ref<Item[]>) {
-  document.addEventListener("click", (e) => {
+  document.addEventListener("click", () => {
     deselectAll(items.value);
     clearRenaming(items.value);
   });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { api } from "@/scripts/api";
+import api from "@/scripts/api";
 import { ref } from "vue";
 
 const props = defineProps<{

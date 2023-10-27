@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as utils from "@/scripts/utils";
 import { ref } from "vue";
-import { showError } from "@/scripts/modal";
+import modal from "@/scripts/modal";
 
 const props = defineProps<{
   items: Item[];
@@ -17,7 +17,7 @@ function handleAddFolderClick() {
   const name = newFolderName.value;
   if (!name) return;
   const { isValid, message } = utils.checkName(name, "folder", props.items);
-  if (!isValid) return showError(message);
+  if (!isValid) return modal.showError(message);
   props.addFolder(name);
   newFolderName.value = "";
 }
@@ -39,8 +39,10 @@ function handleFileUpload(e: Event) {
         @dragend.stop.prevent="utils.clearDragOverStyle"
         draggable="false"
       >
-        <span class="material-symbols-outlined"> cloud </span>
-        Personal drive
+        <span class="material-symbols-outlined pr-2 pointer-events-none">
+          cloud
+        </span>
+        <span class="pointer-events-none">Personal drive</span>
       </RouterLink>
       <template v-for="path in folderPaths">
         <span class="material-symbols-outlined"> chevron_right </span>
