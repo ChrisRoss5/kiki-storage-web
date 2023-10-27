@@ -56,7 +56,7 @@ function renameItem(item: Item) {
     <tbody>
       <tr
         v-for="item in items"
-        :key="item.name"
+        :key="item.name + item.path"
         class="cursor-pointer hover:bg-gray-500/20"
         :class="{
           '!bg-gray-500/40': item.isSelected,
@@ -78,17 +78,17 @@ function renameItem(item: Item) {
                 : 'fiv-icon-folder'
             "
           ></span>
-          <template v-if="item.isRenaming">
+          <div v-if="item.isRenaming" class="inline-flex ml-2">
             <input
               v-model.trim="newItemName"
               type="text"
               placeholder="Press esc to cancel"
-              class="dsy-join-item dsy-input dsy-input-primary outline-none"
+              class="dsy-join-item dsy-input dsy-input-secondary outline-none"
               @keyup.enter="renameItem(item)"
               @keyup.esc="item.isRenaming = false"
             />
             <button
-              class="dsy-join-item dsy-btn dsy-btn-primary"
+              class="dsy-join-item dsy-btn dsy-btn-secondary"
               :class="{ 'dsy-btn-disabled': !newItemName }"
               @click="renameItem(item)"
               v-wave
@@ -96,14 +96,14 @@ function renameItem(item: Item) {
               <span class="material-symbols-outlined"> check </span>
             </button>
             <button
-              class="dsy-join-item dsy-btn dsy-btn-primary"
+              class="dsy-join-item dsy-btn dsy-btn-secondary"
               :class="{ 'dsy-btn-disabled': !newItemName }"
               @click="item.isRenaming = false"
               v-wave
             >
               <span class="material-symbols-outlined"> close </span>
             </button>
-          </template>
+          </div>
           <span v-else class="whitespace-pre"> {{ item.name }}</span>
         </td>
         <td>{{ !item.isFolder ? item.size : "" }}</td>

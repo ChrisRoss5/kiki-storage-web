@@ -73,6 +73,13 @@ export function clearDragOverStyle(e: DragEvent) {
   target.style.background = "";
 }
 
+export function initClickListener(items: Ref<Item[]>) {
+  document.addEventListener("click", (e) => {
+    deselectAll(items.value);
+    clearRenaming(items.value);
+  });
+}
+
 export function initSelectAllListener(items: Ref<Item[]>) {
   document.addEventListener("keydown", (e) => {
     if (
@@ -86,8 +93,8 @@ export function initSelectAllListener(items: Ref<Item[]>) {
     ) {
       document.body.style.userSelect = "none";
       e.preventDefault();
-      console.log("select all");
       selectAll(items.value);
+      clearRenaming(items.value);
       document.body.style.userSelect = "";
     }
   });
@@ -99,6 +106,10 @@ export function selectAll(items: Item[]) {
 
 export function deselectAll(items: Item[]) {
   items.forEach((i) => (i.isSelected = false));
+}
+
+export function clearRenaming(items: Item[]) {
+  items.forEach((i) => (i.isRenaming = false));
 }
 
 /* EXPERIMENTAL; UNUSED; NON-STANDARD */

@@ -12,6 +12,7 @@ const router = useRouter();
 const route = useRoute();
 
 const items = ref<Item[]>([]);
+utils.initClickListener(items);
 utils.initSelectAllListener(items);
 
 const folderPaths = ref<string[]>([]);
@@ -30,7 +31,6 @@ watchEffect(async () => {
   items.value = await api.getItems(newPath);
   utils.deselectAll(items.value);
 });
-
 
 async function addFolder(name: string) {
   const item = {
@@ -88,7 +88,6 @@ function handleDrop(e: DragEvent, path?: string) {
       @dragleave.stop.prevent="utils.clearDragOverStyle"
       @dragend.stop.prevent="utils.clearDragOverStyle"
       @keyup.esc="utils.deselectAll(items)"
-      @click="utils.deselectAll(items)"
     >
       <ExplorerTable
         v-if="items.length"

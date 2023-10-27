@@ -1,26 +1,42 @@
 <script setup lang="ts">
-import { state } from "@/scripts/modal";
+import * as modal from "@/scripts/modal";
 import { ref, watch } from "vue";
 
 const dialog = ref<HTMLDialogElement | null>(null);
 
 watch(
-  () => state.trigger,
+  () => modal.state.trigger,
   () => dialog.value?.showModal()
 );
+
+function handleConfirmation(confirmed: boolean) {
+  modal.state.isConfirmed = confirmed;
+  modal.reset();
+}
 </script>
 
 <template>
   <dialog ref="dialog" class="dsy-modal">
     <div class="dsy-modal-box">
-      <div v-if="state.isError" class="dsy-alert dsy-alert-error">
+      <div v-if="modal.state.isError" class="dsy-alert dsy-alert-error">
         <span class="material-symbols-outlined"> cancel </span>
-        <div>{{ state.message }}</div>
+        <div>{{ modal.state.message }}</div>
       </div>
-      <div v-else>{{ state.message }}</div>
+      <div v-else>{{ modal.state.message }}</div>
       <div class="dsy-modal-action">
         <form method="dialog">
-          <button class="dsy-btn">Close</button>
+          <template v-if="modal.state.isConfirmation">
+            <button
+              class="dsy-btn dsy-btn-primary"
+              @click="handleConfirmation(true)"
+            >
+              Confirm
+            </button>
+            <button class="dsy-btn" @click="handleConfirmation(false)">
+              Cancel
+            </button>
+          </template>
+          <button v-else class="dsy-btn" @click="modal.reset()">Close</button>
         </form>
       </div>
     </div>
