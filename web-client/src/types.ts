@@ -19,3 +19,4 @@ interface FetchResult {
   count: number;
   error?: string;
 }
+

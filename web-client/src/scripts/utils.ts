@@ -54,7 +54,7 @@ export function clearDragOverStyle(e: DragEvent) {
 
 /* EXPERIMENTAL; UNUSED; NON-STANDARD */
 
-export async function getAllFileEntries(
+/* export async function getAllFileEntries(
   dataTransferItemList: DataTransferItemList
 ) {
   const fileEntries = [];
@@ -91,4 +91,4 @@ async function readEntriesPromise(directoryReader: any) {
   } catch (err) {
     // console.log(err);
   }
-}
+} */

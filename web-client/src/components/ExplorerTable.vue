@@ -1,45 +1,67 @@
 <script setup lang="ts">
 import api from "@/scripts/api";
-import { ref } from "vue";
+import { useItemsStore } from "@/stores/items";
+import { usePathStore } from "@/stores/path";
+import { nextTick, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 
-const props = defineProps<{
-  items: Item[];
-  handleItemOpen: (item: Item) => void;
-  handleDrop: (e: DragEvent, path?: string) => void;
-}>();
+const router = useRouter();
+const itemsStore = useItemsStore();
+const pathStore = usePathStore();
 
+const renameInput = ref<HTMLInputElement[] | null>(null);
+const newItemName = ref("");
 let lastSelectedItemIdx = 0;
 
-const newItemName = ref("");
+watch(
+  () => pathStore.currentPath,
+  () => (lastSelectedItemIdx = 0)
+);
+// autofocus attr on "renameInput" only works once so we need to watch for changes
+watch(
+  () => itemsStore.items.find((i) => i.isRenaming),
+  async (item) => {
+    if (!item) return;
+    newItemName.value = item.name;
+    renameInput.value![0].focus();
+    await nextTick();
+    renameInput.value![0].select();
+  },
+  { flush: "post" } // wait for dom to update first
+);
 
-function getItemExtension(item: Item) {
+const getItemExtension = (item: Item) => {
   const split = item.name.split(".");
   return split.length > 1 ? split.at(-1) : "";
-}
-
-function handleRowSelect(item: Item, e: MouseEvent | KeyboardEvent) {
+};
+const handleRowSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
   if (e.ctrlKey) {
     if (item.isSelected) item.isSelected = false;
     else {
       item.isSelected = true;
-      lastSelectedItemIdx = props.items.indexOf(item);
+      lastSelectedItemIdx = itemsStore.items.indexOf(item);
     }
   } else if (e.shiftKey) {
-    props.items.forEach((i) => (i.isSelected = false));
-    const start = Math.min(lastSelectedItemIdx, props.items.indexOf(item));
-    const end = Math.max(lastSelectedItemIdx, props.items.indexOf(item));
-    for (let i = start; i <= Math.min(end, props.items.length - 1); i++)
-      props.items[i].isSelected = true;
+    itemsStore.items.forEach((i) => (i.isSelected = false));
+    const start = Math.min(lastSelectedItemIdx, itemsStore.items.indexOf(item));
+    const end = Math.max(lastSelectedItemIdx, itemsStore.items.indexOf(item));
+    for (let i = start; i <= Math.min(end, itemsStore.items.length - 1); i++)
+      itemsStore.items[i].isSelected = true;
   } else {
-    props.items.forEach((i) => (i.isSelected = false));
+    itemsStore.items.forEach((i) => (i.isSelected = false));
     item.isSelected = true;
-    lastSelectedItemIdx = props.items.indexOf(item);
+    lastSelectedItemIdx = itemsStore.items.indexOf(item);
   }
-}
-
-function renameItem(item: Item) {
+  if (!item.isRenaming) itemsStore.clearRenaming();
+};
+const handleItemOpen = (item: Item) => {
+  if (item.isFolder)
+    router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
+  else console.log("open file");
+};
+const renameItem = (item: Item) => {
   api.renameItem(item, newItemName.value);
-}
+};
 </script>
 
 <template>
@@ -55,14 +77,16 @@ function renameItem(item: Item) {
     </thead>
     <tbody>
       <tr
-        v-for="item in items"
+        v-for="item in itemsStore.items"
         :key="item.name + item.path"
         class="cursor-pointer hover:bg-gray-500/20"
         :class="{
           '!bg-gray-500/40': item.isSelected,
           folder: item.isFolder,
         }"
-        @drop.stop.prevent="handleDrop($event, `${item.path}/${item.name}`)"
+        @drop.stop.prevent="
+          itemsStore.handleDrop($event, `${item.path}/${item.name}`)
+        "
         @click.stop="handleRowSelect(item, $event)"
         @dblclick.stop="handleItemOpen(item)"
         @keyup.space="handleRowSelect(item, $event)"
@@ -80,9 +104,12 @@ function renameItem(item: Item) {
           ></span>
           <div v-if="item.isRenaming" class="inline-flex ml-2">
             <input
+              ref="renameInput"
               v-model.trim="newItemName"
               type="text"
-              placeholder="Press esc to cancel"
+              :placeholder="`Enter a new ${
+                item.isFolder ? 'folder' : 'file'
+              } name`"
               class="dsy-join-item dsy-input dsy-input-secondary outline-none"
               @keyup.enter="renameItem(item)"
               @keyup.esc="item.isRenaming = false"

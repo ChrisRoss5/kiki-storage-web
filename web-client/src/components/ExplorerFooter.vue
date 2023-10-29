@@ -1,38 +1,25 @@
 <script setup lang="ts">
-import api from "@/scripts/api";
+import { useItemsStore } from "@/stores/items";
 import { computed } from "vue";
 
-const props = defineProps<{
-  items: Item[];
-}>();
+const itemsStore = useItemsStore();
 
-const selectedItems = computed(() => props.items.filter((i) => i.isSelected));
+const selectedItems = computed(() =>
+  itemsStore.items.filter((i) => i.isSelected)
+);
 const selectedItemsSize = computed(() => {
-  if (
-    !selectedItems.value?.length ||
-    selectedItems.value.some((i) => i.isFolder)
-  )
-    return "";
-  return selectedItems.value.reduce((acc, i) => acc + i.size!, 0);
+  const showSize =
+    selectedItems.value?.length && !selectedItems.value.some((i) => i.isFolder);
+  if (showSize) return selectedItems.value.reduce((acc, i) => acc + i.size!, 0);
+  return "";
 });
-
-async function deleteItems() {
-  const plural = selectedItems.value.length > 1;
-  const toDelete = plural ? `${selectedItems.value.length} items` : "one item";
-  if (!(await dialog.confirm(`Are you sure you want to delete ${toDelete}?`)))
-    return;
-  api.deleteItems(selectedItems.value);
-  for (const item of selectedItems.value) {
-    props.items.splice(props.items.indexOf(item), 1);
-  }
-}
 </script>
 
 <template>
   <div class="flex items-center bg-purple-950 shadow-md px-6 rounded-2xl">
     <div class="p-4 pr-0">
-      {{ items.length }}
-      {{ items.length == 1 ? "item" : "items" }}
+      {{ itemsStore.items.length }}
+      {{ itemsStore.items.length == 1 ? "item" : "items" }}
     </div>
     <div v-if="selectedItems?.length">
       <span class="px-3">|</span>{{ selectedItems.length }}
@@ -79,7 +66,7 @@ async function deleteItems() {
         <div
           class="dsy-tooltip p-4 cursor-pointer hover:bg-gray-500/20"
           data-tip="Delete"
-          @click="deleteItems"
+          @click="itemsStore.deleteItems(selectedItems)"
           v-wave
         >
           <span class="material-symbols-outlined"> delete </span>
@@ -88,4 +75,3 @@ async function deleteItems() {
     </Transition>
   </div>
 </template>
-@/scripts/dialogManager

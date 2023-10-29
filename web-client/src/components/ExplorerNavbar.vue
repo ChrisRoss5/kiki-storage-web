@@ -1,30 +1,23 @@
 <script setup lang="ts">
 import * as utils from "@/scripts/utils";
+import { useItemsStore } from "@/stores/items";
+import { usePathStore } from "@/stores/path";
 import { ref } from "vue";
 
-const props = defineProps<{
-  items: Item[];
-  folderPaths: string[];
-  addFolder: (name: string) => void;
-  addFiles: (files: FileList, path?: string) => void;
-  handleDrop: (e: DragEvent, path?: string) => void;
-}>();
-
+const itemsStore = useItemsStore();
+const pathStore = usePathStore();
 const newFolderName = ref("");
 
-function handleAddFolderClick() {
+const handleAddFolderClick = () => {
   const name = newFolderName.value;
-  if (!name) return;
-  const { isValid, message } = utils.checkName(name, "folder", props.items);
-  if (!isValid) return dialog.showError(message);
-  props.addFolder(name);
+  if (!name || itemsStore.checkName(name, true)) return;
+  itemsStore.addFolder(name);
   newFolderName.value = "";
-}
-
-function handleFileUpload(e: Event) {
+};
+const handleFileUpload = (e: Event) => {
   const { files } = e.target as HTMLInputElement;
-  if (files) props.addFiles(files);
-}
+  if (files) itemsStore.addFiles(files);
+};
 </script>
 
 <template>
@@ -32,7 +25,7 @@ function handleFileUpload(e: Event) {
     <div class="flex items-center flex-wrap text-2xl">
       <RouterLink
         to="/"
-        @drop.stop.prevent="handleDrop($event, '')"
+        @drop.stop.prevent="itemsStore.handleDrop"
         @dragover.stop.prevent="utils.setDragOverStyle"
         @dragleave.stop.prevent="utils.clearDragOverStyle"
         @dragend.stop.prevent="utils.clearDragOverStyle"
@@ -43,12 +36,12 @@ function handleFileUpload(e: Event) {
         </span>
         <span class="pointer-events-none">Personal drive</span>
       </RouterLink>
-      <template v-for="path in folderPaths">
+      <template v-for="path in pathStore.folderPaths">
         <span class="material-symbols-outlined"> chevron_right </span>
         <RouterLink
           :to="`/${path}`"
           class="whitespace-pre"
-          @drop.stop.prevent="handleDrop($event, path)"
+          @drop.stop.prevent="itemsStore.handleDrop($event, path)"
           @dragover.stop.prevent="utils.setDragOverStyle"
           @dragleave.stop.prevent="utils.clearDragOverStyle"
           @dragend.stop.prevent="utils.clearDragOverStyle"
@@ -105,4 +98,3 @@ a {
   }
 }
 </style>
-@/scripts/itemManager @/scripts/dialogManager
