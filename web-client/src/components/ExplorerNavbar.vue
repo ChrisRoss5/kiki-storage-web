@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import * as utils from "@/scripts/utils";
 import { ref } from "vue";
-import modal from "@/scripts/modal";
 
 const props = defineProps<{
   items: Item[];
@@ -17,7 +16,7 @@ function handleAddFolderClick() {
   const name = newFolderName.value;
   if (!name) return;
   const { isValid, message } = utils.checkName(name, "folder", props.items);
-  if (!isValid) return modal.showError(message);
+  if (!isValid) return dialog.showError(message);
   props.addFolder(name);
   newFolderName.value = "";
 }
@@ -106,3 +105,4 @@ a {
   }
 }
 </style>
+@/scripts/itemManager @/scripts/dialogManager

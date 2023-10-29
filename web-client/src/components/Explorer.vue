@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import api from "@/scripts/api";
 import * as utils from "@/scripts/utils";
+import { useDialogStore } from "@/stores/dialog";
+import { useItemsStore } from "@/stores/items";
+import { storeToRefs } from "pinia";
 import { computed, ref, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerNavbar from "./ExplorerNavbar.vue";
 import ExplorerTable from "./ExplorerTable.vue";
-import modal from "@/scripts/modal";
 
 const router = useRouter();
 const route = useRoute();
-
-const items = ref<Item[]>([]);
-utils.initClickListener(items);
-utils.initSelectAllListener(items);
+const dialogStore = useDialogStore();
+const itemsStore = useItemsStore();
+const { items } = storeToRefs(itemsStore);
 
 const folderPaths = ref<string[]>([]);
 const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
@@ -29,7 +30,7 @@ watchEffect(async () => {
     );
   } else folderPaths.value = [];
   items.value = await api.getItems(newPath);
-  utils.deselectAll(items.value);
+  itemsStore.deselectAll();
 });
 
 async function addFolder(name: string) {
@@ -47,12 +48,17 @@ async function addFolder(name: string) {
 async function addFiles(files: FileList, path?: string) {
   path ??= currentPath.value;
   const newItems = utils.convertFilesToItems(files, path);
-  if (!newItems.length) return modal.showError("No valid files were selected.");
+  if (!newItems.length)
+    return dialogStore.showError("No valid files were selected.");
   const scopedItems =
     path == currentPath.value ? items.value : await api.getItems(path);
   for (const { name } of newItems) {
-    const { isValid, message } = utils.checkName(name, "file", scopedItems);
-    if (!isValid) return modal.showError(message);
+    const { isValid, message } = itemsStore.checkName(
+      name,
+      "file",
+      scopedItems
+    );
+    if (!isValid) return dialogStore.showError(message);
   }
   if (!newItems.length) return;
   if (path == currentPath.value) items.value.push(...newItems);
@@ -87,7 +93,7 @@ function handleDrop(e: DragEvent, path?: string) {
       @dragover.stop.prevent="utils.setDragOverStyle"
       @dragleave.stop.prevent="utils.clearDragOverStyle"
       @dragend.stop.prevent="utils.clearDragOverStyle"
-      @keyup.esc="utils.deselectAll(items)"
+      @keyup.esc="itemsStore.deselectAll"
     >
       <ExplorerTable
         v-if="items.length"

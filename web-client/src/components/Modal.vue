@@ -1,33 +1,41 @@
 <script setup lang="ts">
+import { storeToRefs } from "pinia";
+import { useDialogStore } from "@/stores/dialog";
 import { ref, watch } from "vue";
-import modal from "@/scripts/modal";
 
-const dialog = ref<HTMLDialogElement | null>(null);
+const store = useDialogStore();
+const { state } = storeToRefs(store);
+const dialogEl = ref<HTMLDialogElement | null>(null);
 
-watch(() => modal.state.isOpen, (isOpen) => {
-  if (isOpen) dialog.value?.showModal();
-});
-
+watch(
+  () => state.value.isOpen,
+  (isOpen) => {
+    if (isOpen) dialogEl.value?.showModal();
+  }
+);
 </script>
 
 <template>
-  <dialog ref="dialog" class="dsy-modal" @close="modal.close">
-    <div class="dsy-modal-box">
-      <div v-if="modal.state.isError" class="dsy-alert dsy-alert-error">
+  <dialog ref="dialogEl" class="dsy-dialog" @close="store.close">
+    <div class="dsy-dialog-box">
+      <div v-if="state.isError" class="dsy-alert dsy-alert-error">
         <span class="material-symbols-outlined"> cancel </span>
-        <div>{{ modal.state.message }}</div>
+        <div>{{ state.message }}</div>
       </div>
-      <div v-else>{{ modal.state.message }}</div>
-      <div class="dsy-modal-action">
+      <div v-else>{{ state.message }}</div>
+      <div class="dsy-dialog-action">
         <form method="dialog">
-          <template v-if="modal.state.handleConfirmation">
+          <template v-if="state.handleConfirmation">
             <button
               class="dsy-btn dsy-btn-primary"
-              @click="modal.state.handleConfirmation(true)"
+              @click="state.handleConfirmation(true)"
             >
               Confirm
             </button>
-            <button class="dsy-btn" @click="modal.state.handleConfirmation(false)">
+            <button
+              class="dsy-btn"
+              @click="state.handleConfirmation(false)"
+            >
               Cancel
             </button>
           </template>

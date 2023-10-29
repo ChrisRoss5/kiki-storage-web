@@ -1,7 +1,7 @@
 const baseUrl = "http://localhost:3000";
 
 export default {
-  getItems: async (path: string) => {
+  async getItems(path: string) {
     const result = await _fetch(`getItems?path=${path}`, "GET");
     result.forEach((i: Item) => {
       i.dateAdded = new Date(i.dateAdded);
@@ -9,14 +9,14 @@ export default {
     });
     return result as Item[];
   },
-  createItem: async function(item: Item) {
+  async createItem(item: Item) {
     return await this.createItems([item]);
   },
-  createItems: async (items: Item[]) => {
+  async createItems(items: Item[]) {
     const result = await _fetch("createItems", "POST", items);
     return result as FetchResult;
   },
-  renameItem: async (item: Item, newName: string) => {
+  async renameItem(item: Item, newName: string) {
     const result = await _fetch("renameItem", "PUT", {
       isFolder: item.isFolder,
       path: item.path,
@@ -25,7 +25,7 @@ export default {
     });
     return result as FetchResult;
   },
-  deleteItems: async (items: Item[]) => {
+  async deleteItems(items: Item[]) {
     const result = await _fetch("deleteItems", "DELETE", items);
     return result as FetchResult;
   },

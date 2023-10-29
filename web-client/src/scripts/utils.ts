@@ -1,24 +1,3 @@
-import { Ref } from "vue";
-
-export function checkName(
-  name: string,
-  type: "file" | "folder",
-  items: Item[]
-): { isValid: boolean; message?: string } {
-  let message = "";
-  if (
-    type == "file"
-      ? items.filter((i) => !i.isFolder).some((f) => f.name == name)
-      : items.filter((i) => i.isFolder).some((f) => f.name == name)
-  )
-    message = `This destination already contains a ${type} named '${name}'.`;
-  else if (/[\\/:*?"<>|]/.test(name))
-    message =
-      `A ${type} name can't contain any of the following characters: ` +
-      '\\ / : * ? " < > |';
-  return { isValid: !message, message };
-}
-
 export function convertFilesToItems(files: FileList, path: string): Item[] {
   const newItems: Item[] = [];
   for (const file of files) {
@@ -40,7 +19,7 @@ export function setDragOverStyle(e: DragEvent) {
   if (isThrottled) return;
   let target = e.target as HTMLElement;
   target =
-    target.closest("TR") || target.closest("#explorer-container") || target;
+    target.closest("TR") ?? target.closest("#explorer-container") ?? target;
   let { offsetX: x, offsetY: y } = e;
   if (target.tagName == "TR") {
     if (!target.classList.contains("folder"))
@@ -71,45 +50,6 @@ export function clearDragOverStyle(e: DragEvent) {
     target;
   target.classList.remove("dragover");
   target.style.background = "";
-}
-
-export function initClickListener(items: Ref<Item[]>) {
-  document.addEventListener("click", () => {
-    deselectAll(items.value);
-    clearRenaming(items.value);
-  });
-}
-
-export function initSelectAllListener(items: Ref<Item[]>) {
-  document.addEventListener("keydown", (e) => {
-    if (
-      e.key == "a" &&
-      e.ctrlKey &&
-      !(
-        document.activeElement?.tagName == "INPUT" ||
-        document.activeElement?.tagName == "TEXTAREA" ||
-        (document.activeElement as HTMLElement).isContentEditable
-      )
-    ) {
-      document.body.style.userSelect = "none";
-      e.preventDefault();
-      selectAll(items.value);
-      clearRenaming(items.value);
-      document.body.style.userSelect = "";
-    }
-  });
-}
-
-export function selectAll(items: Item[]) {
-  items.forEach((i) => (i.isSelected = true));
-}
-
-export function deselectAll(items: Item[]) {
-  items.forEach((i) => (i.isSelected = false));
-}
-
-export function clearRenaming(items: Item[]) {
-  items.forEach((i) => (i.isRenaming = false));
 }
 
 /* EXPERIMENTAL; UNUSED; NON-STANDARD */
