@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Modal from "@/components/Modal.vue";
+import Dialog from "@/components/Dialog.vue";
 </script>
 
 <template>
@@ -11,7 +11,7 @@ import Modal from "@/components/Modal.vue";
       />
     </Transition>
   </RouterView>
-  <Modal />
+  <Dialog />
 </template>
 
 <style>

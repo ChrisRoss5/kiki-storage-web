@@ -5,7 +5,7 @@ import cors from "cors";
 const prisma = new PrismaClient();
 const app = express();
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
 
 app.get("/getItems", async (req, res) => {
@@ -25,12 +25,22 @@ app.post("/createItems", async (req, res) => {
 app.put(`/renameItem`, async (req, res) => {
   const { isFolder, path, oldName, newName } = req.body;
   let count = 0;
+  console.log("BODY: ", { isFolder, path, oldName, newName });
+
   if (isFolder) {
-    const oldPathLength = `${path}/${oldName}`.length;
+    const _path = path ? path + "/" : "";
+    const oldPathFullLength = `${_path}${oldName}`.length;
+    const newPathFull = `${_path}${newName}`;
+    const oldPathFull = `${_path}${oldName}`;
+    const q = `
+        UPDATE Item SET
+          path = STUFF(path, 1, ${oldPathFullLength}, \'${newPathFull}\')
+          WHERE path LIKE \'${_path}${oldName}%\'`
+    console.log(q);
     count += await prisma.$executeRaw`
         UPDATE Item SET
-          path = STUFF(path, 1, ${oldPathLength}, ${path}/${newName})
-          WHERE "path" LIKE ${path}/${oldName}%`;
+          path = STUFF(path, 1, ${oldPathFullLength}, \'${newPathFull}\')
+          WHERE path LIKE \'${oldPathFull}%\'`;
   }
   count += +!!(await prisma.item.update({
     where: {

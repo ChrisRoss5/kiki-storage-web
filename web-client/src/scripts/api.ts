@@ -16,11 +16,11 @@ export default {
     const result = await _fetch("createItems", "POST", items);
     return result as FetchResult;
   },
-  async renameItem(item: Item, newName: string) {
+  async renameItem(item: Item, oldName: string, newName: string) {
     const result = await _fetch("renameItem", "PUT", {
       isFolder: item.isFolder,
       path: item.path,
-      oldName: item.name,
+      oldName,
       newName,
     });
     return result as FetchResult;

@@ -16,14 +16,14 @@ watch(
 </script>
 
 <template>
-  <dialog ref="dialogEl" class="dsy-dialog" @close="store.close">
-    <div class="dsy-dialog-box">
+  <dialog ref="dialogEl" class="dsy-modal" @close="store.close">
+    <div class="dsy-modal-box">
       <div v-if="state.isError" class="dsy-alert dsy-alert-error">
         <span class="material-symbols-outlined"> cancel </span>
         <div>{{ state.message }}</div>
       </div>
       <div v-else>{{ state.message }}</div>
-      <div class="dsy-dialog-action">
+      <div class="dsy-modal-action">
         <form method="dialog">
           <template v-if="state.handleConfirmation">
             <button
@@ -32,10 +32,7 @@ watch(
             >
               Confirm
             </button>
-            <button
-              class="dsy-btn"
-              @click="state.handleConfirmation(false)"
-            >
+            <button class="dsy-btn" @click="state.handleConfirmation(false)">
               Cancel
             </button>
           </template>

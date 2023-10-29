@@ -13,23 +13,22 @@ const initialState = {
 export const useDialogStore = defineStore("dialog", () => {
   const state = reactive({ ...initialState });
 
-  const show = (_message = "") => {
-    state.isOpen = true;
-    state.message = _message;
+  const show = (message = "") => {
+    Object.assign(state, { ...initialState, isOpen: true, message });
   };
-  const showError = (_message = "") => {
+  const showError = (message = "") => {
+    show(message);
     state.isError = true;
-    show(_message);
   };
-  const confirm = (_message = "") => {
-    show(_message);
+  const confirm = (message = "") => {
+    show(message);
     return new Promise<boolean>((resolve) => {
       state.handleConfirmation = resolve;
     });
   };
   const close = () => {
     if (state.handleConfirmation) state.handleConfirmation(false);
-    Object.assign(state, initialState);
+    state.isOpen = false;
   };
 
   return { state, show, showError, confirm, close };

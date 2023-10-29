@@ -33,7 +33,8 @@ export const useItemsStore = defineStore("items", () => {
       return dialogStore.showError("No valid files were selected.");
     const scopedItems =
       path == pathStore.currentPath ? items.value : await api.getItems(path);
-    if (newItems.some(i => checkName(i.name, i.isFolder, scopedItems))) return;
+    if (newItems.some((i) => checkName(i.name, i.isFolder, scopedItems)))
+      return;
     if (path == pathStore.currentPath) items.value.push(...newItems);
     await api.createItems(newItems);
   };
@@ -48,8 +49,8 @@ export const useItemsStore = defineStore("items", () => {
   const checkName = (name: string, isFolder: boolean, _items?: Item[]) => {
     _items ??= items.value;
     const exists = isFolder
-      ? _items.filter((i) => !i.isFolder).some((f) => f.name == name)
-      : _items.filter((i) => i.isFolder).some((f) => f.name == name);
+      ? _items.filter((i) => i.isFolder).some((f) => f.name == name)
+      : _items.filter((i) => !i.isFolder).some((f) => f.name == name);
     const hasInvalidChars = /[\\/:*?"<>|]/.test(name);
     const type = isFolder ? "folder" : "file";
     const error = exists
@@ -65,7 +66,16 @@ export const useItemsStore = defineStore("items", () => {
   const clearRenaming = () => {
     const renaming = items.value.find((i) => i.isRenaming);
     if (renaming) renaming.isRenaming = false;
-  }
+  };
+  const renameItem = async (item: Item, newName: string) => {
+    if (checkName(newName, item.isFolder)) return;
+    const oldName = item.name;
+    item.isRenaming = false;
+    item.name = newName;
+    await api.renameItem(item, oldName, newName);
+  };
+
+  /* LISTENERS */
 
   document.addEventListener("click", () => {
     deselectAll();
@@ -94,5 +104,6 @@ export const useItemsStore = defineStore("items", () => {
     selectAll,
     deselectAll,
     clearRenaming,
+    renameItem,
   };
 });

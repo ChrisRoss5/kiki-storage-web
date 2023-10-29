@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import api from "@/scripts/api";
 import { useItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { nextTick, ref, watch } from "vue";
@@ -17,7 +16,7 @@ watch(
   () => pathStore.currentPath,
   () => (lastSelectedItemIdx = 0)
 );
-// autofocus attr on "renameInput" only works once so we need to watch for changes
+// autofocus attr on "renameInput" weirdly only works once so we need to watch for changes
 watch(
   () => itemsStore.items.find((i) => i.isRenaming),
   async (item) => {
@@ -27,7 +26,7 @@ watch(
     await nextTick();
     renameInput.value![0].select();
   },
-  { flush: "post" } // wait for dom to update first
+  { flush: "post" } // wait for DOM to update first
 );
 
 const getItemExtension = (item: Item) => {
@@ -58,9 +57,6 @@ const handleItemOpen = (item: Item) => {
   if (item.isFolder)
     router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
   else console.log("open file");
-};
-const renameItem = (item: Item) => {
-  api.renameItem(item, newItemName.value);
 };
 </script>
 
@@ -111,13 +107,15 @@ const renameItem = (item: Item) => {
                 item.isFolder ? 'folder' : 'file'
               } name`"
               class="dsy-join-item dsy-input dsy-input-secondary outline-none"
-              @keyup.enter="renameItem(item)"
-              @keyup.esc="item.isRenaming = false"
+              @keyup.stop.enter="itemsStore.renameItem(item, newItemName)"
+              @keyup.stop.esc="item.isRenaming = false"
             />
             <button
               class="dsy-join-item dsy-btn dsy-btn-secondary"
-              :class="{ 'dsy-btn-disabled': !newItemName }"
-              @click="renameItem(item)"
+              :class="{
+                'dsy-btn-disabled': !newItemName || newItemName == item.name,
+              }"
+              @click="itemsStore.renameItem(item, newItemName)"
               v-wave
             >
               <span class="material-symbols-outlined"> check </span>
