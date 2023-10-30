@@ -1,4 +1,5 @@
 interface ItemData {
+  id?: number;
   name: string;
   dateAdded: Date;
   dateModified: Date;
@@ -19,4 +20,5 @@ interface FetchResult {
   count: number;
   error?: string;
 }
+
 

@@ -18,7 +18,6 @@ import Dialog from "@/components/Dialog.vue";
 #app {
   overflow: hidden;
 }
-
 .scale-out-enter-from,
 .scale-out-leave-to,
 .scale-in-enter-from,
@@ -26,7 +25,6 @@ import Dialog from "@/components/Dialog.vue";
   opacity: 0;
   position: absolute;
 }
-
 .scale-out-enter-from {
   transform: scale(1.1);
 }

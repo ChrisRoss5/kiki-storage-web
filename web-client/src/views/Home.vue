@@ -9,5 +9,3 @@ import Explorer from "@/components/Explorer.vue";
     <Explorer class="p-5" />
   </div>
 </template>
-
-<style scoped></style>

@@ -20,9 +20,13 @@ watch(
     <div class="dsy-modal-box">
       <div v-if="state.isError" class="dsy-alert dsy-alert-error">
         <span class="material-symbols-outlined"> cancel </span>
-        <div>{{ state.message }}</div>
+        <div class="max-w-full overflow-hidden break-words">
+          {{ state.message }}
+        </div>
       </div>
-      <div v-else>{{ state.message }}</div>
+      <div v-else class="max-w-full overflow-hidden break-words">
+        {{ state.message }}
+      </div>
       <div class="dsy-modal-action">
         <form method="dialog">
           <template v-if="state.handleConfirmation">

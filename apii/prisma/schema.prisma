@@ -17,7 +17,7 @@ model Item {
   dateModified DateTime @default(now())
   path         String
   isFolder     Boolean  @default(false)
-  size         Int?
+  size         BigInt?
 
-  @@unique([name, path])
+  @@unique([name, path, isFolder])
 }

@@ -41,13 +41,13 @@ const handleRowSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
       lastSelectedItemIdx = itemsStore.items.indexOf(item);
     }
   } else if (e.shiftKey) {
-    itemsStore.items.forEach((i) => (i.isSelected = false));
+    itemsStore.deselectAll();
     const start = Math.min(lastSelectedItemIdx, itemsStore.items.indexOf(item));
     const end = Math.max(lastSelectedItemIdx, itemsStore.items.indexOf(item));
     for (let i = start; i <= Math.min(end, itemsStore.items.length - 1); i++)
       itemsStore.items[i].isSelected = true;
   } else {
-    itemsStore.items.forEach((i) => (i.isSelected = false));
+    itemsStore.deselectAll();
     item.isSelected = true;
     lastSelectedItemIdx = itemsStore.items.indexOf(item);
   }
@@ -58,6 +58,14 @@ const handleItemOpen = (item: Item) => {
     router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
   else console.log("open file");
 };
+const handleDragStart = (item: Item, e: DragEvent) => {
+  item.isSelected = itemsStore.dragging = true;
+  e.dataTransfer?.setData("items", JSON.stringify(itemsStore.selectedItems));
+  document.body.setAttribute("dragging-items", "true");
+};
+const handleDragStop = () => {
+  document.body.removeAttribute("dragging-items");
+};
 </script>
 
 <template>
@@ -66,20 +74,26 @@ const handleItemOpen = (item: Item) => {
       Explorer table
     </caption>
     <thead class="pointer-events-none">
-      <th class="w-full">Name</th>
-      <th>Size</th>
-      <th>Type</th>
-      <th>Date added</th>
+      <th class="w-full sticky top-0 bg-base-100 z-10">Name</th>
+      <th class="sticky top-0 bg-base-100 z-10">Size</th>
+      <th class="sticky top-0 bg-base-100 z-10">Type</th>
+      <th class="sticky top-0 bg-base-100 z-10">Date added</th>
     </thead>
     <tbody>
       <tr
         v-for="item in itemsStore.items"
-        :key="item.name + item.path"
-        class="cursor-pointer hover:bg-gray-500/20"
+        :key="item.name + item.path + item.isFolder"
+        class="cursor-pointer hover:bg-base-200"
         :class="{
-          '!bg-gray-500/40': item.isSelected,
+          '!bg-base-300': item.isSelected,
           folder: item.isFolder,
+          'pointer-events-none':
+            false && itemsStore.dragging && item.isSelected, // todo
         }"
+        tabindex="0"
+        draggable="true"
+        @dragstart="handleDragStart(item, $event)"
+        @dragend="handleDragStop"
         @drop.stop.prevent="
           itemsStore.handleDrop($event, `${item.path}/${item.name}`)
         "
@@ -87,7 +101,6 @@ const handleItemOpen = (item: Item) => {
         @dblclick.stop="handleItemOpen(item)"
         @keyup.space="handleRowSelect(item, $event)"
         @keyup.enter="handleItemOpen(item)"
-        tabindex="0"
       >
         <td class="rounded-l-lg">
           <span

@@ -22,7 +22,6 @@ export const usePathStore = defineStore("path", () => {
       );
     } else folderPaths.value = [];
     itemsStore.items = await api.getItems(newPath);
-    itemsStore.deselectAll();
   });
 
   return { folderPaths, currentPath };

@@ -2,42 +2,55 @@ const baseUrl = "http://localhost:3000";
 
 export default {
   async getItems(path: string) {
-    const result = await _fetch(`getItems?path=${path}`, "GET");
-    result.forEach((i: Item) => {
+    const items = await _fetch<ItemData[]>(`getItems?path=${path}`, "GET");
+    items.forEach((i) => {
       i.dateAdded = new Date(i.dateAdded);
       i.dateModified = new Date(i.dateModified);
     });
-    return result as Item[];
+    return items;
   },
   async createItem(item: Item) {
-    return await this.createItems([item]);
+    return (await this.createItems([item]))[0];
   },
-  async createItems(items: Item[]) {
-    const result = await _fetch("createItems", "POST", items);
-    return result as FetchResult;
+  createItems(items: Item[]) {
+    return _fetch<ItemData[]>("createItems", "POST", sanitize(items));
   },
-  async renameItem(item: Item, oldName: string, newName: string) {
-    const result = await _fetch("renameItem", "PUT", {
+  moveItems(items: Item[], newPath: string) {
+    _fetch("moveItems", "PUT", { items: sanitize(items), newPath });
+  },
+  renameItem(item: Item, oldName: string, newName: string) {
+    _fetch("renameItem", "PUT", {
       isFolder: item.isFolder,
       path: item.path,
       oldName,
       newName,
     });
-    return result as FetchResult;
   },
-  async deleteItems(items: Item[]) {
-    const result = await _fetch("deleteItems", "DELETE", items);
-    return result as FetchResult;
+  deleteItems(items: Item[]) {
+    _fetch("deleteItems", "DELETE", sanitize(items));
   },
 };
 
-async function _fetch(endpoint: string, method: string, body?: any) {
+async function _fetch<T>(endpoint: string, method: string, body?: any) {
   const res = await fetch(`${baseUrl}/${endpoint}`, {
     method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  const json = await res.json();
+  const json = (await res.json()) as T;
   // console.log(json);
   return json;
+}
+
+function sanitize(items: Item[]): ItemData[] {
+  return items.map((i) => {
+    return {
+      id: i.id,
+      isFolder: i.isFolder,
+      name: i.name,
+      path: i.path,
+      dateAdded: i.dateAdded,
+      dateModified: i.dateModified,
+    };
+  });
 }

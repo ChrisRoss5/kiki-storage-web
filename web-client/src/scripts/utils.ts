@@ -1,4 +1,28 @@
-export function convertFilesToItems(files: FileList, path: string): Item[] {
+export function createFolder(name: string, path: string) {
+  return {
+    name,
+    dateAdded: new Date(),
+    dateModified: new Date(),
+    path: "",
+    isFolder: true,
+  };
+}
+
+export function checkName(name: string, isFolder: boolean, items: Item[]) {
+  const alreadyExists = isFolder
+    ? items.filter((i) => i.isFolder).some((f) => f.name == name)
+    : items.filter((i) => !i.isFolder).some((f) => f.name == name);
+  const hasInvalidChars = /[\\/:*?"<>|]/.test(name);
+  const type = isFolder ? "folder" : "file";
+  const error = alreadyExists
+    ? `This destination already contains a ${type} named '${name}'.`
+    : hasInvalidChars
+    ? `A ${type} name can't contain any of the following characters: \\ / : * ? " < > |`
+    : undefined;
+  return { error };
+}
+
+export function convertFilesToItemFiles(files: FileList, path: string): Item[] {
   const newItems: Item[] = [];
   for (const file of files) {
     if (!file.size) continue;
@@ -12,6 +36,10 @@ export function convertFilesToItems(files: FileList, path: string): Item[] {
     });
   }
   return newItems;
+}
+
+export function itemsEqual(a: Item, b: Item): boolean {
+  return a.name == b.name && a.path == b.path && a.isFolder == b.isFolder;
 }
 
 let isThrottled = false;
@@ -28,12 +56,18 @@ export function setDragOverStyle(e: DragEvent) {
     x = e.clientX - rect.left;
     y = e.clientY - rect.top;
   }
+  if (
+    document.body.hasAttribute("dragging-items") &&
+    (target.id == "explorer-container" ||
+      target.classList.contains("router-link-active"))
+  )
+    return;
   target.classList.add("dragover");
   target.style.background = `radial-gradient(
     circle at ${x}px ${y}px,
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 255, 255, 0) 70%
+    hsl(var(--a) / 100%),
+    hsl(var(--a) / 50%) 50%,
+    hsl(var(--b1)) 70%
   ) no-repeat`;
   isThrottled = true;
   setTimeout(() => (isThrottled = false), 10);
@@ -45,8 +79,8 @@ export function clearDragOverStyle(e: DragEvent) {
   if (typeof target == "string") return;
   if (target.closest("TR:not(.folder)")) return;
   target =
-    target.closest(".folder") ||
-    target.closest("#explorer-container") ||
+    target.closest(".folder") ??
+    target.closest("#explorer-container") ??
     target;
   target.classList.remove("dragover");
   target.style.background = "";

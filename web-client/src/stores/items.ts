@@ -1,7 +1,7 @@
 import api from "@/scripts/api";
 import * as utils from "@/scripts/utils";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useDialogStore } from "./dialog";
 import { usePathStore } from "./path";
 
@@ -10,31 +10,46 @@ export const useItemsStore = defineStore("items", () => {
   const pathStore = usePathStore();
 
   const items = ref<Item[]>([]);
+  const dragging = ref<boolean>(false);
+  const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
 
-  const handleDrop = (e: DragEvent, path?: string) => {
+  const checkNewItems = async (newItems: Item[], path: string) => {
+    const scopedItems =
+      path == pathStore.currentPath ? items.value : await api.getItems(path);
+    const isInvalid = (i: Item) =>
+      checkName(i.name, i.isFolder, scopedItems).error;
+    return { error: newItems.some(isInvalid) };
+  };
+  const checkName = (name: string, isFolder: boolean, _items?: Item[]) => {
+    const { error } = utils.checkName(name, isFolder, _items ?? items.value);
+    if (error) dialogStore.showError(error);
+    return { error: !!error };
+  };
+  const handleDrop = async (e: DragEvent, path?: string) => {
+    path ??= pathStore.currentPath;
     utils.clearDragOverStyle(e);
-    if (e.dataTransfer) addFiles(e.dataTransfer.files, path);
+    const itemsData = e.dataTransfer?.getData("items");
+    if (itemsData) {
+      if (path == pathStore.currentPath) return;
+      const newItems = JSON.parse(itemsData) as Item[];
+      if ((await checkNewItems(newItems, path)).error) return;
+      await api.moveItems(newItems, path);
+      items.value = items.value.filter((a) =>
+        newItems.every((b) => !utils.itemsEqual(a, b))
+      );  // todo - realtime update instead
+    } else if (e.dataTransfer) addFiles(e.dataTransfer.files, path);
   };
   const addFolder = async (name: string) => {
-    const item = {
-      name,
-      dateAdded: new Date(),
-      dateModified: new Date(),
-      path: pathStore.currentPath,
-      isFolder: true,
-    };
+    const item = utils.createFolder(name, pathStore.currentPath);
     items.value.push(item);
     await api.createItem(item);
   };
   const addFiles = async (files: FileList, path?: string) => {
     path ??= pathStore.currentPath;
-    const newItems = utils.convertFilesToItems(files, path);
+    const newItems = utils.convertFilesToItemFiles(files, path);
     if (!newItems.length)
       return dialogStore.showError("No valid files were selected.");
-    const scopedItems =
-      path == pathStore.currentPath ? items.value : await api.getItems(path);
-    if (newItems.some((i) => checkName(i.name, i.isFolder, scopedItems)))
-      return;
+    if ((await checkNewItems(newItems, path)).error) return;
     if (path == pathStore.currentPath) items.value.push(...newItems);
     await api.createItems(newItems);
   };
@@ -45,21 +60,6 @@ export const useItemsStore = defineStore("items", () => {
     if (!(await dialogStore.confirm(message))) return;
     items.value = items.value.filter((i) => !selectedItems.includes(i));
     api.deleteItems(selectedItems);
-  };
-  const checkName = (name: string, isFolder: boolean, _items?: Item[]) => {
-    _items ??= items.value;
-    const exists = isFolder
-      ? _items.filter((i) => i.isFolder).some((f) => f.name == name)
-      : _items.filter((i) => !i.isFolder).some((f) => f.name == name);
-    const hasInvalidChars = /[\\/:*?"<>|]/.test(name);
-    const type = isFolder ? "folder" : "file";
-    const error = exists
-      ? `This destination already contains a ${type} named '${name}'.`
-      : hasInvalidChars
-      ? `A ${type} name can't contain any of the following characters: \\ / : * ? " < > |`
-      : undefined;
-    if (error) dialogStore.showError(error);
-    return error;
   };
   const selectAll = () => items.value.forEach((i) => (i.isSelected = true));
   const deselectAll = () => items.value.forEach((i) => (i.isSelected = false));
@@ -96,6 +96,8 @@ export const useItemsStore = defineStore("items", () => {
 
   return {
     items,
+    dragging,
+    selectedItems,
     handleDrop,
     addFolder,
     addFiles,

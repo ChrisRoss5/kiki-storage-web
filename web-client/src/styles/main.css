@@ -6,19 +6,27 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #213547;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-
-  @media (prefers-color-scheme: dark) {
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #121212;
+}
+::-webkit-scrollbar {
+  width: 0.65rem;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--b1));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--p));
+  border-radius: 1rem;
+  border: 0.15rem solid transparent;
+  background-clip: padding-box;
+  &:hover {
+    border: 0;
   }
 }
-
 a {
   font-weight: 500;
   text-decoration: inherit;
@@ -28,7 +36,6 @@ body {
   margin: 0;
   overflow: hidden;
 }
-
 .material-symbols-outlined {
   vertical-align: middle;
   user-select: none;
