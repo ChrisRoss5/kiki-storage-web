@@ -54,17 +54,20 @@ const handleRowSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
   if (!item.isRenaming) itemsStore.clearRenaming();
 };
 const handleItemOpen = (item: Item) => {
-  if (item.isFolder)
-    router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
+  if (item.isFolder) router.push(`${item.path}/${item.name}`);
   else console.log("open file");
 };
 const handleDragStart = (item: Item, e: DragEvent) => {
-  item.isSelected = itemsStore.dragging = true;
+  item.isSelected = true;
   e.dataTransfer?.setData("items", JSON.stringify(itemsStore.selectedItems));
   document.body.setAttribute("dragging-items", "true");
 };
 const handleDragStop = () => {
   document.body.removeAttribute("dragging-items");
+};
+const handleDrop = (item: Item, e: DragEvent) => {
+  if (item.isFolder && !item.isSelected)
+    itemsStore.handleDrop(e, `${item.path ? `${item.path}/` : ""}${item.name}`);
 };
 </script>
 
@@ -86,17 +89,14 @@ const handleDragStop = () => {
         class="cursor-pointer hover:bg-base-200"
         :class="{
           '!bg-base-300': item.isSelected,
+          'is-selected': item.isSelected,
           folder: item.isFolder,
-          'pointer-events-none':
-            false && itemsStore.dragging && item.isSelected, // todo
         }"
         tabindex="0"
         draggable="true"
         @dragstart="handleDragStart(item, $event)"
         @dragend="handleDragStop"
-        @drop.stop.prevent="
-          itemsStore.handleDrop($event, `${item.path}/${item.name}`)
-        "
+        @drop.stop.prevent="handleDrop(item, $event)"
         @click.stop="handleRowSelect(item, $event)"
         @dblclick.stop="handleItemOpen(item)"
         @keyup.space="handleRowSelect(item, $event)"
@@ -128,7 +128,7 @@ const handleDragStop = () => {
               :class="{
                 'dsy-btn-disabled': !newItemName || newItemName == item.name,
               }"
-              @click="itemsStore.renameItem(item, newItemName)"
+              @click.stop="itemsStore.renameItem(item, newItemName)"
               v-wave
             >
               <span class="material-symbols-outlined"> check </span>
@@ -136,7 +136,7 @@ const handleDragStop = () => {
             <button
               class="dsy-join-item dsy-btn dsy-btn-secondary"
               :class="{ 'dsy-btn-disabled': !newItemName }"
-              @click="item.isRenaming = false"
+              @click.stop="item.isRenaming = false"
               v-wave
             >
               <span class="material-symbols-outlined"> close </span>

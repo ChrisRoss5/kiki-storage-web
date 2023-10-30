@@ -31,7 +31,7 @@ const selectedItemsSize = computed(() => {
         <div
           class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
           data-tip="Download"
-          @click=""
+          @click.stop=""
           v-wave
         >
           <span class="material-symbols-outlined"> download </span>
@@ -39,7 +39,7 @@ const selectedItemsSize = computed(() => {
         <div
           class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
           data-tip="Share"
-          @click=""
+          @click.stop=""
           v-wave
         >
           <span class="material-symbols-outlined"> share </span>
@@ -47,7 +47,7 @@ const selectedItemsSize = computed(() => {
         <div
           class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
           data-tip="Move"
-          @click=""
+          @click.stop=""
           v-wave
         >
           <span class="material-symbols-outlined"> drive_file_move </span>
@@ -66,7 +66,7 @@ const selectedItemsSize = computed(() => {
         <div
           class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
           data-tip="Delete"
-          @click="itemsStore.deleteItems(selectedItems)"
+          @click.stop="itemsStore.deleteItems(selectedItems)"
           v-wave
         >
           <span class="material-symbols-outlined"> delete </span>

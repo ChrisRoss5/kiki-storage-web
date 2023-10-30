@@ -25,7 +25,7 @@ const handleFileUpload = (e: Event) => {
     <div class="flex items-center flex-wrap text-2xl">
       <RouterLink
         to="/"
-        @drop.stop.prevent="itemsStore.handleDrop"
+        @drop.stop.prevent="itemsStore.handleDrop($event, '')"
         @dragover.stop.prevent="utils.setDragOverStyle"
         @dragleave.stop.prevent="utils.clearDragOverStyle"
         @dragend.stop.prevent="utils.clearDragOverStyle"

@@ -16,7 +16,8 @@ watch(
 </script>
 
 <template>
-  <dialog ref="dialogEl" class="dsy-modal" @close="store.close">
+  <!-- Using empty click.stop to keep selected items selected -->
+  <dialog ref="dialogEl" class="dsy-modal" @close="store.close" @click.stop="null">
     <div class="dsy-modal-box">
       <div v-if="state.isError" class="dsy-alert dsy-alert-error">
         <span class="material-symbols-outlined"> cancel </span>

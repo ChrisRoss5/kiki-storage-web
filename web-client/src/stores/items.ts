@@ -10,7 +10,6 @@ export const useItemsStore = defineStore("items", () => {
   const pathStore = usePathStore();
 
   const items = ref<Item[]>([]);
-  const dragging = ref<boolean>(false);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
 
   const checkNewItems = async (newItems: Item[], path: string) => {
@@ -26,23 +25,26 @@ export const useItemsStore = defineStore("items", () => {
     return { error: !!error };
   };
   const handleDrop = async (e: DragEvent, path?: string) => {
+    console.log(path);
     path ??= pathStore.currentPath;
+    console.log(path);
+
     utils.clearDragOverStyle(e);
     const itemsData = e.dataTransfer?.getData("items");
     if (itemsData) {
       if (path == pathStore.currentPath) return;
       const newItems = JSON.parse(itemsData) as Item[];
       if ((await checkNewItems(newItems, path)).error) return;
-      await api.moveItems(newItems, path);
+      api.moveItems(newItems, path);
       items.value = items.value.filter((a) =>
         newItems.every((b) => !utils.itemsEqual(a, b))
-      );  // todo - realtime update instead
+      ); // todo - realtime update instead
     } else if (e.dataTransfer) addFiles(e.dataTransfer.files, path);
   };
-  const addFolder = async (name: string) => {
+  const addFolder = (name: string) => {
     const item = utils.createFolder(name, pathStore.currentPath);
     items.value.push(item);
-    await api.createItem(item);
+    api.createItem(item);
   };
   const addFiles = async (files: FileList, path?: string) => {
     path ??= pathStore.currentPath;
@@ -51,7 +53,7 @@ export const useItemsStore = defineStore("items", () => {
       return dialogStore.showError("No valid files were selected.");
     if ((await checkNewItems(newItems, path)).error) return;
     if (path == pathStore.currentPath) items.value.push(...newItems);
-    await api.createItems(newItems);
+    api.createItems(newItems);
   };
   const deleteItems = async (selectedItems: Item[]) => {
     const plural = selectedItems.length > 1;
@@ -67,12 +69,18 @@ export const useItemsStore = defineStore("items", () => {
     const renaming = items.value.find((i) => i.isRenaming);
     if (renaming) renaming.isRenaming = false;
   };
-  const renameItem = async (item: Item, newName: string) => {
-    if (checkName(newName, item.isFolder)) return;
+  const renameItem = (item: Item, newName: string) => {
+    console.log(item.name, newName);
+
+    if (item.name == newName) {
+      item.isRenaming = false;
+      return;
+    }
+    if (checkName(newName, item.isFolder).error) return;
     const oldName = item.name;
     item.isRenaming = false;
     item.name = newName;
-    await api.renameItem(item, oldName, newName);
+    api.renameItem({ ...item, name: oldName }, newName);
   };
 
   /* LISTENERS */
@@ -96,7 +104,6 @@ export const useItemsStore = defineStore("items", () => {
 
   return {
     items,
-    dragging,
     selectedItems,
     handleDrop,
     addFolder,

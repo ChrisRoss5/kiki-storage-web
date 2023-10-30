@@ -18,13 +18,8 @@ export default {
   moveItems(items: Item[], newPath: string) {
     _fetch("moveItems", "PUT", { items: sanitize(items), newPath });
   },
-  renameItem(item: Item, oldName: string, newName: string) {
-    _fetch("renameItem", "PUT", {
-      isFolder: item.isFolder,
-      path: item.path,
-      oldName,
-      newName,
-    });
+  renameItem(item: Item, newName: string) {
+    _fetch("renameItem", "PUT", { item: sanitize(item), newName });
   },
   deleteItems(items: Item[]) {
     _fetch("deleteItems", "DELETE", sanitize(items));
@@ -42,15 +37,16 @@ async function _fetch<T>(endpoint: string, method: string, body?: any) {
   return json;
 }
 
-function sanitize(items: Item[]): ItemData[] {
-  return items.map((i) => {
-    return {
-      id: i.id,
-      isFolder: i.isFolder,
-      name: i.name,
-      path: i.path,
-      dateAdded: i.dateAdded,
-      dateModified: i.dateModified,
-    };
+function sanitize(item: Item): ItemData;
+function sanitize(items: Item[]): ItemData[];
+function sanitize(items: Item | Item[]): ItemData | ItemData[] {
+  const transform = (i: Item): ItemData => ({
+    id: i.id,
+    isFolder: i.isFolder,
+    name: i.name,
+    path: i.path,
+    dateAdded: i.dateAdded,
+    dateModified: i.dateModified,
   });
+  return Array.isArray(items) ? items.map(transform) : transform(items);
 }

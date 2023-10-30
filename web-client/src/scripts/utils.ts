@@ -3,7 +3,7 @@ export function createFolder(name: string, path: string) {
     name,
     dateAdded: new Date(),
     dateModified: new Date(),
-    path: "",
+    path,
     isFolder: true,
   };
 }
@@ -59,7 +59,8 @@ export function setDragOverStyle(e: DragEvent) {
   if (
     document.body.hasAttribute("dragging-items") &&
     (target.id == "explorer-container" ||
-      target.classList.contains("router-link-active"))
+      target.classList.contains("router-link-active") ||
+      target.classList.contains("is-selected"))
   )
     return;
   target.classList.add("dragover");

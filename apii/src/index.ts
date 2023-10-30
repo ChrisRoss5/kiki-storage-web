@@ -27,17 +27,15 @@ app.post("/createItems", async (req, res) => {
 });
 
 app.put("/moveItems", async (req, res) => {
-  let count = 0;
   const items = req.body.items as ItemWithId[];
   const itemIds = items.map((i) => i.id);
   const oldPath = items[0].path;
   const newPath = req.body.newPath as string;
-  const _oldPath = oldPath ? oldPath + "/" : "";
-  const _newPath = newPath ? newPath + "/" : "";
+  let count = 0;
   for (const { isFolder, name } of items) {
     if (!isFolder) continue;
-    const oldPathWithName = `${_oldPath}${name}`;
-    const newPathWithName = `${_newPath}${name}`;
+    const oldPathWithName = `${oldPath ? oldPath + "/" : ""}${name}`;
+    const newPathWithName = `${newPath ? newPath + "/" : ""}${name}`;
     count += await updatePaths(oldPathWithName, newPathWithName);
   }
   count += (
@@ -50,31 +48,26 @@ app.put("/moveItems", async (req, res) => {
 });
 
 app.put(`/renameItem`, async (req, res) => {
-  const { isFolder, path, oldName, newName } = req.body;
+  const { id, name: oldName, path, isFolder } = req.body as ItemWithId;
+  const newName = req.body.newName as string;
   let count = 0;
   if (isFolder) {
     const _path = path ? path + "/" : "";
     const newPathWithName = `${_path}${newName}`;
     const oldPathWithName = `${_path}${oldName}`;
-    const oldPathWithNameLength = oldPathWithName.length;
-    const like = `${oldPathWithName}%`;
-    count += await prisma.$executeRaw`
-        UPDATE Item SET
-          path = STUFF(path, 1, ${oldPathWithNameLength}, ${newPathWithName})
-          WHERE path LIKE ${like}`;
+    count += await updatePaths(oldPathWithName, newPathWithName);
   }
   count += +!!(await prisma.item.update({
-    where: {
-      name_path_isFolder: { name: oldName, path, isFolder },
-    },
+    where: { id },
     data: { name: newName },
   }));
   res.json({ count } satisfies Prisma.BatchPayload);
 });
 
 app.delete(`/deleteItems`, async (req, res) => {
+  const items = req.body as ItemWithId[];
   let count = 0;
-  for (const { isFolder, path, name } of req.body) {
+  for (const { id, isFolder, path, name } of items) {
     if (isFolder) {
       count += (
         await prisma.item.deleteMany({
@@ -85,9 +78,7 @@ app.delete(`/deleteItems`, async (req, res) => {
       ).count;
     }
     count += +!!(await prisma.item.delete({
-      where: {
-        name_path_isFolder: { name, path, isFolder },
-      },
+      where: { id },
     }));
   }
   res.json({ count } satisfies Prisma.BatchPayload);
