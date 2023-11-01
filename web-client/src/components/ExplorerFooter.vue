@@ -58,7 +58,7 @@ const selectedItemsSize = computed(() => {
         <div
           class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
           data-tip="Delete"
-          @click.stop="itemsStore.deleteItems(selectedItems)"
+          @click.stop="itemsStore.deleteItems"
           v-wave
         >
           <span class="material-symbols-outlined"> delete </span>

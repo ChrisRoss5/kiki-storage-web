@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { useDialogStore } from "@/stores/dialog";
 import { useItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
+import { useSelectionRectStore } from "@/stores/selectionRect";
 import { nextTick, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const itemsStore = useItemsStore();
 const pathStore = usePathStore();
+const selectionRectStore = useSelectionRectStore();
+const dialogStore = useDialogStore();
 
 const renameInput = ref<HTMLInputElement[] | null>(null);
 const newItemName = ref("");
@@ -16,7 +20,7 @@ watch(
   () => pathStore.currentPath,
   () => (lastSelectedItemIdx = 0)
 );
-// autofocus attr on "renameInput" weirdly only works once so we need to watch for changes
+// autofocus attr on "renameInput" only works once so we need to watch for changes
 watch(
   () => itemsStore.items.find((i) => i.isRenaming),
   async (item) => {
@@ -33,7 +37,7 @@ const getItemExtension = (item: Item) => {
   const split = item.name.split(".");
   return split.length > 1 ? split.at(-1) : "";
 };
-const handleRowSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
+const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
   if (e.ctrlKey) {
     if (item.isSelected) item.isSelected = false;
     else {
@@ -55,10 +59,11 @@ const handleRowSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
 };
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) router.push(`${item.path}/${item.name}`);
-  else console.log("open file");
+  else dialogStore.showError("This item cannot be previewed.");
 };
-const handleDragStart = (item: Item, e: DragEvent) => {
-  item.isSelected = true;  // todo remove if implemented mouse selection
+const handleDragStart = (e: DragEvent) => {
+  if (selectionRectStore.isActive) return e.preventDefault();
+  else selectionRectStore.isLeftMouseDown = false;
   e.dataTransfer?.setData("items", JSON.stringify(itemsStore.selectedItems));
   document.body.setAttribute("dragging-items", "true");
 };
@@ -85,7 +90,8 @@ const handleDrop = (item: Item, e: DragEvent) => {
     <tbody>
       <tr
         v-for="item in itemsStore.items"
-        :key="item.name + item.path + item.isFolder"
+        :key="item.id"
+        :id="item.id?.toString()"
         class="cursor-pointer hover:bg-base-200"
         :class="{
           '!bg-base-300': item.isSelected,
@@ -93,13 +99,13 @@ const handleDrop = (item: Item, e: DragEvent) => {
           folder: item.isFolder,
         }"
         tabindex="0"
-        draggable="true"
-        @dragstart="handleDragStart(item, $event)"
+        :draggable="item.isSelected"
+        @dragstart="handleDragStart"
         @dragend="handleDragStop"
         @drop.stop.prevent="handleDrop(item, $event)"
-        @click.stop="handleRowSelect(item, $event)"
+        @click.stop="handleItemSelect(item, $event)"
         @dblclick.stop="handleItemOpen(item)"
-        @keyup.space="handleRowSelect(item, $event)"
+        @keyup.space="handleItemSelect(item, $event)"
         @keyup.enter="handleItemOpen(item)"
       >
         <td class="rounded-l-lg">

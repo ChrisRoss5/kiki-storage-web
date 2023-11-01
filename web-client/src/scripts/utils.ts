@@ -47,17 +47,14 @@ export function itemsEqual(a: Item, b: Item): boolean {
 let isThrottled = false;
 export function setDragOverStyle(e: DragEvent) {
   if (isThrottled) return;
+  isThrottled = true;
+  setTimeout(() => (isThrottled = false), 10);
   let target = e.target as HTMLElement;
   target =
     target.closest("TR") ?? target.closest("#explorer-container") ?? target;
-  let { offsetX: x, offsetY: y } = e;
-  if (target.tagName == "TR") {
-    if (!target.classList.contains("folder"))
-      target = target.closest("#explorer-container")!;
-    const rect = target.getBoundingClientRect();
-    x = e.clientX - rect.left;
-    y = e.clientY - rect.top;
-  }
+  const willNeedRect = target.tagName == "TR";
+  if (willNeedRect && !target.classList.contains("folder"))
+    target = target.closest("#explorer-container")!;
   if (
     document.body.hasAttribute("dragging-items") &&
     (target.id == "explorer-container" ||
@@ -65,6 +62,12 @@ export function setDragOverStyle(e: DragEvent) {
       target.classList.contains("is-selected"))
   )
     return;
+  let { offsetX: x, offsetY: y } = e;
+  if (willNeedRect) {
+    const rect = target.getBoundingClientRect();
+    x = e.clientX - rect.left;
+    y = e.clientY - rect.top;
+  }
   target.classList.add("dragover");
   target.style.background = `radial-gradient(
     circle at ${x}px ${y}px,
@@ -72,8 +75,6 @@ export function setDragOverStyle(e: DragEvent) {
     hsl(var(--a) / 50%) 50%,
     hsl(var(--b1)) 70%
   ) no-repeat`;
-  isThrottled = true;
-  setTimeout(() => (isThrottled = false), 10);
 }
 
 export function clearDragOverStyle(e: DragEvent) {
