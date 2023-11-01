@@ -58,7 +58,7 @@ const handleItemOpen = (item: Item) => {
   else console.log("open file");
 };
 const handleDragStart = (item: Item, e: DragEvent) => {
-  item.isSelected = true;
+  item.isSelected = true;  // todo remove if implemented mouse selection
   e.dataTransfer?.setData("items", JSON.stringify(itemsStore.selectedItems));
   document.body.setAttribute("dragging-items", "true");
 };
@@ -135,7 +135,6 @@ const handleDrop = (item: Item, e: DragEvent) => {
             </button>
             <button
               class="dsy-join-item dsy-btn dsy-btn-secondary"
-              :class="{ 'dsy-btn-disabled': !newItemName }"
               @click.stop="item.isRenaming = false"
               v-wave
             >

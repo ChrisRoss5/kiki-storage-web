@@ -10,7 +10,7 @@ const newFolderName = ref("");
 
 const handleAddFolderClick = () => {
   const name = newFolderName.value;
-  if (itemsStore.checkName(name, true).error) return;
+  if (itemsStore.isNameInvalid(name, true)) return;
   itemsStore.addFolder(name);
   newFolderName.value = "";
 };

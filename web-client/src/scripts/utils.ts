@@ -14,7 +14,9 @@ export function checkName(name: string, isFolder: boolean, items: Item[]) {
     : items.filter((i) => !i.isFolder).some((f) => f.name == name);
   const hasInvalidChars = /[\\/:*?"<>|]/.test(name);
   const type = isFolder ? "folder" : "file";
-  const error = alreadyExists
+  const error = !name
+    ? `A ${type} name can't be blank.`
+    : alreadyExists
     ? `This destination already contains a ${type} named '${name}'.`
     : hasInvalidChars
     ? `A ${type} name can't contain any of the following characters: \\ / : * ? " < > |`

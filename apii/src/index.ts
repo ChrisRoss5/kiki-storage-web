@@ -48,7 +48,7 @@ app.put("/moveItems", async (req, res) => {
 });
 
 app.put(`/renameItem`, async (req, res) => {
-  const { id, name: oldName, path, isFolder } = req.body as ItemWithId;
+  const { id, name: oldName, path, isFolder } = req.body.item as ItemWithId;
   const newName = req.body.newName as string;
   let count = 0;
   if (isFolder) {

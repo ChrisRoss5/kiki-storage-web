@@ -45,14 +45,6 @@ const selectedItemsSize = computed(() => {
           <span class="material-symbols-outlined"> share </span>
         </div>
         <div
-          class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
-          data-tip="Move"
-          @click.stop=""
-          v-wave
-        >
-          <span class="material-symbols-outlined"> drive_file_move </span>
-        </div>
-        <div
           v-show="selectedItems.length == 1"
           class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
           data-tip="Rename"

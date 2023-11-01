@@ -12,29 +12,24 @@ export const useItemsStore = defineStore("items", () => {
   const items = ref<Item[]>([]);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
 
-  const checkNewItems = async (newItems: Item[], path: string) => {
+  const areItemsInvalid = async (newItems: Item[], path: string) => {
     const scopedItems =
       path == pathStore.currentPath ? items.value : await api.getItems(path);
-    const isInvalid = (i: Item) =>
-      checkName(i.name, i.isFolder, scopedItems).error;
-    return { error: newItems.some(isInvalid) };
+    return newItems.some((i) => isNameInvalid(i.name, i.isFolder, scopedItems));
   };
-  const checkName = (name: string, isFolder: boolean, _items?: Item[]) => {
+  const isNameInvalid = (name: string, isFolder: boolean, _items?: Item[]) => {
     const { error } = utils.checkName(name, isFolder, _items ?? items.value);
     if (error) dialogStore.showError(error);
-    return { error: !!error };
+    return !!error;
   };
   const handleDrop = async (e: DragEvent, path?: string) => {
-    console.log(path);
     path ??= pathStore.currentPath;
-    console.log(path);
-
     utils.clearDragOverStyle(e);
     const itemsData = e.dataTransfer?.getData("items");
     if (itemsData) {
       if (path == pathStore.currentPath) return;
       const newItems = JSON.parse(itemsData) as Item[];
-      if ((await checkNewItems(newItems, path)).error) return;
+      if ((await areItemsInvalid(newItems, path))) return;
       api.moveItems(newItems, path);
       items.value = items.value.filter((a) =>
         newItems.every((b) => !utils.itemsEqual(a, b))
@@ -51,7 +46,7 @@ export const useItemsStore = defineStore("items", () => {
     const newItems = utils.convertFilesToItemFiles(files, path);
     if (!newItems.length)
       return dialogStore.showError("No valid files were selected.");
-    if ((await checkNewItems(newItems, path)).error) return;
+    if ((await areItemsInvalid(newItems, path))) return;
     if (path == pathStore.currentPath) items.value.push(...newItems);
     api.createItems(newItems);
   };
@@ -70,13 +65,11 @@ export const useItemsStore = defineStore("items", () => {
     if (renaming) renaming.isRenaming = false;
   };
   const renameItem = (item: Item, newName: string) => {
-    console.log(item.name, newName);
-
     if (item.name == newName) {
       item.isRenaming = false;
       return;
     }
-    if (checkName(newName, item.isFolder).error) return;
+    if (isNameInvalid(newName, item.isFolder)) return;
     const oldName = item.name;
     item.isRenaming = false;
     item.name = newName;
@@ -90,6 +83,12 @@ export const useItemsStore = defineStore("items", () => {
     clearRenaming();
   });
   document.addEventListener("keydown", (e) => {
+    if (e.key == "Delete" && selectedItems.value.length)
+      deleteItems(selectedItems.value);
+    if (e.key == "F2" && selectedItems.value.length == 1) {
+      e.preventDefault();
+      selectedItems.value[0].isRenaming = true;
+    }
     const inEditable =
       document.activeElement?.tagName == "INPUT" ||
       document.activeElement?.tagName == "TEXTAREA" ||
@@ -104,12 +103,12 @@ export const useItemsStore = defineStore("items", () => {
 
   return {
     items,
+    isNameInvalid,
     selectedItems,
     handleDrop,
     addFolder,
     addFiles,
     deleteItems,
-    checkName,
     selectAll,
     deselectAll,
     clearRenaming,
