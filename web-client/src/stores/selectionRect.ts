@@ -1,26 +1,33 @@
+import { useItemsStore } from "@/stores/items";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { useItemsStore } from "@/stores/items";
 
 export const useSelectionRectStore = defineStore("selectionRect", () => {
   const itemsStore = useItemsStore();
 
-  let items = [] as { el: HTMLElement; item: Item }[];
   const rectEl = ref<HTMLElement | null>(null);
-  let rectElBounding = null as DOMRect | null;
-  let startCoords = { x: 0, y: 0 };
+  const explEl = ref<HTMLElement | null>(null);
   let isLeftMouseDown = ref<boolean>(false);
   let isActive = ref<boolean>(false);
   let wasActive = ref<boolean>(false);
-  let scrollDirection = ref<"up" | "down" | null>(null);
+
+  let items = [] as { el: HTMLElement; item: Item; wasSelected: boolean }[];
+  let explElRect = null as DOMRect | null;
+  let startCoords = { x: 0, y: 0 };
+  let startScrollTop = 0;
   let isCtrlOrShiftDown = false;
+  let lastScrollDirection = null as "up" | "down" | null;
+  let isThrottled = false;
+  let interval: NodeJS.Timeout | undefined;
 
   const activate = () => {
     document.body.style.userSelect = "none";
     rectEl.value!.style.display = "";
     isActive.value = true;
     items = itemsStore.items.map((item) => {
-      return { el: document.getElementById(item.id!.toString())!, item };
+      const el = document.getElementById(item.id!.toString())!;
+      const wasSelected = (isCtrlOrShiftDown && item.isSelected) || false;
+      return { el, item, wasSelected };
     });
     if (!isCtrlOrShiftDown) itemsStore.deselectAll();
   };
@@ -28,67 +35,103 @@ export const useSelectionRectStore = defineStore("selectionRect", () => {
     document.body.style.userSelect = "";
     rectEl.value!.style.display = "none";
     isActive.value = false;
-    scrollDirection.value = null;
+    clearInterval(interval);
+    lastScrollDirection = null;
   };
-  const handleMouseDown = (e: MouseEvent) => {
+  const handleLeftMouseDown = (e: MouseEvent) => {
+    if (!rectEl.value) return;
     isCtrlOrShiftDown = e.ctrlKey || e.shiftKey;
-    let target = e.target as HTMLElement;
-    target = target.closest("#explorer-container") as HTMLElement;
-    rectElBounding = target.getBoundingClientRect();
-    startCoords = { x: e.clientX, y: e.clientY };
+    explElRect = explEl.value!.getBoundingClientRect();
+    startScrollTop = explEl.value!.scrollTop;
+    startCoords = {
+      x: e.clientX - explElRect.left,
+      y: e.clientY - explElRect.top + startScrollTop,
+    };
     isLeftMouseDown.value = true;
   };
-  let isThrottled = false;
+  let scrollStrength = 0;
+
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isLeftMouseDown.value) return;
-    const _rectEl = rectEl.value!;
-    const left = Math.min(startCoords.x, e.clientX);
-    const top = Math.min(startCoords.y, e.clientY);
-    const right = Math.max(startCoords.x, e.clientX);
-    const bottom = Math.max(startCoords.y, e.clientY);
-    const _left = Math.max(left, rectElBounding!.left);
-    const _top = Math.max(top, rectElBounding!.top);
-    const _right = Math.min(right, rectElBounding!.right);
-    const _bottom = Math.min(bottom, rectElBounding!.bottom);
-    const _width = _right - _left;
-    const _height = _bottom - _top;
-    if (!isActive.value && (_width < 5 || _height < 5)) return;
-    if (!isActive.value) activate();
-    _rectEl.style.width = `${_width}px`;
-    _rectEl.style.height = `${_height}px`;
-    _rectEl.style.left = `${_left}px`;
-    _rectEl.style.top = `${_top}px`;
-    if (rectElBounding!.top > top) scrollDirection.value = "up";
-    else if (rectElBounding!.bottom < bottom) scrollDirection.value = "down";
-    else scrollDirection.value = null;
+    if (!rectEl.value || !isLeftMouseDown.value) return;
+    const scrolledDown = explEl.value!.scrollTop - startScrollTop;
+    const newCoords = {
+      x: e.clientX - explElRect!.left,
+      y: e.clientY - explElRect!.top + startScrollTop + scrolledDown,
+    };
+    const x = newCoords.x - startCoords.x;
+    const y = newCoords.y - startCoords.y;
+    const width = Math.abs(x);
+    let height = Math.abs(y);
+    if (!isActive.value) {
+      if (width < 5 || height < 5) return;
+      activate();
+    }
+    const left = x < 0 ? startCoords.x - width : startCoords.x;
+    let top = y < 0 ? startCoords.y - height : startCoords.y;
+    rectEl.value!.style.display = "block";
+    rectEl.value!.style.top = `${top}px`;
+    rectEl.value!.style.left = `${left}px`;
+    rectEl.value!.style.width = `${width}px`;
+    rectEl.value!.style.height = `${height}px`;
+
+    const checkOverlap = () => {
+      for (const { el, item, wasSelected } of items) {
+        if (wasSelected) continue;
+        item.isSelected = !(
+          el.offsetLeft + el.offsetWidth + 1 < left ||
+          el.offsetLeft - 1 > left + width ||
+          el.offsetTop + el.offsetHeight + 1 < top ||
+          el.offsetTop - 1 > top + height
+        );
+      }
+    };
+
+    let scrollDirection = null as "up" | "down" | null;
+    if (e.clientY < explElRect!.top) {
+      scrollDirection = "up";
+      scrollStrength = explElRect!.top - e.clientY;
+    }
+    if (e.clientY > explElRect!.bottom) {
+      scrollDirection = "down";
+      scrollStrength = e.clientY - explElRect!.bottom;
+    }
+    if (scrollDirection != lastScrollDirection) {
+      lastScrollDirection = scrollDirection;
+      clearInterval(interval);
+      if (!scrollDirection) return;
+      interval = setInterval(() => {
+        const strength = Math.max(5, scrollStrength / 8);
+        const pixels = scrollDirection == "up" ? -strength : strength;
+        explEl.value!.scrollBy(0, pixels);
+        const scrolledDown = explEl.value!.scrollTop - startScrollTop + pixels;
+        const newY =
+          e.clientY - explElRect!.top + startScrollTop + scrolledDown;
+        height = Math.abs(newY - startCoords.y);
+        top = y < 0 ? startCoords.y - height : startCoords.y;
+        rectEl.value!.style.top = `${top}px`;
+        rectEl.value!.style.height = `${height}px`;
+        checkOverlap();
+      }, 10);
+    }
 
     if (isThrottled) return;
     isThrottled = true;
     setTimeout(() => (isThrottled = false), 10);
-    for (const { el, item } of items) {
-      const rect = el.getBoundingClientRect();
-      const isOverlapping = !(
-        rect.right + 1 < _left ||
-        rect.left - 1 > _right ||
-        rect.bottom + 1 < _top ||
-        rect.top - 1 > _bottom
-      );
-      if (isOverlapping) item.isSelected = true;
-    }
+    checkOverlap();
   };
-  const handleSelectionExit = () => {
+  const handleLeftMouseUp = () => {
+    if (!rectEl.value) return;
     if (isActive.value) wasActive.value = true;
     isLeftMouseDown.value = false;
     deactivate();
   };
 
   return {
-    items,
     rectEl,
-    scrollDirection,
+    explEl,
     handleMouseMove,
-    handleMouseDown,
-    handleSelectionExit,
+    handleLeftMouseDown,
+    handleLeftMouseUp,
     isLeftMouseDown,
     isActive,
     wasActive,

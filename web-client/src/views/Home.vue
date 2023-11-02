@@ -1,38 +1,47 @@
 <script setup lang="ts">
 import Explorer from "@/components/Explorer.vue";
 import Header from "@/components/Header.vue";
+import { useDialogStore } from "@/stores/dialog";
 import { useItemsStore } from "@/stores/items";
 import { useSelectionRectStore } from "@/stores/selectionRect";
-import { onBeforeMount, onBeforeUnmount, onMounted, ref } from "vue";
+import { onBeforeMount, onBeforeUnmount } from "vue";
 
 const itemsStore = useItemsStore();
 const selectionRectStore = useSelectionRectStore();
-
-const rectEl = ref<HTMLDivElement | null>(null);
+const dialogStore = useDialogStore();
 
 onBeforeMount(() => document.addEventListener("keydown", handleKeydown));
 onBeforeUnmount(() => document.removeEventListener("keydown", handleKeydown));
-onMounted(() => (selectionRectStore.rectEl = rectEl.value!));
 
 const handleKeydown = (e: KeyboardEvent) => {
   const selectedItems = itemsStore.selectedItems;
+  if (
+    e.key == "Enter" &&
+    dialogStore.state.isOpen &&
+    dialogStore.state.handleConfirmation
+  ) {
+    e.preventDefault();
+    dialogStore.state.handleConfirmation(true);
+    dialogStore.close();
+  }
   if (e.key == "Delete" && selectedItems.length) {
     e.preventDefault();
     itemsStore.deleteItems();
   } else if (e.key == "F2" && selectedItems.length == 1) {
     e.preventDefault();
     selectedItems[0].isRenaming = true;
+  } else if (e.key == "a" && e.ctrlKey) {
+    const inEditable =
+      document.activeElement?.tagName == "INPUT" ||
+      document.activeElement?.tagName == "TEXTAREA" ||
+      (document.activeElement as HTMLElement).isContentEditable;
+    if (inEditable) return;
+    e.preventDefault();
+    document.body.style.userSelect = "none";
+    itemsStore.selectAll();
+    itemsStore.clearRenaming();
+    document.body.style.userSelect = "";
   }
-  const inEditable =
-    document.activeElement?.tagName == "INPUT" ||
-    document.activeElement?.tagName == "TEXTAREA" ||
-    (document.activeElement as HTMLElement).isContentEditable;
-  if (e.key != "a" || !e.ctrlKey || inEditable) return;
-  e.preventDefault();
-  document.body.style.userSelect = "none";
-  itemsStore.selectAll();
-  itemsStore.clearRenaming();
-  document.body.style.userSelect = "";
 };
 const handleClickLeft = (e: MouseEvent) => {
   if (selectionRectStore.wasActive) {
@@ -50,15 +59,10 @@ const handleClickLeft = (e: MouseEvent) => {
   <div
     class="flex flex-col"
     @mousemove="selectionRectStore.handleMouseMove"
-    @mouseup.left="selectionRectStore.handleSelectionExit"
-    @mouseleave="selectionRectStore.handleSelectionExit"
+    @mouseup.left="selectionRectStore.handleLeftMouseUp"
     @click.left="handleClickLeft"
   >
     <Header class="p-5" />
     <Explorer class="p-5" />
-    <div
-      ref="rectEl"
-      class="fixed border border-primary bg-base-300 pointer-events-none z-50"
-    ></div>
   </div>
 </template>
