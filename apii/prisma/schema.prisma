@@ -13,12 +13,12 @@ datasource db {
 model Item {
   id           Int      @id @default(autoincrement())
   name         String
+  type         String
   dateAdded    DateTime @default(now())
   dateModified DateTime @default(now())
   path         String
   isFolder     Boolean  @default(false)
   size         BigInt?
-  type         String?
 
   @@unique([name, type, path, isFolder])
 }

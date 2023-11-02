@@ -2,12 +2,21 @@ import { Prisma } from "@prisma/client";
 import cors from "cors";
 import express from "express";
 import prisma from "./prisma";
-import { updatePaths } from "./utils";
+import * as utils from "./utils";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.get("/searchItems", async (req, res) => {
+  const result = await prisma.item.findMany({
+    where: {
+      name: { startsWith: req.query.query as string },
+    },
+  });
+  res.json(result);
+});
 
 app.get("/getItems", async (req, res) => {
   const result = await prisma.item.findMany({
@@ -21,6 +30,7 @@ app.post("/createItems", async (req, res) => {
   const createdItems = await prisma.$transaction(
     items.map((item) => prisma.item.create({ data: item }))
   );
+  await utils.updateDateModified(items[0].path);
   res.json(createdItems);
 });
 
@@ -33,7 +43,7 @@ app.put("/moveItems", async (req, res) => {
   for (const { name } of items.filter((i) => i.isFolder)) {
     const oldPathWithName = `${oldPath ? oldPath + "/" : ""}${name}`;
     const newPathWithName = `${newPath ? newPath + "/" : ""}${name}`;
-    count += await updatePaths(oldPathWithName, newPathWithName);
+    count += await utils.updatePaths(oldPathWithName, newPathWithName);
   }
   count += (
     await prisma.item.updateMany({
@@ -41,6 +51,7 @@ app.put("/moveItems", async (req, res) => {
       data: { path: newPath },
     })
   ).count;
+  await utils.updateDateModified(newPath);
   res.json({ count } satisfies Prisma.BatchPayload);
 });
 
@@ -52,12 +63,13 @@ app.put(`/renameItem`, async (req, res) => {
     const _path = path ? path + "/" : "";
     const newPathWithName = `${_path}${newName}`;
     const oldPathWithName = `${_path}${oldName}`;
-    count += await updatePaths(oldPathWithName, newPathWithName);
+    count += await utils.updatePaths(oldPathWithName, newPathWithName);
   }
   count += +!!(await prisma.item.update({
     where: { id },
     data: { name: newName },
   }));
+  await utils.updateDateModified(path);
   res.json({ count } satisfies Prisma.BatchPayload);
 });
 
@@ -78,6 +90,7 @@ app.delete(`/deleteItems`, async (req, res) => {
       where: { id },
     }));
   }
+  await utils.updateDateModified(items[0].path);
   res.json({ count } satisfies Prisma.BatchPayload);
 });
 

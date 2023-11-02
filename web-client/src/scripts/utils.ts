@@ -1,6 +1,7 @@
 export function createFolder(name: string, path: string) {
   return {
     name,
+    type: "",
     dateAdded: new Date(),
     dateModified: new Date(),
     path,
@@ -15,12 +16,12 @@ export function convertFilesToItemFiles(files: FileList, path: string): Item[] {
     const split = file.name.split(".");
     newItems.push({
       name: split.length > 1 ? split.slice(0, -1).join(".") : file.name,
+      type: split.length > 1 ? split.at(-1)! : "",
       dateAdded: new Date(),
       dateModified: new Date(file.lastModified),
       path,
       isFolder: false,
       size: file.size,
-      type: split.length > 1 ? split.at(-1) : "",
     });
   }
   return newItems;
@@ -105,6 +106,16 @@ export function formatSize(bytes: number) {
   const size = bytes / Math.pow(1024, i);
   const decimals = i > 2 ? 2 : i > 1 ? 1 : 0;
   return `${+size.toFixed(decimals)} ${sizes[i]}`;
+}
+
+export function formatDate(date: Date, locales: string) {
+  return date.toLocaleString(locales, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 /* EXPERIMENTAL; UNUSED; NON-STANDARD */

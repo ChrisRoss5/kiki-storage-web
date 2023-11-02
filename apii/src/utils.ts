@@ -13,8 +13,18 @@ export function updatePaths(oldPathWithName: string, newPathWithName: string) {
 }
 
 export function updateDateModified(path: string) {
+  if (!path) return Promise.resolve();
+  const name = path.split("/").pop()!;
+  path = path.slice(0, -name.length - 1);
   return prisma.item.update({
-    where: { path, isFolder: true },
-    data: { dateModified: new Date() },
+    where: {
+      name_type_path_isFolder: {
+        name,
+        type: "",
+        path,
+        isFolder: true,
+      },
+    },
+    data: { dateModified: new Date().toISOString() },
   });
 }

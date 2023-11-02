@@ -62,7 +62,7 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
   if (!item.isRenaming) itemsStore.clearRenaming();
 };
 const handleItemOpen = (item: Item) => {
-  if (item.isFolder) router.push(`${item.path}/${item.name}`);
+  if (item.isFolder) router.push(`/${item.path}/${item.name}`);
   else dialogStore.showError("This item cannot be previewed.");
 };
 const handleDragStart = (item: Item, e: DragEvent) => {
@@ -167,9 +167,11 @@ const handleDrop = (item: Item, e: DragEvent) => {
           {{ item.isFolder ? "" : utils.formatSize(item.size!) }}
         </td>
         <td class="capitalize">{{ item.isFolder ? "folder" : item.type }}</td>
-        <td>{{ item.dateAdded.toLocaleDateString() }}</td>
-        <td class="rounded-r-lg">
-          {{ item.dateModified.toLocaleDateString() }}
+        <td class="whitespace-nowrap">
+          {{ utils.formatDate(item.dateModified, "hr") }}
+        </td>
+        <td class="whitespace-nowrap rounded-r-lg">
+          {{ utils.formatDate(item.dateModified, "hr") }}
         </td>
       </tr>
     </tbody>

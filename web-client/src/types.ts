@@ -1,12 +1,12 @@
 interface ItemData {
   id?: number;
   name: string;
+  type: string;
   dateAdded: Date;
   dateModified: Date;
   path: string;
   isFolder: boolean;
   size?: number;
-  type?: string;
 }
 
 interface Item extends ItemData {

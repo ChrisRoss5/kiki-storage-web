@@ -3,8 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "studio": "prisma studio",
     "nodemon": "nodemon",
+    "start": "ts-node src/index.ts",
     "db:push": "prisma db push",
     "db:migrate-dev": "npx prisma migrate dev --name init"
   },

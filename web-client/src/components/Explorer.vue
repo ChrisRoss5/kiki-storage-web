@@ -25,7 +25,7 @@ const selectionRectStore = useSelectionRectStore();
       @mousedown.left="selectionRectStore.handleLeftMouseDown"
     >
       <template v-if="itemsStore.items.length">
-        <ExplorerTable v-if="itemsStore.items.length" />
+        <ExplorerTable />
         <div
           :ref="(el) => (selectionRectStore.rectEl = el as HTMLElement)"
           class="absolute border border-primary bg-base-300 pointer-events-none z-50"
