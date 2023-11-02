@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import * as utils from "@/scripts/utils";
 import { useItemsStore } from "@/stores/items";
 import { computed } from "vue";
 
@@ -24,7 +25,9 @@ const selectedItemsSize = computed(() => {
     <div v-if="selectedItems?.length">
       <span class="px-3">|</span>{{ selectedItems.length }}
       {{ selectedItems.length == 1 ? "item" : "items" }} selected
-      <template v-if="selectedItemsSize"> ({{ selectedItemsSize }}) </template>
+      <template v-if="selectedItemsSize">
+        ({{ utils.formatSize(selectedItemsSize) }})
+      </template>
     </div>
     <Transition name="fade">
       <div class="ml-auto flex" v-if="selectedItems?.length">
@@ -34,7 +37,7 @@ const selectedItemsSize = computed(() => {
           @click.stop=""
           v-wave
         >
-          <span class="material-symbols-outlined"> download </span>
+          <span class="material-symbols-outlined leading-4"> download </span>
         </div>
         <div
           class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
@@ -42,7 +45,7 @@ const selectedItemsSize = computed(() => {
           @click.stop=""
           v-wave
         >
-          <span class="material-symbols-outlined"> share </span>
+          <span class="material-symbols-outlined leading-4"> share </span>
         </div>
         <div
           v-show="selectedItems.length == 1"
@@ -53,7 +56,7 @@ const selectedItemsSize = computed(() => {
           "
           v-wave
         >
-          <span class="material-symbols-outlined"> edit </span>
+          <span class="material-symbols-outlined leading-4"> edit </span>
         </div>
         <div
           class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
@@ -61,7 +64,7 @@ const selectedItemsSize = computed(() => {
           @click.stop="itemsStore.deleteItems"
           v-wave
         >
-          <span class="material-symbols-outlined"> delete </span>
+          <span class="material-symbols-outlined leading-4"> delete </span>
         </div>
       </div>
     </Transition>

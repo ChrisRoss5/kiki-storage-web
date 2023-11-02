@@ -24,8 +24,9 @@ export const useSelectionRectStore = defineStore("selectionRect", () => {
     document.body.style.userSelect = "none";
     rectEl.value!.style.display = "";
     isActive.value = true;
+    const rowEls = [...explEl.value!.querySelectorAll("tr")];
     items = itemsStore.items.map((item) => {
-      const el = document.getElementById(item.id!.toString())!;
+      const el = rowEls.find((el) => el.id == item.id!.toString())!;
       const wasSelected = (isCtrlOrShiftDown && item.isSelected) || false;
       return { el, item, wasSelected };
     });

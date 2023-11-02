@@ -5,6 +5,7 @@ interface Item {
   path: string;
   isFolder: boolean;
   size?: number;
+  type?: string;
 }
 
 interface ItemWithId extends Item {

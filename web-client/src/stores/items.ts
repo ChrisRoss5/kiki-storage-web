@@ -33,22 +33,21 @@ export const useItemsStore = defineStore("items", () => {
       api.moveItems(newItems, path);
       items.value = items.value.filter((a) =>
         newItems.every((b) => !utils.itemsEqual(a, b))
-      ); // todo - realtime update instead
+      ); // todo - realtime update instead, and remove itemsequal from utils
     } else if (e.dataTransfer) addFiles(e.dataTransfer.files, path);
   };
-  const addFolder = (name: string) => {
+  const addFolder = async (name: string) => {
     const item = utils.createFolder(name, pathStore.currentPath);
-    items.value.push(item);
-    api.createItem(item);
+    items.value.push(await api.createItem(item));
   };
   const addFiles = async (files: FileList, path?: string) => {
     path ??= pathStore.currentPath;
-    const newItems = utils.convertFilesToItemFiles(files, path);
+    let newItems = utils.convertFilesToItemFiles(files, path);
     if (!newItems.length)
       return dialogStore.showError("No valid files were selected.");
     if (await areItemsInvalid(newItems, path)) return;
+    newItems = await api.createItems(newItems);
     if (path == pathStore.currentPath) items.value.push(...newItems);
-    api.createItems(newItems);
   };
   const deleteItems = async () => {
     const _items = selectedItems.value;
@@ -57,12 +56,6 @@ export const useItemsStore = defineStore("items", () => {
     if (!(await dialogStore.confirm(message))) return;
     items.value = items.value.filter((i) => !_items.includes(i));
     api.deleteItems(_items);
-  };
-  const selectAll = () => items.value.forEach((i) => (i.isSelected = true));
-  const deselectAll = () => items.value.forEach((i) => (i.isSelected = false));
-  const clearRenaming = () => {
-    const renaming = items.value.find((i) => i.isRenaming);
-    if (renaming) renaming.isRenaming = false;
   };
   const renameItem = (item: Item, newName: string) => {
     if (item.name == newName) {
@@ -75,6 +68,12 @@ export const useItemsStore = defineStore("items", () => {
     item.name = newName;
     api.renameItem({ ...item, name: oldName }, newName);
   };
+  const clearRenaming = () => {
+    const renaming = items.value.find((i) => i.isRenaming);
+    if (renaming) renaming.isRenaming = false;
+  };
+  const selectAll = () => items.value.forEach((i) => (i.isSelected = true));
+  const deselectAll = () => items.value.forEach((i) => (i.isSelected = false));
 
   return {
     items,

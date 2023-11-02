@@ -21,8 +21,6 @@ app.post("/createItems", async (req, res) => {
   const createdItems = await prisma.$transaction(
     items.map((item) => prisma.item.create({ data: item }))
   );
-  console.log(items);
-  console.log(createdItems);
   res.json(createdItems);
 });
 
@@ -32,8 +30,7 @@ app.put("/moveItems", async (req, res) => {
   const oldPath = items[0].path;
   const newPath = req.body.newPath as string;
   let count = 0;
-  for (const { isFolder, name } of items) {
-    if (!isFolder) continue;
+  for (const { name } of items.filter((i) => i.isFolder)) {
     const oldPathWithName = `${oldPath ? oldPath + "/" : ""}${name}`;
     const newPathWithName = `${newPath ? newPath + "/" : ""}${name}`;
     count += await updatePaths(oldPathWithName, newPathWithName);

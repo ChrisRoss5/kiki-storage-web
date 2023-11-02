@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import * as utils from "@/scripts/utils";
 import { useDialogStore } from "@/stores/dialog";
 import { useItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { useSelectionRectStore } from "@/stores/selectionRect";
-import { nextTick, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -15,6 +16,13 @@ const dialogStore = useDialogStore();
 const renameInput = ref<HTMLInputElement[] | null>(null);
 const newItemName = ref("");
 let lastSelectedItemIdx = 0;
+const itemsSorted = computed(() =>
+  itemsStore.items.sort((a, b) => {
+    if (a.isFolder && !b.isFolder) return -1;
+    if (!a.isFolder && b.isFolder) return 1;
+    return a.name.localeCompare(b.name);
+  })
+);
 
 watch(
   () => pathStore.currentPath,
@@ -33,10 +41,6 @@ watch(
   { flush: "post" } // wait for DOM to update first
 );
 
-const getItemExtension = (item: Item) => {
-  const split = item.name.split(".");
-  return split.length > 1 ? split.at(-1) : "";
-};
 const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
   if (e.ctrlKey) {
     if (item.isSelected) item.isSelected = false;
@@ -61,8 +65,8 @@ const handleItemOpen = (item: Item) => {
   if (item.isFolder) router.push(`${item.path}/${item.name}`);
   else dialogStore.showError("This item cannot be previewed.");
 };
-const handleDragStart = (e: DragEvent) => {
-  if (selectionRectStore.isActive) return e.preventDefault();
+const handleDragStart = (item: Item, e: DragEvent) => {
+  if (selectionRectStore.isActive || item.isRenaming) return e.preventDefault();
   else selectionRectStore.isLeftMouseDown = false;
   e.dataTransfer?.setData("items", JSON.stringify(itemsStore.selectedItems));
   document.body.setAttribute("dragging-items", "true");
@@ -86,10 +90,11 @@ const handleDrop = (item: Item, e: DragEvent) => {
       <th class="sticky top-0 bg-base-100 z-10">Size</th>
       <th class="sticky top-0 bg-base-100 z-10">Type</th>
       <th class="sticky top-0 bg-base-100 z-10">Date added</th>
+      <th class="sticky top-0 bg-base-100 z-10">Date modified</th>
     </thead>
     <tbody>
       <tr
-        v-for="item in itemsStore.items"
+        v-for="item in itemsSorted"
         :key="item.id"
         :id="item.id?.toString()"
         class="cursor-pointer hover:bg-base-200"
@@ -100,7 +105,7 @@ const handleDrop = (item: Item, e: DragEvent) => {
         }"
         tabindex="0"
         :draggable="item.isSelected"
-        @dragstart="handleDragStart"
+        @dragstart="handleDragStart(item, $event)"
         @dragend="handleDragStop"
         @drop.stop.prevent="handleDrop(item, $event)"
         @click.stop="handleItemSelect(item, $event)"
@@ -112,12 +117,17 @@ const handleDrop = (item: Item, e: DragEvent) => {
           <span
             class="fiv-viv text-xl mr-3"
             :class="
-              !item.isFolder
-                ? `fiv-icon-${getItemExtension(item)}`
-                : 'fiv-icon-folder'
+              item.isFolder
+                ? 'fiv-icon-folder'
+                : `fiv-icon-${item.type! || 'blank'}`
             "
           ></span>
-          <div v-if="item.isRenaming" class="inline-flex ml-2">
+          <div
+            v-if="item.isRenaming"
+            class="inline-flex ml-2"
+            @mousedown.stop="null"
+            @click.stop="null"
+          >
             <input
               ref="renameInput"
               v-model.trim="newItemName"
@@ -126,13 +136,15 @@ const handleDrop = (item: Item, e: DragEvent) => {
                 item.isFolder ? 'folder' : 'file'
               } name`"
               class="dsy-join-item dsy-input dsy-input-secondary outline-none"
-              @keyup.stop.enter="itemsStore.renameItem(item, newItemName)"
+              @keyup.stop.enter="
+                newItemName.length && itemsStore.renameItem(item, newItemName)
+              "
               @keyup.stop.esc="item.isRenaming = false"
             />
             <button
               class="dsy-join-item dsy-btn dsy-btn-secondary"
               :class="{
-                'dsy-btn-disabled': !newItemName || newItemName == item.name,
+                'dsy-btn-disabled': !newItemName.length,
               }"
               @click.stop="itemsStore.renameItem(item, newItemName)"
               v-wave
@@ -147,13 +159,18 @@ const handleDrop = (item: Item, e: DragEvent) => {
               <span class="material-symbols-outlined"> close </span>
             </button>
           </div>
-          <span v-else class="whitespace-pre"> {{ item.name }}</span>
+          <span v-else class="whitespace-pre">
+            {{ item.name + (item.type ? `.${item.type}` : "") }}
+          </span>
         </td>
-        <td>{{ !item.isFolder ? item.size : "" }}</td>
-        <td>{{ !item.isFolder ? getItemExtension(item) : "Folder" }}</td>
-
-        <!-- todo full extension name -->
-        <td class="rounded-r-lg">{{ item.dateAdded.toLocaleDateString() }}</td>
+        <td class="whitespace-nowrap">
+          {{ item.isFolder ? "" : utils.formatSize(item.size!) }}
+        </td>
+        <td class="capitalize">{{ item.isFolder ? "folder" : item.type }}</td>
+        <td>{{ item.dateAdded.toLocaleDateString() }}</td>
+        <td class="rounded-r-lg">
+          {{ item.dateModified.toLocaleDateString() }}
+        </td>
       </tr>
     </tbody>
   </table>

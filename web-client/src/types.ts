@@ -6,6 +6,7 @@ interface ItemData {
   path: string;
   isFolder: boolean;
   size?: number;
+  type?: string;
 }
 
 interface Item extends ItemData {

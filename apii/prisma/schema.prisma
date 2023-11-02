@@ -18,6 +18,7 @@ model Item {
   path         String
   isFolder     Boolean  @default(false)
   size         BigInt?
+  type         String?
 
-  @@unique([name, path, isFolder])
+  @@unique([name, type, path, isFolder])
 }

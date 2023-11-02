@@ -8,6 +8,24 @@ export function createFolder(name: string, path: string) {
   };
 }
 
+export function convertFilesToItemFiles(files: FileList, path: string): Item[] {
+  const newItems: Item[] = [];
+  for (const file of files) {
+    if (!file.size) continue;
+    const split = file.name.split(".");
+    newItems.push({
+      name: split.length > 1 ? split.slice(0, -1).join(".") : file.name,
+      dateAdded: new Date(),
+      dateModified: new Date(file.lastModified),
+      path,
+      isFolder: false,
+      size: file.size,
+      type: split.length > 1 ? split.at(-1) : "",
+    });
+  }
+  return newItems;
+}
+
 export function checkName(name: string, isFolder: boolean, items: Item[]) {
   const alreadyExists = isFolder
     ? items.filter((i) => i.isFolder).some((f) => f.name == name)
@@ -24,24 +42,14 @@ export function checkName(name: string, isFolder: boolean, items: Item[]) {
   return { error };
 }
 
-export function convertFilesToItemFiles(files: FileList, path: string): Item[] {
-  const newItems: Item[] = [];
-  for (const file of files) {
-    if (!file.size) continue;
-    newItems.push({
-      name: file.name,
-      dateAdded: new Date(),
-      dateModified: new Date(file.lastModified),
-      path,
-      isFolder: false,
-      size: file.size,
-    });
-  }
-  return newItems;
-}
-
 export function itemsEqual(a: Item, b: Item): boolean {
-  return a.name == b.name && a.path == b.path && a.isFolder == b.isFolder;
+  // server: @@unique([name, type, path, isFolder])
+  return (
+    a.name == b.name &&
+    a.type == b.type &&
+    a.path == b.path &&
+    a.isFolder == b.isFolder
+  );
 }
 
 let isThrottled = false;
@@ -88,6 +96,15 @@ export function clearDragOverStyle(e: DragEvent) {
     target;
   target.classList.remove("dragover");
   target.style.background = "";
+}
+
+export function formatSize(bytes: number) {
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  if (bytes == 0) return "0 B";
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const size = bytes / Math.pow(1024, i);
+  const decimals = i > 2 ? 2 : i > 1 ? 1 : 0;
+  return `${+size.toFixed(decimals)} ${sizes[i]}`;
 }
 
 /* EXPERIMENTAL; UNUSED; NON-STANDARD */

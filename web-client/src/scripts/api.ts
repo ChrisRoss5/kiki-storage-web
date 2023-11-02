@@ -1,19 +1,14 @@
 const baseUrl = "http://localhost:3000";
 
 export default {
-  async getItems(path: string) {
-    const items = await _fetch<ItemData[]>(`getItems?path=${path}`, "GET");
-    items.forEach((i) => {
-      i.dateAdded = new Date(i.dateAdded);
-      i.dateModified = new Date(i.dateModified);
-    });
-    return items;
+  getItems(path: string) {
+    return _fetch<Item[]>(`getItems?path=${path}`, "GET", null, true);
   },
   async createItem(item: Item) {
     return (await this.createItems([item]))[0];
   },
   createItems(items: Item[]) {
-    return _fetch<ItemData[]>("createItems", "POST", sanitize(items));
+    return _fetch<Item[]>("createItems", "POST", sanitize(items), true);
   },
   moveItems(items: Item[], newPath: string) {
     _fetch("moveItems", "PUT", { items: sanitize(items), newPath });
@@ -26,15 +21,27 @@ export default {
   },
 };
 
-async function _fetch<T>(endpoint: string, method: string, body?: any) {
+async function _fetch<T>(
+  endpoint: string,
+  method: string,
+  body?: any,
+  doFormatDates?: boolean
+) {
   const res = await fetch(`${baseUrl}/${endpoint}`, {
     method,
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: body ? JSON.stringify(body) : undefined,
   });
   const json = (await res.json()) as T;
-  // console.log(json);
-  return json;
+  return doFormatDates ? formatItems(json as ItemData[]) : json;
+}
+
+function formatItems(items: ItemData[]): Item[] {
+  return items.map((i: Item) => {
+    i.dateAdded = new Date(i.dateAdded);
+    i.dateModified = new Date(i.dateModified);
+    return i;
+  });
 }
 
 function sanitize(item: Item): ItemData;
@@ -42,11 +49,13 @@ function sanitize(items: Item[]): ItemData[];
 function sanitize(items: Item | Item[]): ItemData | ItemData[] {
   const transform = (i: Item): ItemData => ({
     id: i.id,
-    isFolder: i.isFolder,
     name: i.name,
     path: i.path,
     dateAdded: i.dateAdded,
     dateModified: i.dateModified,
+    isFolder: i.isFolder,
+    size: i.size,
+    type: i.type,
   });
   return Array.isArray(items) ? items.map(transform) : transform(items);
 }
