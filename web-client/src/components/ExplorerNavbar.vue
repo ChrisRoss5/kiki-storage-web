@@ -58,6 +58,8 @@ const handleFileUpload = (e: Event) => {
         placeholder="Add a new folder"
         class="dsy-join-item dsy-input dsy-input-primary outline-none"
         @keyup.enter="handleAddFolderClick"
+        spellcheck="false"
+        autocomplete="off"
       />
       <button
         class="dsy-join-item dsy-btn dsy-btn-primary"

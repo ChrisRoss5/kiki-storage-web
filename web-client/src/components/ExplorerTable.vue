@@ -3,26 +3,33 @@ import * as utils from "@/scripts/utils";
 import { useDialogStore } from "@/stores/dialog";
 import { useItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
+import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selectionRect";
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, inject, nextTick, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+
+const isSearch = inject<boolean>("isSearch")!;
 
 const router = useRouter();
 const itemsStore = useItemsStore();
 const pathStore = usePathStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useDialogStore();
+const searchStore = useSearchStore();
 
 const renameInput = ref<HTMLInputElement[] | null>(null);
 const newItemName = ref("");
 let lastSelectedItemIdx = 0;
-const itemsSorted = computed(() =>
-  itemsStore.items.sort((a, b) => {
-    if (a.isFolder && !b.isFolder) return -1;
-    if (!a.isFolder && b.isFolder) return 1;
-    return a.name.localeCompare(b.name);
-  })
-);
+
+const itemsSorted = computed(() => {
+  return itemsStore.items
+    .filter((i) => (isSearch ? i.isSearched : !i.isSearchedNew))
+    .sort((a, b) => {
+      if (a.isFolder && !b.isFolder) return -1;
+      if (!a.isFolder && b.isFolder) return 1;
+      return a.name.localeCompare(b.name);
+    });
+});
 
 watch(
   () => pathStore.currentPath,
@@ -62,8 +69,10 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
   if (!item.isRenaming) itemsStore.clearRenaming();
 };
 const handleItemOpen = (item: Item) => {
-  if (item.isFolder) router.push(`/${item.path}/${item.name}`);
-  else dialogStore.showError("This item cannot be previewed.");
+  if (item.isFolder) {
+    router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
+    searchStore.close();
+  } else dialogStore.showError("This item cannot be previewed.");
 };
 const handleDragStart = (item: Item, e: DragEvent) => {
   if (selectionRectStore.isActive || item.isRenaming) return e.preventDefault();
@@ -81,7 +90,7 @@ const handleDrop = (item: Item, e: DragEvent) => {
 </script>
 
 <template>
-  <table class="dsy-table place-self-start select-none">
+  <table class="dsy-table place-self-start">
     <caption class="sr-only">
       Explorer table
     </caption>
@@ -114,59 +123,68 @@ const handleDrop = (item: Item, e: DragEvent) => {
         @keyup.enter="handleItemOpen(item)"
       >
         <td class="rounded-l-lg">
-          <span
-            class="fiv-viv text-xl mr-3"
-            :class="
+          <div class="flex items-center">
+            <div
+              class="fiv-viv text-xl mr-3 flex-shrink-0"
+              :class="
               item.isFolder
                 ? 'fiv-icon-folder'
                 : `fiv-icon-${item.type! || 'blank'}`
             "
-          ></span>
-          <div
-            v-if="item.isRenaming"
-            class="inline-flex ml-2"
-            @mousedown.stop="null"
-            @click.stop="null"
-          >
-            <input
-              ref="renameInput"
-              v-model.trim="newItemName"
-              type="text"
-              :placeholder="`Enter a new ${
-                item.isFolder ? 'folder' : 'file'
-              } name`"
-              class="dsy-join-item dsy-input dsy-input-secondary outline-none"
-              @keyup.stop.enter="
-                newItemName.length && itemsStore.renameItem(item, newItemName)
-              "
-              @keyup.stop.esc="item.isRenaming = false"
-            />
-            <button
-              class="dsy-join-item dsy-btn dsy-btn-secondary"
-              :class="{
-                'dsy-btn-disabled': !newItemName.length,
-              }"
-              @click.stop="itemsStore.renameItem(item, newItemName)"
-              v-wave
+            ></div>
+            <div
+              v-if="item.isRenaming"
+              class="inline-flex ml-2"
+              @mousedown.stop="null"
+              @click.stop="null"
             >
-              <span class="material-symbols-outlined"> check </span>
-            </button>
-            <button
-              class="dsy-join-item dsy-btn dsy-btn-secondary"
-              @click.stop="item.isRenaming = false"
-              v-wave
-            >
-              <span class="material-symbols-outlined"> close </span>
-            </button>
+              <input
+                ref="renameInput"
+                v-model.trim="newItemName"
+                type="text"
+                :placeholder="`Enter a new ${
+                  item.isFolder ? 'folder' : 'file'
+                } name`"
+                class="dsy-join-item dsy-input dsy-input-secondary outline-none"
+                @keyup.stop.enter="
+                  newItemName.length && itemsStore.renameItem(item, newItemName)
+                "
+                @keyup.stop.esc="item.isRenaming = false"
+                spellcheck="false"
+                autocomplete="off"
+              />
+              <button
+                class="dsy-join-item dsy-btn dsy-btn-secondary"
+                :class="{
+                  'dsy-btn-disabled': !newItemName.length,
+                }"
+                @click.stop="itemsStore.renameItem(item, newItemName)"
+                v-wave
+              >
+                <span class="material-symbols-outlined"> check </span>
+              </button>
+              <button
+                class="dsy-join-item dsy-btn dsy-btn-secondary"
+                @click.stop="item.isRenaming = false"
+                v-wave
+              >
+                <span class="material-symbols-outlined"> close </span>
+              </button>
+            </div>
+            <div v-else>
+              <div class="whitespace-pre">
+                {{ item.name + (item.type ? `.${item.type}` : "") }}
+              </div>
+              <div v-if="isSearch" class="font-weight-bold">
+                Path: Personal drive/{{ item.path }}
+              </div>
+            </div>
           </div>
-          <span v-else class="whitespace-pre">
-            {{ item.name + (item.type ? `.${item.type}` : "") }}
-          </span>
         </td>
         <td class="whitespace-nowrap">
           {{ item.isFolder ? "" : utils.formatSize(item.size!) }}
         </td>
-        <td class="capitalize">{{ item.isFolder ? "folder" : item.type }}</td>
+        <td>{{ item.isFolder ? "Folder" : item.type.toUpperCase() }}</td>
         <td class="whitespace-nowrap">
           {{ utils.formatDate(item.dateModified, "hr") }}
         </td>

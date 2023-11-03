@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import Explorer from "@/components/Explorer.vue";
-import api from "@/scripts/api";
-import { ref, watch } from "vue";
+import ExplorerContainer from "@/components/ExplorerContainer.vue";
+import { useSearchStore } from "@/stores/search";
+import { provide } from "vue";
 
-const query = ref("");
-const showResults = ref(false);
-const results = ref<Item[]>([]);
+provide("isSearch", true);
 
-watch(query, async (query) => {
-  showResults.value = !!query.length;
-  if (!query.length) return;
-  //results.value = await api.searchItems(query);
-});
+const searchStore = useSearchStore();
 </script>
 
 <template>
@@ -25,16 +19,22 @@ watch(query, async (query) => {
         type="text"
         placeholder="Search"
         class="w-full dsy-input dsy-input-bordered dsy-input-primary"
-        v-model="query"
+        v-model="searchStore.query"
+        spellcheck="false"
+        autocomplete="off"
+        @focus="searchStore.show()"
       />
       <div
-        v-if="showResults"
-        class="absolute top-full left-0 right-0 max-h-40 shadow-lg rounded-md bg-base-100 px-4 py-4 mt-3 z-10"
+        v-if="searchStore.isOpen"
+        class="absolute top-full left-0 right-0 shadow-lg rounded-2xl bg-base-100 px-4 py-4 mt-3 z-10"
       >
-        <Explorer />
+        <ExplorerContainer v-if="searchStore.itemsFound" class="max-h-[70vh]" />
+        <div v-else class="flex-center flex-col gap-3">
+          <span class="material-symbols-outlined"> search </span>
+          <div>No results found</div>
+        </div>
       </div>
     </div>
-
     <div>
       <img alt="" class="rounded-full h-14" src="@/assets/default-pfp.webp" />
     </div>

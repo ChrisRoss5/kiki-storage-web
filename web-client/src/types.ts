@@ -12,14 +12,9 @@ interface ItemData {
 interface Item extends ItemData {
   isSelected?: boolean;
   isRenaming?: boolean;
-  isDeleting?: boolean;
-  isUploading?: boolean;
-  isDownloading?: boolean;
+  isDeleting?: boolean; // todo
+  isUploading?: boolean; // todo
+  isDownloading?: boolean; // todo
+  isSearched?: boolean;
+  isSearchedNew?: boolean;
 }
-
-interface FetchResult {
-  count: number;
-  error?: string;
-}
-
-

@@ -3,19 +3,25 @@ import Explorer from "@/components/Explorer.vue";
 import Header from "@/components/Header.vue";
 import { useDialogStore } from "@/stores/dialog";
 import { useItemsStore } from "@/stores/items";
+import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selectionRect";
 import { onBeforeMount, onBeforeUnmount } from "vue";
 
 const itemsStore = useItemsStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useDialogStore();
+const searchStore = useSearchStore();
 
 onBeforeMount(() => document.addEventListener("keydown", handleKeydown));
 onBeforeUnmount(() => document.removeEventListener("keydown", handleKeydown));
 
 const handleKeydown = (e: KeyboardEvent) => {
   const selectedItems = itemsStore.selectedItems;
-  if (
+  if (e.key == "Escape") {
+    e.preventDefault();
+    if (searchStore.isOpen) searchStore.close();
+    else if (selectedItems.length) itemsStore.deselectAll();
+  } else if (
     e.key == "Enter" &&
     dialogStore.state.isOpen &&
     dialogStore.state.handleConfirmation
@@ -23,8 +29,7 @@ const handleKeydown = (e: KeyboardEvent) => {
     e.preventDefault();
     dialogStore.state.handleConfirmation(true);
     dialogStore.close();
-  }
-  if (e.key == "Delete" && selectedItems.length) {
+  } else if (e.key == "Delete" && selectedItems.length) {
     e.preventDefault();
     itemsStore.deleteItems();
   } else if (e.key == "F2" && selectedItems.length == 1) {

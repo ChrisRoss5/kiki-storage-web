@@ -78,10 +78,11 @@ app.delete(`/deleteItems`, async (req, res) => {
   let count = 0;
   for (const { id, isFolder, path, name } of items) {
     if (isFolder) {
+      const _path = path ? path + "/" : "";
       count += (
         await prisma.item.deleteMany({
           where: {
-            path: { startsWith: `${path}/${name}` },
+            path: { startsWith: `${_path}${name}` },
           },
         })
       ).count;
