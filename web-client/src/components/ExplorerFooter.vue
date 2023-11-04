@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import * as utils from "@/scripts/utils";
 import { useItemsStore } from "@/stores/items";
-import { computed } from "vue";
+import { computed, inject } from "vue";
+
+const isSearch = inject<boolean>("isSearch")!;
 
 const itemsStore = useItemsStore();
 
-const selectedItems = computed(() =>
-  itemsStore.items.filter((i) => i.isSelected)
+const items = computed(() =>
+  isSearch ? itemsStore.searchedItems : itemsStore.mainItems
 );
+const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
 const selectedItemsSize = computed(() => {
   const showSize =
     selectedItems.value?.length && !selectedItems.value.some((i) => i.isFolder);
@@ -19,8 +22,8 @@ const selectedItemsSize = computed(() => {
 <template>
   <div class="flex items-center bg-base-200 shadow-md px-6 rounded-2xl">
     <div class="p-4 pr-0">
-      {{ itemsStore.items.length }}
-      {{ itemsStore.items.length == 1 ? "item" : "items" }}
+      {{ items.length }}
+      {{ items.length == 1 ? "item" : "items" }}
     </div>
     <div v-if="selectedItems?.length">
       <span class="px-3">|</span>{{ selectedItems.length }}

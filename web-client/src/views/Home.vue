@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Explorer from "@/components/Explorer.vue";
-import Header from "@/components/Header.vue";
+import Header from "@/components/header/Header.vue";
 import { useDialogStore } from "@/stores/dialog";
 import { useItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";

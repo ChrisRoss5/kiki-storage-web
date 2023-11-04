@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CreateOrUpload from "./CreateOrUpload.vue";
-import Search from "@/components/search/Search.vue";
+import Search from "./search/Search.vue";
 </script>
 
 <template>
