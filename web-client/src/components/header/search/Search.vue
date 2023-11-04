@@ -3,6 +3,7 @@ import ExplorerContainer from "@/components/ExplorerContainer.vue";
 import ExplorerFooter from "@/components/ExplorerFooter.vue";
 import { useSearchStore } from "@/stores/search";
 import { provide } from "vue";
+import SearchOptions from "./SearchOptions.vue";
 
 provide("isSearch", true);
 
@@ -33,5 +34,6 @@ const searchStore = useSearchStore();
         <div>No results found</div>
       </div>
     </div>
+    <SearchOptions />
   </div>
 </template>

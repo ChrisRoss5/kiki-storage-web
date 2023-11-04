@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useSearchStore } from "@/stores/search";
 import { ref } from "vue";
+import SizeDialog from "./SizeDialog.vue";
+import TypeDialog from "./TypeDialog.vue";
 
 const searchStore = useSearchStore();
 
