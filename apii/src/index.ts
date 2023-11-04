@@ -10,9 +10,28 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/searchItems", async (req, res) => {
+  const query = req.query.query as string;
+  const minSize = parseInt(req.query.minSize as string);
+  const maxSize = parseInt(req.query.maxSize as string);
+  const type = req.query.type as string;
+  const types = type.split(",").map((t) => t.trim());
   const result = await prisma.item.findMany({
     where: {
-      name: { startsWith: req.query.query as string },
+      name: { startsWith: query },
+      ...(minSize || maxSize
+        ? {
+            size: {
+              ...(minSize ? { gte: minSize } : {}),
+              ...(maxSize ? { lte: maxSize } : {}),
+            },
+          }
+        : {}),
+      ...(type
+        ? {
+            isFolder: type == "Folders",
+            ...(!/Files|Folders/.test(type) ? { type: { in: types } } : {}),
+          }
+        : {}),
     },
   });
   res.json(result);
@@ -27,6 +46,7 @@ app.get("/getItems", async (req, res) => {
 
 app.post("/createItems", async (req, res) => {
   const items = req.body as Item[];
+  if (!items.length) return;
   const createdItems = await prisma.$transaction(
     items.map((item) => prisma.item.create({ data: item }))
   );
@@ -36,6 +56,7 @@ app.post("/createItems", async (req, res) => {
 
 app.put("/moveItems", async (req, res) => {
   const items = req.body.items as ItemWithId[];
+  if (!items.length) return;
   const itemIds = items.map((i) => i.id);
   const oldPath = items[0].path;
   const newPath = req.body.newPath as string;
@@ -75,6 +96,7 @@ app.put(`/renameItem`, async (req, res) => {
 
 app.delete(`/deleteItems`, async (req, res) => {
   const items = req.body as ItemWithId[];
+  if (!items.length) return;
   let count = 0;
   for (const { id, isFolder, path, name } of items) {
     if (isFolder) {

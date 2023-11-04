@@ -10,6 +10,8 @@ export const useItemsStore = defineStore("items", () => {
   const pathStore = usePathStore();
 
   const items = ref<Item[]>([]);
+  const mainItems = computed(() => items.value.filter((i) => !i.isSearchedNew));
+  const searchedItems = computed(() => items.value.filter((i) => i.isSearched));
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
 
   const areItemsInvalid = async (newItems: Item[], path: string) => {
@@ -72,11 +74,13 @@ export const useItemsStore = defineStore("items", () => {
     const renaming = items.value.find((i) => i.isRenaming);
     if (renaming) renaming.isRenaming = false;
   };
-  const selectAll = () => items.value.forEach((i) => (i.isSelected = true));
+  const selectAll = () =>  items.value.forEach((i) => (i.isSelected = true));
   const deselectAll = () => items.value.forEach((i) => (i.isSelected = false));
 
   return {
     items,
+    mainItems,
+    searchedItems,
     selectedItems,
     isNameInvalid,
     handleDrop,

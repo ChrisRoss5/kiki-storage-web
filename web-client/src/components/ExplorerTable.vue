@@ -22,13 +22,13 @@ const newItemName = ref("");
 let lastSelectedItemIdx = 0;
 
 const itemsSorted = computed(() => {
-  return itemsStore.items
-    .filter((i) => (isSearch ? i.isSearched : !i.isSearchedNew))
-    .sort((a, b) => {
+  return (isSearch ? itemsStore.searchedItems : itemsStore.mainItems).sort(
+    (a, b) => {
       if (a.isFolder && !b.isFolder) return -1;
       if (!a.isFolder && b.isFolder) return 1;
       return a.name.localeCompare(b.name);
-    });
+    }
+  );
 });
 
 watch(
@@ -71,7 +71,7 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
     router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
-    searchStore.close();
+    if (isSearch) searchStore.close();
   } else dialogStore.showError("This item cannot be previewed.");
 };
 const handleDragStart = (item: Item, e: DragEvent) => {
@@ -119,18 +119,18 @@ const handleDrop = (item: Item, e: DragEvent) => {
         @drop.stop.prevent="handleDrop(item, $event)"
         @click.stop="handleItemSelect(item, $event)"
         @dblclick.stop="handleItemOpen(item)"
-        @keyup.space="handleItemSelect(item, $event)"
-        @keyup.enter="handleItemOpen(item)"
+        @keyup.space.stop="handleItemSelect(item, $event)"
+        @keyup.enter.stop="handleItemOpen(item)"
       >
         <td class="rounded-l-lg">
           <div class="flex items-center">
             <div
               class="fiv-viv text-xl mr-3 flex-shrink-0"
               :class="
-              item.isFolder
-                ? 'fiv-icon-folder'
-                : `fiv-icon-${item.type! || 'blank'}`
-            "
+                item.isFolder
+                  ? 'fiv-icon-folder'
+                  : `fiv-icon-blank fiv-icon-${item.type}`
+              "
             ></div>
             <div
               v-if="item.isRenaming"
@@ -146,10 +146,10 @@ const handleDrop = (item: Item, e: DragEvent) => {
                   item.isFolder ? 'folder' : 'file'
                 } name`"
                 class="dsy-join-item dsy-input dsy-input-secondary outline-none"
-                @keyup.stop.enter="
+                @keyup.enter.stop="
                   newItemName.length && itemsStore.renameItem(item, newItemName)
                 "
-                @keyup.stop.esc="item.isRenaming = false"
+                @keyup.esc.stop="item.isRenaming = false"
                 spellcheck="false"
                 autocomplete="off"
               />

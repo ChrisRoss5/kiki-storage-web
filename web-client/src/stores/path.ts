@@ -3,10 +3,12 @@ import { defineStore } from "pinia";
 import { computed, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import { useItemsStore } from "./items";
+import { useSearchStore } from "./search";
 
 export const usePathStore = defineStore("path", () => {
   const route = useRoute();
   const itemsStore = useItemsStore();
+  const searchStore = useSearchStore();
 
   const folderPaths = ref<string[]>([]);
   const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
@@ -22,6 +24,7 @@ export const usePathStore = defineStore("path", () => {
       );
     } else folderPaths.value = [];
     itemsStore.items = await api.getItems(newPath);
+    searchStore.updateSearchedItems();
   });
 
   return { folderPaths, currentPath };

@@ -1,3 +1,9 @@
+export const sizeSuffixes = ["B", "KB", "MB", "GB", "TB"] as const;
+
+export function toBytes(size: number, suffix: (typeof sizeSuffixes)[number]) {
+  return size * 1024 ** sizeSuffixes.indexOf(suffix);
+}
+
 export function createFolder(name: string, path: string) {
   return {
     name,
@@ -44,7 +50,7 @@ export function checkName(name: string, isFolder: boolean, items: Item[]) {
 }
 
 export function itemsEqual(a: Item, b: Item): boolean {
-  // server: @@unique([name, type, path, isFolder])
+  // server: @@unique([name, type, path, isFolder]) todo remove
   return (
     a.name == b.name &&
     a.type == b.type &&
@@ -100,12 +106,11 @@ export function clearDragOverStyle(e: DragEvent) {
 }
 
 export function formatSize(bytes: number) {
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
   if (bytes == 0) return "0 B";
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   const size = bytes / Math.pow(1024, i);
   const decimals = i > 2 ? 2 : i > 1 ? 1 : 0;
-  return `${+size.toFixed(decimals)} ${sizes[i]}`;
+  return `${+size.toFixed(decimals)} ${sizeSuffixes[i]}`;
 }
 
 export function formatDate(date: Date, locales: string) {

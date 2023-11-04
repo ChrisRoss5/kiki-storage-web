@@ -12,25 +12,21 @@ const selectionRectStore = useSelectionRectStore();
 const dialogStore = useDialogStore();
 const searchStore = useSearchStore();
 
-onBeforeMount(() => document.addEventListener("keydown", handleKeydown));
-onBeforeUnmount(() => document.removeEventListener("keydown", handleKeydown));
+onBeforeMount(() => {
+  document.addEventListener("keydown", handleKeydown);
+  document.addEventListener("keyup", handleKeyUp);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("keydown", handleKeydown);
+  document.removeEventListener("keyup", handleKeyUp);
+});
 
 const handleKeydown = (e: KeyboardEvent) => {
   const selectedItems = itemsStore.selectedItems;
   if (e.key == "Escape") {
-    e.preventDefault();
     if (searchStore.isOpen) searchStore.close();
     else if (selectedItems.length) itemsStore.deselectAll();
-  } else if (
-    e.key == "Enter" &&
-    dialogStore.state.isOpen &&
-    dialogStore.state.handleConfirmation
-  ) {
-    e.preventDefault();
-    dialogStore.state.handleConfirmation(true);
-    dialogStore.close();
   } else if (e.key == "Delete" && selectedItems.length) {
-    e.preventDefault();
     itemsStore.deleteItems();
   } else if (e.key == "F2" && selectedItems.length == 1) {
     e.preventDefault();
@@ -48,12 +44,21 @@ const handleKeydown = (e: KeyboardEvent) => {
     document.body.style.userSelect = "";
   }
 };
+const handleKeyUp = (e: KeyboardEvent) => {
+  if (e.key == "Enter" && dialogStore.state.isOpen) {
+    if (dialogStore.state.handleConfirmation)
+      dialogStore.state.handleConfirmation(true);
+    dialogStore.close();
+  }
+};
 const handleClickLeft = (e: MouseEvent) => {
   if (selectionRectStore.wasActive) {
     // Necessary because mouseup is triggered before click
     selectionRectStore.wasActive = false;
     return;
   }
+  if (!itemsStore.searchedItems.length && searchStore.isOpen)
+    searchStore.close();
   if (e.ctrlKey || e.shiftKey) return;
   itemsStore.deselectAll();
   itemsStore.clearRenaming();

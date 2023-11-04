@@ -1,8 +1,9 @@
 const baseUrl = "http://localhost:3000";
 
 export default {
-  searchItems(query: string) {
-    return _fetch<Item[]>(`searchItems?query=${query}`, "GET", null, true);
+  searchItems(query: string, minSize: string, maxSize: string, type: string) {
+    const searchParams = new URLSearchParams({ query, minSize, maxSize, type });
+    return _fetch<Item[]>(`searchItems?${searchParams}`, "GET", null, true);
   },
   getItems(path: string) {
     return _fetch<Item[]>(`getItems?path=${path}`, "GET", null, true);

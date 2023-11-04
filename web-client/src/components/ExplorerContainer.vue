@@ -15,7 +15,7 @@ const rectEl = ref<HTMLElement | null>(null);
 <template>
   <div
     ref="explorerContainer"
-    class="explorer-container relative flex-1 flex rounded-2xl z-0 select-none overflow-x-hidden overflow-y-auto [&.dragover_tr:not(.folder)]:pointer-events-none"
+    class="explorer-container relative flex-1 flex rounded-2xl z-0 select-none overflow-x-hidden overflow-y-auto [&.dragover_tr:not(.folder)]:pointer-events-none [&.dragover_tr:not(.folder)]:opacity-25"
     @drop.stop.prevent="itemsStore.handleDrop"
     @dragover.stop.prevent="utils.setDragOverStyle"
     @dragleave.stop.prevent="utils.clearDragOverStyle"
@@ -28,7 +28,7 @@ const rectEl = ref<HTMLElement | null>(null);
       )
     "
   >
-    <template v-if="itemsStore.items.length">
+    <template v-if="itemsStore.mainItems.length">
       <ExplorerTable />
       <div
         ref="rectEl"

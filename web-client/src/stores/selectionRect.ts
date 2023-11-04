@@ -12,6 +12,7 @@ export const useSelectionRectStore = defineStore("selectionRect", () => {
   const wasActive = ref<boolean>(false);
 
   let items = [] as { el: HTMLElement; item: Item }[];
+  let inSearch = false;
   let explElRect = null as DOMRect | null;
   let startCoords = { x: 0, y: 0 };
   let startScrollTop = 0;
@@ -29,12 +30,14 @@ export const useSelectionRectStore = defineStore("selectionRect", () => {
     rectEl.value!.style.opacity = "1";
     rectEl.value!.style.pointerEvents = "";
     const rowEls = [...explEl.value!.querySelectorAll("tr")];
-    items = itemsStore.items.flatMap((item) => {
-      const el = rowEls.find((el) => el.id == item.id!.toString());
-      if (!el) return [];  // Because this might be search explorer
-      const wasSelected = isCtrlOrShiftDown && item.isSelected;
-      return wasSelected ? [] : [{ el, item }];
-    });
+    items = (inSearch ? itemsStore.searchedItems : itemsStore.items).flatMap(
+      (item) => {
+        const el = rowEls.find((el) => el.id == item.id!.toString());
+        if (!el) return []; // Because this might be search explorer
+        const wasSelected = isCtrlOrShiftDown && item.isSelected;
+        return wasSelected ? [] : [{ el, item }];
+      }
+    );
     if (!isCtrlOrShiftDown) itemsStore.deselectAll();
   };
   const deactivate = () => {
@@ -52,6 +55,7 @@ export const useSelectionRectStore = defineStore("selectionRect", () => {
     _rectEl: HTMLElement,
     e: MouseEvent
   ) => {
+    inSearch = _explEl.classList.contains("in-search");
     explEl.value = _explEl;
     rectEl.value = _rectEl;
     explElRect = explEl.value!.getBoundingClientRect();
