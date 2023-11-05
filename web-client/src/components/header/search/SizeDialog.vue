@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { sizeSuffixes, toBytes } from "@/scripts/utils";
+import { toBytes, units } from "@/utils/format";
 import { useDialogStore } from "@/stores/dialog";
 import { SizeFilter, useSearchStore } from "@/stores/search";
 import { ref, watch } from "vue";
@@ -52,7 +52,7 @@ const handleClear = () => {
             v-model="sizeFilter.minSuffix"
             class="dsy-join-item pl-0 py-1"
           >
-            <option v-for="suffix in sizeSuffixes" :key="suffix">
+            <option v-for="suffix in units" :key="suffix">
               {{ suffix }}
             </option>
           </select>
@@ -79,7 +79,7 @@ const handleClear = () => {
             v-model="sizeFilter.maxSuffix"
             class="dsy-join-item pl-0 py-1"
           >
-            <option v-for="suffix in sizeSuffixes" :key="suffix">
+            <option v-for="suffix in units" :key="suffix">
               {{ suffix }}
             </option>
           </select>

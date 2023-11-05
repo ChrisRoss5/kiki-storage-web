@@ -2,12 +2,13 @@
 import Explorer from "@/components/Explorer.vue";
 import Header from "@/components/header/Header.vue";
 import { useDialogStore } from "@/stores/dialog";
-import { useItemsStore } from "@/stores/items";
+import { useItemsStore, useSearchItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";
-import { useSelectionRectStore } from "@/stores/selectionRect";
+import { useSelectionRectStore } from "@/stores/selection-rect";
 import { onBeforeMount, onBeforeUnmount } from "vue";
 
 const itemsStore = useItemsStore();
+const searchItemsStore = useSearchItemsStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useDialogStore();
 const searchStore = useSearchStore();
@@ -57,8 +58,7 @@ const handleClickLeft = (e: MouseEvent) => {
     selectionRectStore.wasActive = false;
     return;
   }
-  if (!itemsStore.searchedItems.length && searchStore.isOpen)
-    searchStore.close();
+  if (!searchItemsStore.items.length) searchStore.close();
   if (e.ctrlKey || e.shiftKey) return;
   itemsStore.deselectAll();
   itemsStore.clearRenaming();

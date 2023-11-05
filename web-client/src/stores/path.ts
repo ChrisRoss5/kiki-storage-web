@@ -1,4 +1,4 @@
-import api from "@/scripts/api";
+import api from "@/utils/api";
 import { defineStore } from "pinia";
 import { computed, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";

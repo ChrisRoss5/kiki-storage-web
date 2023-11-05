@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import * as utils from "@/scripts/utils";
-import { useItemsStore } from "@/stores/items";
+import { useItemsStore, useSearchItemsStore } from "@/stores/items";
+import { formatSize } from "@/utils/format";
 import { computed, inject } from "vue";
 
 const isSearch = inject<boolean>("isSearch")!;
+const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
 
-const itemsStore = useItemsStore();
-
-const items = computed(() =>
-  isSearch ? itemsStore.searchedItems : itemsStore.mainItems
+const selectedItems = computed(() =>
+  itemsStore.items.filter((i) => i.isSelected)
 );
-const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
 const selectedItemsSize = computed(() => {
   const showSize =
     selectedItems.value?.length && !selectedItems.value.some((i) => i.isFolder);
@@ -22,14 +20,14 @@ const selectedItemsSize = computed(() => {
 <template>
   <div class="flex items-center bg-base-200 shadow-md px-6 rounded-2xl">
     <div class="p-4 pr-0">
-      {{ items.length }}
-      {{ items.length == 1 ? "item" : "items" }}
+      {{ itemsStore.items.length }}
+      {{ itemsStore.items.length == 1 ? "item" : "items" }}
     </div>
     <div v-if="selectedItems?.length">
       <span class="px-3">|</span>{{ selectedItems.length }}
       {{ selectedItems.length == 1 ? "item" : "items" }} selected
       <template v-if="selectedItemsSize">
-        ({{ utils.formatSize(selectedItemsSize) }})
+        ({{ formatSize(selectedItemsSize) }})
       </template>
     </div>
     <Transition name="fade">

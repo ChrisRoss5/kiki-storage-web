@@ -1,34 +1,30 @@
 <script setup lang="ts">
-import * as utils from "@/scripts/utils";
 import { useDialogStore } from "@/stores/dialog";
-import { useItemsStore } from "@/stores/items";
+import { useItemsStore, useSearchItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { useSearchStore } from "@/stores/search";
-import { useSelectionRectStore } from "@/stores/selectionRect";
+import { useSelectionRectStore } from "@/stores/selection-rect";
+import { formatDate, formatSize } from "@/utils/format";
 import { computed, inject, nextTick, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const isSearch = inject<boolean>("isSearch")!;
-
+const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
 const router = useRouter();
-const itemsStore = useItemsStore();
 const pathStore = usePathStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useDialogStore();
 const searchStore = useSearchStore();
 
 const renameInput = ref<HTMLInputElement[] | null>(null);
-const newItemName = ref("");
 let lastSelectedItemIdx = 0;
 
 const itemsSorted = computed(() => {
-  return (isSearch ? itemsStore.searchedItems : itemsStore.mainItems).sort(
-    (a, b) => {
-      if (a.isFolder && !b.isFolder) return -1;
-      if (!a.isFolder && b.isFolder) return 1;
-      return a.name.localeCompare(b.name);
-    }
-  );
+  return itemsStore.items.sort((a, b) => {
+    if (a.isFolder && !b.isFolder) return -1;
+    if (!a.isFolder && b.isFolder) return 1;
+    return a.name.localeCompare(b.name);
+  });
 });
 
 watch(
@@ -40,7 +36,7 @@ watch(
   () => itemsStore.items.find((i) => i.isRenaming),
   async (item) => {
     if (!item) return;
-    newItemName.value = item.name;
+    item.newName = item.name;
     renameInput.value![0].focus();
     await nextTick();
     renameInput.value![0].select();
@@ -105,7 +101,7 @@ const handleDrop = (item: Item, e: DragEvent) => {
       <tr
         v-for="item in itemsSorted"
         :key="item.id"
-        :id="item.id?.toString()"
+        :ref="(el) => item.el = el as HTMLElement"
         class="cursor-pointer hover:bg-base-200"
         :class="{
           '!bg-base-300': item.isSelected,
@@ -140,25 +136,21 @@ const handleDrop = (item: Item, e: DragEvent) => {
             >
               <input
                 ref="renameInput"
-                v-model.trim="newItemName"
+                v-model.trim="item.newName"
                 type="text"
                 :placeholder="`Enter a new ${
                   item.isFolder ? 'folder' : 'file'
                 } name`"
                 class="dsy-join-item dsy-input dsy-input-secondary outline-none"
-                @keyup.enter.stop="
-                  newItemName.length && itemsStore.renameItem(item, newItemName)
-                "
+                @keyup.enter.stop="itemsStore.renameItem(item)"
                 @keyup.esc.stop="item.isRenaming = false"
                 spellcheck="false"
                 autocomplete="off"
               />
               <button
                 class="dsy-join-item dsy-btn dsy-btn-secondary"
-                :class="{
-                  'dsy-btn-disabled': !newItemName.length,
-                }"
-                @click.stop="itemsStore.renameItem(item, newItemName)"
+                :class="{ 'dsy-btn-disabled': !!item.newName }"
+                @click.stop="itemsStore.renameItem(item)"
                 v-wave
               >
                 <span class="material-symbols-outlined"> check </span>
@@ -182,14 +174,14 @@ const handleDrop = (item: Item, e: DragEvent) => {
           </div>
         </td>
         <td class="whitespace-nowrap">
-          {{ item.isFolder ? "" : utils.formatSize(item.size!) }}
+          {{ item.isFolder ? "" : formatSize(item.size!) }}
         </td>
         <td>{{ item.isFolder ? "Folder" : item.type.toUpperCase() }}</td>
         <td class="whitespace-nowrap">
-          {{ utils.formatDate(item.dateModified, "hr") }}
+          {{ formatDate(item.dateModified, "hr") }}
         </td>
         <td class="whitespace-nowrap rounded-r-lg">
-          {{ utils.formatDate(item.dateModified, "hr") }}
+          {{ formatDate(item.dateModified, "hr") }}
         </td>
       </tr>
     </tbody>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import * as utils from "@/scripts/utils";
 import { useItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
+import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 
 const itemsStore = useItemsStore();
 const pathStore = usePathStore();
@@ -12,9 +12,9 @@ const pathStore = usePathStore();
     <RouterLink
       to="/"
       @drop.stop.prevent="itemsStore.handleDrop($event, '')"
-      @dragover.stop.prevent="utils.setDragOverStyle"
-      @dragleave.stop.prevent="utils.clearDragOverStyle"
-      @dragend.stop.prevent="utils.clearDragOverStyle"
+      @dragover.stop.prevent="setDragOverStyle"
+      @dragleave.stop.prevent="clearDragOverStyle"
+      @dragend.stop.prevent="clearDragOverStyle"
       draggable="false"
     >
       <span class="material-symbols-outlined pr-2 pointer-events-none">
@@ -28,9 +28,9 @@ const pathStore = usePathStore();
         :to="`/${path}`"
         class="whitespace-pre"
         @drop.stop.prevent="itemsStore.handleDrop($event, path)"
-        @dragover.stop.prevent="utils.setDragOverStyle"
-        @dragleave.stop.prevent="utils.clearDragOverStyle"
-        @dragend.stop.prevent="utils.clearDragOverStyle"
+        @dragover.stop.prevent="setDragOverStyle"
+        @dragleave.stop.prevent="clearDragOverStyle"
+        @dragend.stop.prevent="clearDragOverStyle"
         draggable="false"
       >
         {{ path.slice(path.lastIndexOf("/") + 1) }}

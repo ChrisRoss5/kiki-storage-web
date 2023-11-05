@@ -1,8 +1,13 @@
 const baseUrl = "http://localhost:3000";
 
 export default {
-  searchItems(query: string, minSize: string, maxSize: string, type: string) {
-    const searchParams = new URLSearchParams({ query, minSize, maxSize, type });
+  searchItems(filters: SearchFilters) {
+    const searchParams = new URLSearchParams({
+      query: filters.query,
+      minSize: filters.minSize.toString(),
+      maxSize: filters.maxSize.toString(),
+      type: filters.type,
+    });
     return _fetch<Item[]>(`searchItems?${searchParams}`, "GET", null, true);
   },
   getItems(path: string) {
@@ -17,7 +22,8 @@ export default {
   moveItems(items: Item[], newPath: string) {
     _fetch("moveItems", "PUT", { items: sanitize(items), newPath });
   },
-  renameItem(item: Item, newName: string) {
+  renameItem(item: Item) {
+    const { newName } = item;
     _fetch("renameItem", "PUT", { item: sanitize(item), newName });
   },
   deleteItems(items: Item[]) {

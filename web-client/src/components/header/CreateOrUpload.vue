@@ -1,38 +1,29 @@
 <script setup lang="ts">
 import { useItemsStore } from "@/stores/items";
-import { ref } from "vue";
 
 const itemsStore = useItemsStore();
 
-const newFolderName = ref("");
-
-const handleAddFolderClick = () => {
-  const name = newFolderName.value;
-  if (itemsStore.isNameInvalid(name, true)) return;
-  itemsStore.addFolder(name);
-  newFolderName.value = "";
-};
 const handleFileUpload = (e: Event) => {
   const { files } = e.target as HTMLInputElement;
-  if (files) itemsStore.addFiles(files);
+  if (files) itemsStore.createFiles(files);
 };
 </script>
 
 <template>
   <div class="dsy-join">
     <input
-      v-model.trim="newFolderName"
+      v-model.trim="itemsStore.newFolderName"
       type="text"
       placeholder="Add a new folder"
       class="dsy-join-item dsy-input dsy-input-primary outline-none"
-      @keyup.enter.stop="handleAddFolderClick"
+      @keyup.enter.stop="itemsStore.createFolder"
       spellcheck="false"
       autocomplete="off"
     />
     <button
       class="dsy-join-item dsy-btn dsy-btn-primary"
-      :class="{ 'dsy-btn-disabled': !newFolderName }"
-      @click="handleAddFolderClick"
+      :class="{ 'dsy-btn-disabled': !itemsStore.newFolderName }"
+      @click="itemsStore.createFolder"
       v-wave
     >
       <span class="material-symbols-outlined"> add </span>

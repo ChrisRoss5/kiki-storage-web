@@ -1,14 +1,14 @@
-import api from "@/scripts/api";
-import { sizeSuffixes, toBytes } from "@/scripts/utils";
+import api from "@/utils/api";
+import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
-import { useItemsStore } from "./items";
+import { useItemsStore, useSearchItemsStore } from "./items";
 
 export interface SizeFilter {
   min: number;
   max: number;
-  minSuffix: (typeof sizeSuffixes)[number];
-  maxSuffix: (typeof sizeSuffixes)[number];
+  minSuffix: (typeof units)[number];
+  maxSuffix: (typeof units)[number];
 }
 
 const initialSizeFilter: SizeFilter = {
@@ -18,56 +18,53 @@ const initialSizeFilter: SizeFilter = {
   maxSuffix: "MB",
 };
 
+const filterCheck: {
+  [K in keyof SearchFilters]: (i: Item, filter: SearchFilters[K]) => boolean;
+} = {
+  query: (i, q) => i.name.startsWith(q),
+  minSize: (i, s) => !i.isFolder && s <= i.size!,
+  maxSize: (i, s) => !i.isFolder && i.size! <= s,
+  type: (i, t) => {
+    const types = t.split(",").map((tt) => tt.trim());
+    return (
+      !t ||
+      (t == "Folders" && i.isFolder) ||
+      (t == "Files" && !i.isFolder) ||
+      types.includes(i.type)
+    );
+  },
+};
+
 export const useSearchStore = defineStore("search", () => {
   const itemsStore = useItemsStore();
+  const searchItemsStore = useSearchItemsStore();
 
-  const query = ref("");
   const isOpen = ref(false);
-  const searchedItems = ref<Item[]>([]);
+  const query = ref("");
   const sizeFilter = ref<SizeFilter>({ ...initialSizeFilter });
-  const minSize = computed(() =>
-    toBytes(sizeFilter.value.min, sizeFilter.value.minSuffix)
-  );
-  const maxSize = computed(() =>
-    toBytes(sizeFilter.value.max, sizeFilter.value.maxSuffix)
-  );
   const type = ref<string>("");
+  const filters = computed<SearchFilters>(() => ({
+    query: query.value,
+    minSize: toBytes(sizeFilter.value.min, sizeFilter.value.minSuffix),
+    maxSize: toBytes(sizeFilter.value.max, sizeFilter.value.maxSuffix),
+    type: type.value,
+  }));
 
-  watch(query, queryItems);
-  watch(minSize, queryItems);
-  watch(maxSize, queryItems);
-  watch(type, queryItems);
+  watch(filters, queryItems);
 
   async function queryItems() {
-    isOpen.value = [query, minSize, maxSize, type].some((x) => !!x.value);
-    if (!isOpen) return;
-    searchedItems.value = await api.searchItems(
-      query.value,
-      minSize.value.toString(),
-      maxSize.value.toString(),
-      type.value
-    );
-    itemsStore.items = itemsStore.items.filter((i) => {
-      i.isSearched = false;
-      return !i.isSearchedNew;
-    });
-    updateSearchedItems();
+    isOpen.value = Object.values(filters.value).some(Boolean);
+    if (isOpen.value) updateSearchedItems(await api.searchItems(filters.value));
   }
 
-  const updateSearchedItems = () => {
-    for (const item of searchedItems.value) {
-      const existingItem = itemsStore.items.find((i) => i.id == item.id);
-      if (!existingItem)
-        itemsStore.items.push({
-          ...item,
-          isSearched: true,
-          isSearchedNew: true,
-        });
-      else existingItem.isSearched = true;
-    }
+  const updateSearchedItems = (newSearch?: Item[]) => {
+    searchItemsStore.items = (newSearch ?? searchItemsStore.items).map(
+      (i) => itemsStore.items.find((_i) => _i.id == i.id) ?? i
+    );
   };
   const show = () => {
     if (!isOpen.value) queryItems();
+    else isOpen.value = true;
   };
   const close = () => {
     isOpen.value = false;
@@ -80,17 +77,22 @@ export const useSearchStore = defineStore("search", () => {
     type.value = "";
     resetSizeFilter();
   };
+  const itemPassesFilters = (item: Item) => {
+    const keys = Object.keys(filters.value) as (keyof SearchFilters)[];
+    return keys.every((k) => filterCheck[k](item, filters.value[k] as never));
+  };
 
   return {
     query,
     isOpen,
-    searchedItems,
     sizeFilter,
     type,
+    filters,
     updateSearchedItems,
     show,
     close,
     resetSizeFilter,
     reset,
+    itemPassesFilters,
   };
 });

@@ -10,11 +10,19 @@ interface ItemData {
 }
 
 interface Item extends ItemData {
+  el?: HTMLElement;
   isSelected?: boolean;
   isRenaming?: boolean;
   isDeleting?: boolean; // todo
   isUploading?: boolean; // todo
   isDownloading?: boolean; // todo
   isSearched?: boolean;
-  isSearchedNew?: boolean;
+  newName?: string;
+}
+
+interface SearchFilters {
+  query: string;
+  minSize: number;
+  maxSize: number;
+  type: string;
 }
