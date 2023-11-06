@@ -11,6 +11,7 @@ interface ItemData {
 
 interface Item extends ItemData {
   el?: HTMLElement;
+  searchEl?: HTMLElement;
   isSelected?: boolean;
   isRenaming?: boolean;
   isDeleting?: boolean; // todo

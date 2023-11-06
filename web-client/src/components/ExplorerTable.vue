@@ -83,6 +83,10 @@ const handleDrop = (item: Item, e: DragEvent) => {
   if (item.isFolder && !item.isSelected)
     itemsStore.handleDrop(e, `${item.path ? `${item.path}/` : ""}${item.name}`);
 };
+const handleItemRef = (item: Item, el: HTMLElement) => {
+  if (isSearch) item.searchEl = el;
+  else item.el = el;
+};
 </script>
 
 <template>
@@ -101,7 +105,7 @@ const handleDrop = (item: Item, e: DragEvent) => {
       <tr
         v-for="item in itemsSorted"
         :key="item.id"
-        :ref="(el) => item.el = el as HTMLElement"
+        :ref="(el) => handleItemRef(item, el as HTMLElement)"
         class="cursor-pointer hover:bg-base-200"
         :class="{
           '!bg-base-300': item.isSelected,

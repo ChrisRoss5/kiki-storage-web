@@ -9,6 +9,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
   const wasActive = ref<boolean>(false);
 
   let items = [] as Item[];
+  let isSearch = false;
   let explElRect = null as DOMRect | null;
   let startCoords = { x: 0, y: 0 };
   let startScrollTop = 0;
@@ -40,6 +41,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     _explEl: HTMLElement,
     _rectEl: HTMLElement,
     _items: Item[],
+    _isSearch: boolean,
     e: MouseEvent
   ) => {
     items = _items.filter((i) => !(isCtrlOrShiftDown && i.isSelected));
@@ -77,13 +79,16 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     rectEl.value!.style.width = `${width}px`;
     rectEl.value!.style.height = `${height}px`;
     const checkOverlap = () => {
-      for (const item of items)
+      for (const item of items) {
+        const el = isSearch ? item.searchEl : item.el;
+        if (!el) continue;
         item.isSelected = !(
-          item.el!.offsetLeft + item.el!.offsetWidth <= left ||
-          item.el!.offsetLeft >= left + width ||
-          item.el!.offsetTop + item.el!.offsetHeight <= top ||
-          item.el!.offsetTop >= top + height
+          el.offsetLeft + el.offsetWidth <= left ||
+          el.offsetLeft >= left + width ||
+          el.offsetTop + el.offsetHeight <= top ||
+          el.offsetTop >= top + height
         );
+      }
     };
     let scrollDirection = null as "up" | "down" | null;
     if (e.clientY < explElRect!.top) {

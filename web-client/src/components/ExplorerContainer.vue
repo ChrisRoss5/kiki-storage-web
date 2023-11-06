@@ -6,7 +6,6 @@ import { inject, ref } from "vue";
 import ExplorerTable from "./ExplorerTable.vue";
 
 const isSearch = inject<boolean>("isSearch")!;
-console.log(isSearch);
 
 const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
 const selectionRectStore = useSelectionRectStore();
@@ -28,6 +27,7 @@ const rectEl = ref<HTMLElement | null>(null);
         explorerContainer!,
         rectEl!,
         itemsStore.items,
+        isSearch,
         $event
       )
     "

@@ -22,8 +22,8 @@ const filterCheck: {
   [K in keyof SearchFilters]: (i: Item, filter: SearchFilters[K]) => boolean;
 } = {
   query: (i, q) => i.name.startsWith(q),
-  minSize: (i, s) => !i.isFolder && s <= i.size!,
-  maxSize: (i, s) => !i.isFolder && i.size! <= s,
+  minSize: (i, s) => i.isFolder || s <= i.size!,
+  maxSize: (i, s) => i.isFolder || i.size! <= s,
   type: (i, t) => {
     const types = t.split(",").map((tt) => tt.trim());
     return (
@@ -33,6 +33,7 @@ const filterCheck: {
       types.includes(i.type)
     );
   },
+  // todo: check underscores or escape them on server
 };
 
 export const useSearchStore = defineStore("search", () => {

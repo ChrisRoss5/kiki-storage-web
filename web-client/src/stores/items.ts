@@ -103,8 +103,6 @@ export const useItemsManager = defineStore("items-manager", () => {
 
   const createItem = (item: Item) => {
     itemsStore.items.push(item);
-    console.log(searchStore.itemPassesFilters(item));
-
     if (searchStore.itemPassesFilters(item)) searchItemsStore.items.push(item);
   };
   const createItems = (items: Item[], path: string) => {
