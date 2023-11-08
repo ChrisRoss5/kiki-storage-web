@@ -1,4 +1,4 @@
-import api from "@/utils/api";
+import api from "@/firebase/api";
 import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";

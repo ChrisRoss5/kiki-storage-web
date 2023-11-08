@@ -1,4 +1,4 @@
-import api from "@/utils/api";
+import api from "@/firebase/api";
 import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
 import { defineStore } from "pinia";
@@ -65,7 +65,8 @@ const itemsStore = () => {
   const renameItem = (item: Item) => {
     if (!item.newName) return;
     item.isRenaming = item.newName != item.name;
-    if (!item.isRenaming || isItemInvalid(item)) return;
+    if (!item.isRenaming || isItemInvalid({ ...item, name: item.newName }))
+      return;
     api.renameItem(item);
     item.isRenaming = false;
     item.name = item.newName;

@@ -1,14 +1,12 @@
 <script setup lang="ts">
+import Logo from "@/components/Logo.vue";
 import CreateOrUpload from "./CreateOrUpload.vue";
 import Search from "./search/Search.vue";
 </script>
 
 <template>
   <div class="flex items-center gap-5">
-    <RouterLink to="/" class="flex-center text-2xl">
-      <img alt="" class="h-14 mr-3" src="/logo.png" />
-      Dropbox Clone
-    </RouterLink>
+    <Logo />
     <CreateOrUpload />
     <Search class="relative flex-1" @click.stop="null" />
     <div>

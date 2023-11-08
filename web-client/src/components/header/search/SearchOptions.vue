@@ -14,6 +14,9 @@ const showTypeDialog = ref(false);
   <div class="absolute top-0 right-2 bottom-0 flex items-center gap-2">
     <div
       class="cursor-pointer bg-base-200 hover:bg-base-300 rounded-full border border-primary p-1 px-2"
+      :class="{
+        '!bg-primary': searchStore.sizeFilter.min || searchStore.sizeFilter.max,
+      }"
       @click="showSizeDialog = true"
     >
       <template v-if="searchStore.sizeFilter.min || searchStore.sizeFilter.max">
@@ -31,6 +34,7 @@ const showTypeDialog = ref(false);
     </div>
     <div
       class="cursor-pointer bg-base-200 hover:bg-base-300 rounded-full border border-primary p-1 px-2"
+      :class="{ '!bg-primary': searchStore.type }"
       @click="showTypeDialog = true"
     >
       {{ searchStore.type || "Type" }}

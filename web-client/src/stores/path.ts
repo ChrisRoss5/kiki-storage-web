@@ -1,4 +1,4 @@
-import api from "@/utils/api";
+import api from "@/firebase/api";
 import { defineStore } from "pinia";
 import { computed, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
@@ -17,7 +17,7 @@ export const usePathStore = defineStore("path", () => {
     let newPath = decodeURIComponent(route.path.replace(/\/+/g, "/"));
     if (newPath.startsWith("/")) newPath = newPath.slice(1);
     if (newPath.endsWith("/")) newPath = newPath.slice(0, -1);
-    if (newPath) {
+    if (newPath != "drive") {  // todo
       const pathSplit = newPath.split("/");
       folderPaths.value = pathSplit.map((_, i) =>
         pathSplit.slice(0, i + 1).join("/")

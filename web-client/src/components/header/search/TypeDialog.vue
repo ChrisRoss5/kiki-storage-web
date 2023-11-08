@@ -41,14 +41,14 @@ const handleClear = () => {
           <div
             class="dsy-join-item"
             :class="{ 'bg-primary text-primary-content': isFiles }"
-            @click="isFiles = true"
+            @click="isFiles = true" v-wave
           >
             Files
           </div>
           <div
             class="dsy-join-item"
             :class="{ 'bg-primary text-primary-content': !isFiles }"
-            @click="isFiles = false"
+            @click="isFiles = false" v-wave
           >
             Folders
           </div>
