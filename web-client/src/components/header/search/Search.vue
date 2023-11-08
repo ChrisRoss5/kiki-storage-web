@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ExplorerContainer from "@/components/ExplorerContainer.vue";
-import ExplorerFooter from "@/components/ExplorerFooter.vue";
+import ExplorerContainer from "@/components/explorer/ExplorerContainer.vue";
+import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import { useSearchStore } from "@/stores/search";
 import { provide } from "vue";
 import SearchOptions from "./SearchOptions.vue";

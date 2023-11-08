@@ -35,6 +35,6 @@ async function readEntriesPromise(directoryReader: any) {
       directoryReader.readEntries(resolve, reject);
     });
   } catch (err) {
-    // console.log(err);
+
   }
 } */

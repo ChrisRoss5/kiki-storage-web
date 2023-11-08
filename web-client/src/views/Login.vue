@@ -21,7 +21,10 @@ onMounted(() => {
     ],
     signInFlow: "popup",
     callbacks: {
-      signInSuccessWithAuthResult: () => false,
+      signInSuccessWithAuthResult: (r) => {
+        console.log(r);  // todo
+        return false;
+      },
     },
   });
 });

@@ -6,11 +6,9 @@ import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { formatDate, formatSize } from "@/utils/format";
 import { computed, inject, nextTick, ref, watch } from "vue";
-import { useRouter } from "vue-router";
 
 const isSearch = inject<boolean>("isSearch")!;
 const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
-const router = useRouter();
 const pathStore = usePathStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useDialogStore();
@@ -66,7 +64,7 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
 };
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
-    router.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
+    pathStore.push(`${item.path ? `/${item.path}` : ""}/${item.name}`)
     if (isSearch) searchStore.close();
   } else dialogStore.showError("This item cannot be previewed.");
 };
@@ -153,7 +151,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               />
               <button
                 class="dsy-join-item dsy-btn dsy-btn-secondary"
-                :class="{ 'dsy-btn-disabled': !!item.newName }"
+                :class="{ 'dsy-btn-disabled': !item.newName }"
                 @click.stop="itemsStore.renameItem(item)"
                 v-wave
               >

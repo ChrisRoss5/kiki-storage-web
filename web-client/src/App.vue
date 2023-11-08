@@ -1,5 +1,22 @@
 <script setup lang="ts">
 import Dialog from "@/components/Dialog.vue";
+import { watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useCurrentUser } from "vuefire";
+
+const user = useCurrentUser();
+const router = useRouter();
+const route = useRoute();
+
+watch(user, async (currentUser) => {
+  if (!currentUser) {
+    if (route.meta.requiresAuth) return router.push("/login");
+    return;
+  }
+  if (typeof route.query.redirect == "string")
+    return router.push(route.query.redirect);
+  return router.push("/");
+});
 </script>
 
 <template>
