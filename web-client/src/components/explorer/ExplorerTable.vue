@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useDialogStore } from "@/stores/dialog";
 import { useItemsStore, useSearchItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
+import { useShortDialogStore } from "@/stores/short-dialog";
 import { formatDate, formatSize } from "@/utils/format";
 import { computed, inject, nextTick, ref, watch } from "vue";
 
@@ -11,7 +11,7 @@ const isSearch = inject<boolean>("isSearch")!;
 const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
 const pathStore = usePathStore();
 const selectionRectStore = useSelectionRectStore();
-const dialogStore = useDialogStore();
+const dialogStore = useShortDialogStore();
 const searchStore = useSearchStore();
 
 const renameInput = ref<HTMLInputElement[] | null>(null);
@@ -64,7 +64,7 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
 };
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
-    pathStore.push(`${item.path ? `/${item.path}` : ""}/${item.name}`)
+    pathStore.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
     if (isSearch) searchStore.close();
   } else dialogStore.showError("This item cannot be previewed.");
 };

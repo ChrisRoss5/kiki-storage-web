@@ -3,13 +3,13 @@ import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { useDialogStore } from "./dialog";
 import { usePathStore } from "./path";
 import { useSearchStore } from "./search";
+import { useShortDialogStore } from "./short-dialog";
 
 const itemsStore = () => {
   const itemsManager = useItemsManager();
-  const dialogStore = useDialogStore();
+  const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
 
   const items = ref<Item[]>([]);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Dialog from "@/components/Dialog.vue";
+import ShortDialog from "./components/ShortDialog.vue";
 import { watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useCurrentUser } from "vuefire";
@@ -28,7 +28,7 @@ watch(user, async (currentUser) => {
       />
     </Transition>
   </RouterView>
-  <Dialog />
+  <ShortDialog />
 </template>
 
 <style>

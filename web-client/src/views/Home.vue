@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import Explorer from "@/components/explorer/Explorer.vue";
 import Header from "@/components/header/Header.vue";
-import { useDialogStore } from "@/stores/dialog";
 import { useItemsStore, useSearchItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
+import { useShortDialogStore } from "@/stores/short-dialog";
 import { onBeforeMount, onBeforeUnmount } from "vue";
 
 const itemsStore = useItemsStore();
 const searchItemsStore = useSearchItemsStore();
 const selectionRectStore = useSelectionRectStore();
-const dialogStore = useDialogStore();
+const dialogStore = useShortDialogStore();
 const searchStore = useSearchStore();
 
 onBeforeMount(() => {

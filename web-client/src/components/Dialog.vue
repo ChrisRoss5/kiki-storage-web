@@ -1,53 +1,40 @@
 <script setup lang="ts">
-import { useDialogStore } from "@/stores/dialog";
-import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
+import { useSlots } from 'vue'
 
-const store = useDialogStore();
-const { state } = storeToRefs(store);
+const slots = useSlots()
+const props = defineProps<{ show: boolean; closeOutside?: boolean }>();
+const emit = defineEmits<(e: "close") => void>();
+
 const dialogEl = ref<HTMLDialogElement | null>(null);
 
 watch(
-  () => state.value.isOpen,
-  (isOpen) => {
-    if (isOpen) dialogEl.value?.showModal();
+  () => props.show,
+  (show) => {
+    if (show) dialogEl.value?.showModal();
     else dialogEl.value?.close();
   }
 );
 </script>
 
 <template>
-  <!-- Using empty click.stop to keep selected items selected -->
+  <!-- Using empty click.stop to prevent
+    triggering global listeners in Home.vue -->
   <dialog
     ref="dialogEl"
     class="dsy-modal"
-    @close="store.close"
+    @close="emit('close')"
     @click.stop="null"
+    @click.self="closeOutside && emit('close')"
   >
     <div class="dsy-modal-box">
-      <div v-if="state.isError" class="dsy-alert dsy-alert-error">
-        <span class="material-symbols-outlined"> cancel </span>
-        <div class="max-w-full overflow-hidden break-words">
-          {{ state.message }}
-        </div>
+      <div v-if="$slots.header" class="">
+        <slot name="header"></slot>
       </div>
-      <div v-else class="max-w-full overflow-hidden break-words">
-        {{ state.message }}
-      </div>
+      <slot name="content"></slot>
       <div class="dsy-modal-action">
         <form method="dialog">
-          <template v-if="state.handleConfirmation">
-            <button
-              class="dsy-btn dsy-btn-primary"
-              @click="state.handleConfirmation(true)"
-            >
-              Confirm
-            </button>
-            <button class="dsy-btn" @click="state.handleConfirmation(false)">
-              Cancel
-            </button>
-          </template>
-          <button v-else class="dsy-btn">Close</button>
+          <slot name="actions"></slot>
         </form>
       </div>
     </div>

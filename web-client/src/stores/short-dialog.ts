@@ -10,7 +10,7 @@ const initialState = {
     | ((value: boolean | PromiseLike<boolean>) => void),
 };
 
-export const useDialogStore = defineStore("dialog", () => {
+export const useShortDialogStore = defineStore("short-dialog", () => {
   const state = reactive({ ...initialState });
 
   const show = (message = "") => {

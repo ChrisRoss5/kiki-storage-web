@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { toBytes, units } from "@/utils/format";
-import { useDialogStore } from "@/stores/dialog";
+import Dialog from "@/components/Dialog.vue";
 import { SizeFilter, useSearchStore } from "@/stores/search";
+import { useShortDialogStore } from "@/stores/short-dialog";
+import { toBytes, units } from "@/utils/format";
 import { ref, watch } from "vue";
 
 const props = defineProps<{ show: boolean }>();
 const emit = defineEmits<(e: "close") => void>();
 
 const searchStore = useSearchStore();
-const dialogStore = useDialogStore();
+const dialogStore = useShortDialogStore();
 
-const sizeDialog = ref<HTMLDialogElement | null>(null);
 const sizeFilter = ref<SizeFilter>({ ...searchStore.sizeFilter });
 
 watch(
@@ -18,7 +18,6 @@ watch(
   (show) => {
     if (!show) return;
     sizeFilter.value = { ...searchStore.sizeFilter };
-    sizeDialog.value?.showModal();
   }
 );
 
@@ -37,8 +36,8 @@ const handleClear = () => {
 </script>
 
 <template>
-  <dialog ref="sizeDialog" class="dsy-modal" @close="emit('close')">
-    <div class="dsy-modal-box">
+  <Dialog :show="props.show" :closeOutside="true" @close="emit('close')">
+    <template #content>
       <div class="py-4 flex items-center gap-3">
         <div>Set minimum size:</div>
         <div class="flex-1 dsy-join border border-primary">
@@ -85,15 +84,15 @@ const handleClear = () => {
           </select>
         </div>
       </div>
-      <div class="dsy-modal-action">
-        <form method="dialog">
-          <button class="dsy-btn dsy-btn-primary" @click="handleSearch">
-            Search
-          </button>
-          <button class="dsy-btn">Cancel</button>
-          <button class="dsy-btn" @click="handleClear">Clear</button>
-        </form>
-      </div>
-    </div>
-  </dialog>
+    </template>
+    <template #actions>
+      <form method="dialog">
+        <button class="dsy-btn dsy-btn-primary" @click="handleSearch">
+          Search
+        </button>
+        <button class="dsy-btn">Cancel</button>
+        <button class="dsy-btn" @click="handleClear">Clear</button>
+      </form>
+    </template>
+  </Dialog>
 </template>

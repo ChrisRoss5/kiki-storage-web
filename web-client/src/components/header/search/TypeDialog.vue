@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Dialog from "@/components/Dialog.vue";
 import { useSearchStore } from "@/stores/search";
 import { ref, watch } from "vue";
 
@@ -7,7 +8,6 @@ const emit = defineEmits<(e: "close") => void>();
 
 const searchStore = useSearchStore();
 
-const typeDialog = ref<HTMLDialogElement | null>(null);
 const types = ref(searchStore.type);
 const isFiles = ref(true);
 
@@ -18,7 +18,6 @@ watch(
     isFiles.value = searchStore.type != "Folders";
     if (isFiles.value && searchStore.type != "Files")
       types.value = searchStore.type;
-    typeDialog.value!.showModal();
   }
 );
 
@@ -31,8 +30,8 @@ const handleClear = () => {
 </script>
 
 <template>
-  <dialog ref="typeDialog" class="dsy-modal" @close="emit('close')">
-    <div class="dsy-modal-box">
+  <Dialog :show="props.show" :closeOutside="true" @close="emit('close')">
+    <template #content>
       <div class="py-4 flex items-center gap-3">
         <div>Search for:</div>
         <div
@@ -41,14 +40,16 @@ const handleClear = () => {
           <div
             class="dsy-join-item"
             :class="{ 'bg-primary text-primary-content': isFiles }"
-            @click="isFiles = true" v-wave
+            @click="isFiles = true"
+            v-wave
           >
             Files
           </div>
           <div
             class="dsy-join-item"
             :class="{ 'bg-primary text-primary-content': !isFiles }"
-            @click="isFiles = false" v-wave
+            @click="isFiles = false"
+            v-wave
           >
             Folders
           </div>
@@ -63,15 +64,15 @@ const handleClear = () => {
           placeholder="Leave blank to search all files"
         />
       </div>
-      <div class="dsy-modal-action">
-        <form method="dialog">
-          <button class="dsy-btn dsy-btn-primary" @click="handleSearch">
-            Search
-          </button>
-          <button class="dsy-btn">Cancel</button>
-          <button class="dsy-btn" @click="handleClear">Clear</button>
-        </form>
-      </div>
-    </div>
-  </dialog>
+    </template>
+    <template #actions>
+      <form method="dialog">
+        <button class="dsy-btn dsy-btn-primary" @click="handleSearch">
+          Search
+        </button>
+        <button class="dsy-btn">Cancel</button>
+        <button class="dsy-btn" @click="handleClear">Clear</button>
+      </form>
+    </template>
+  </Dialog>
 </template>

@@ -17,5 +17,3 @@ export function useFirebaseUI() {
   ui ??= new auth.AuthUI(useFirebaseAuth());
   return ui;
 }
-
-//export const db = getDatabase(firebaseApp);
