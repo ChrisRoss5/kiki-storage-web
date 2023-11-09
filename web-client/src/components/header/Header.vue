@@ -11,7 +11,7 @@ const showSettingsDialog = ref(false);
 </script>
 
 <template>
-  <div class="flex items-center gap-5">
+  <div class="flex items-center gap-5 p-5">
     <Logo />
     <CreateOrUpload />
     <Search class="relative flex-1" @click.stop="null" />

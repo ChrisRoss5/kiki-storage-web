@@ -72,7 +72,7 @@ const handleClickLeft = (e: MouseEvent) => {
     @mouseup.left="selectionRectStore.handleLeftMouseUp"
     @click.left="handleClickLeft"
   >
-    <Header class="p-5" />
-    <Explorer class="p-5" />
+    <Header />
+    <Explorer />
   </div>
 </template>
