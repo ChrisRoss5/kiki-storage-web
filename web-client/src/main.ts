@@ -10,6 +10,9 @@ import { firebaseApp } from "./firebase";
 
 // import Toast, { PluginOptions } from "vue-toastification"; todo: add toast
 
+/* document.documentElement.dataset.theme =
+  localStorage.getItem("theme") ?? "light"; */
+
 const pinia = createPinia();
 const app = createApp(App);
 

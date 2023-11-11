@@ -69,7 +69,7 @@ const handleClear = () => {
             />
             <div
               v-if="!sizeFilter.max"
-              class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none bg-white w-4 text-xl"
+              class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none bg-[field] w-4 text-xl"
             >
               ∞
             </div>

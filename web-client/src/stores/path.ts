@@ -28,8 +28,8 @@ export const usePathStore = defineStore("path", () => {
         pathSplit.slice(0, i + 1).join("/")
       );
     } else folderPaths.value = [];
-    //itemsStore.items = await api.getItems(newPath);
-    //searchStore.updateSearchedItems();
+    itemsStore.items = await api.getItems(newPath);
+    searchStore.updateSearchedItems();
   });
 
   function push(path: string) {

@@ -31,7 +31,7 @@ watch(user, async (currentUser) => {
   <ShortDialog />
 </template>
 
-<style>
+<style scoped>
 #app {
   overflow: hidden;
 }
@@ -40,18 +40,13 @@ watch(user, async (currentUser) => {
 .scale-in-enter-from,
 .scale-in-leave-to {
   opacity: 0;
-  position: absolute;
 }
-.scale-out-enter-from {
-  transform: scale(1.1);
-}
-.scale-out-leave-to {
-  transform: scale(0.9);
-}
-.scale-in-enter-from {
-  transform: scale(0.9);
-}
+.scale-out-enter-from,
 .scale-in-leave-to {
   transform: scale(1.1);
+}
+.scale-out-leave-to,
+.scale-in-enter-from {
+  transform: scale(0.9);
 }
 </style>

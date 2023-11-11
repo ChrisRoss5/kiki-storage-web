@@ -43,8 +43,7 @@ const itemsStore = () => {
     const item = _createFolder(newFolderName.value, pathStore.currentPath);
     if (isItemInvalid(item)) return;
     newFolderName.value = "";
-    itemsManager.createItem(item);
-    api.createItem(item);
+    itemsManager.createItem(await api.createItem(item));
   };
   const createFiles = async (files: FileList, path?: string) => {
     path ??= pathStore.currentPath;

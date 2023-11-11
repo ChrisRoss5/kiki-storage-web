@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import defaultPfp from "@/assets/default-pfp.webp";
 import Logo from "@/components/Logo.vue";
+import SettingsDialog from "@/components/settings/SettingsDialog.vue";
+import { ref } from "vue";
+import { useCurrentUser, useFirebaseAuth } from "vuefire";
 import CreateOrUpload from "./CreateOrUpload.vue";
 import Search from "./search/Search.vue";
-import { useFirebaseAuth } from "vuefire";
-import { ref } from "vue";
-import SettingsDialog from "@/components/settings/SettingsDialog.vue";
 
 const auth = useFirebaseAuth();
+const user = useCurrentUser();
+
 const showSettingsDialog = ref(false);
 </script>
 
@@ -17,7 +20,12 @@ const showSettingsDialog = ref(false);
     <Search class="relative flex-1" @click.stop="null" />
     <div class="dsy-dropdown">
       <label tabindex="0" class="cursor-pointer">
-        <img alt="" class="rounded-full h-14" src="@/assets/default-pfp.webp" />
+        <img
+          alt=""
+          class="rounded-full h-16"
+          :src="user?.photoURL || defaultPfp"
+          @error="($event.target as HTMLImageElement).src = defaultPfp"
+        />
       </label>
       <ul
         tabindex="0"

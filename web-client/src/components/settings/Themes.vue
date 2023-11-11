@@ -1,4 +1,10 @@
 <script setup lang="ts">
+defineProps<{
+  activeTheme: Theme;
+  onlyActiveTheme?: boolean;
+  handleThemeUpdate?: (newTheme: Theme) => Promise<void>;
+}>();
+
 const themes = [
   "light",
   "dark",
@@ -29,23 +35,25 @@ const themes = [
   "night",
   "coffee",
   "winter",
-] as const;
-
-const setTheme = (theme: (typeof themes)[number]) => {
-  console.log(theme);
-  document.documentElement.dataset.theme = theme;
-};
+] satisfies Theme[];
 </script>
 
 <template>
   <div
     class="rounded-box grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+    :class="{ '!grid-cols-1': onlyActiveTheme }"
   >
     <div
-      v-for="theme in themes"
+      v-for="theme in onlyActiveTheme ? [activeTheme] : themes"
       :key="theme"
-      @click="setTheme(theme)"
+      @click="handleThemeUpdate && handleThemeUpdate(theme)"
       class="border-base-content/20 hover:border-base-content/40 overflow-hidden rounded-lg border outline outline-2 outline-offset-2 outline-transparent"
+      :class="{
+        'outline-2': theme == activeTheme && !onlyActiveTheme,
+        'outline-offset-2': theme == activeTheme && !onlyActiveTheme,
+        'outline-primary': theme == activeTheme && !onlyActiveTheme,
+      }"
+      v-wave
     >
       <div
         :data-theme="theme"
@@ -60,6 +68,19 @@ const setTheme = (theme: (typeof themes)[number]) => {
             <div class="font-bold">{{ theme }}</div>
             <div class="flex flex-wrap gap-1">
               <div
+                v-for="color in ['primary', 'secondary', 'accent', 'neutral']"
+                :key="color"
+              >
+                <div
+                  :class="`bg-${color} flex aspect-square w-5 items-center justify-center rounded lg:w-6`"
+                >
+                  <div :class="`text-${color}-content text-sm font-bold`">
+                    A
+                  </div>
+                </div>
+              </div>
+
+              <!--               <div
                 class="bg-primary flex aspect-square w-5 items-center justify-center rounded lg:w-6"
               >
                 <div class="text-primary-content text-sm font-bold">A</div>
@@ -78,7 +99,7 @@ const setTheme = (theme: (typeof themes)[number]) => {
                 class="bg-neutral flex aspect-square w-5 items-center justify-center rounded lg:w-6"
               >
                 <div class="text-neutral-content text-sm font-bold">A</div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
