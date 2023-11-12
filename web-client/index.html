@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="cupcake">
   <head>
     <meta charset="UTF-8" />
@@ -9,6 +9,10 @@
       rel="stylesheet"
     />
     <title>Dropbox Clone</title>
+    <script>
+      document.documentElement.dataset.theme =
+        localStorage.getItem("theme") ?? "light";
+    </script>
   </head>
   <body>
     <div id="app"></div>

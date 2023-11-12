@@ -104,7 +104,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
       clearInterval(interval);
       if (!scrollDirection) return;
       interval = setInterval(() => {
-        const strength = Math.round(Math.max(5, scrollStrength / 8));
+        const strength = Math.max(5, scrollStrength / 8);
         const pixels = scrollDirection == "up" ? -strength : strength;
         if (
           scrollDirection == "down" &&

@@ -24,7 +24,7 @@ watch(
     triggering global listeners in Home.vue -->
   <dialog
     ref="dialogEl"
-    class="dsy-modal"
+    class="dsy-modal border-none"
     @close="emit('close')"
     @click.stop="null"
     @click.self="closeOutside && emit('close')"

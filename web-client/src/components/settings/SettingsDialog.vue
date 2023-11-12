@@ -16,26 +16,20 @@ const db = useDatabase();
 const dbPath = `settings/${user.value?.uid}`;
 const dbSettings = useDatabaseObject<Settings>(dbRef(db, dbPath));
 const settings = computed<Settings>(() => dbSettings.value ?? defaultSettings);
-document.documentElement.dataset.theme =
-  localStorage.getItem("theme") ?? settings.value.theme;
 
 const showThemes = ref(false);
 
-watch(
-  settings,
-  (settings) => {
-    if (!settings) return;
-    document.documentElement.dataset.theme = settings.theme;
-    localStorage.setItem("theme", settings.theme);
-  },
-  { immediate: true }
-);
+watch(settings, (settings) => {
+  document.documentElement.dataset.theme = settings.theme;
+  localStorage.setItem("theme", settings.theme);
+});
 
 const handleThemeUpdate = async (newTheme: Theme) => {
   set(dbRef(db, `${dbPath}/theme`), newTheme);
 };
 const handleReset = () => {
   if (!dialogStore.confirm("Reset all settings to default?")) return;
+  set(dbRef(db, dbPath), defaultSettings);
 };
 </script>
 
@@ -66,7 +60,7 @@ const handleReset = () => {
           :activeTheme="settings.theme"
           :handleThemeUpdate="handleThemeUpdate"
         />
-        <div v-else class="flex gap-3 w-full">
+        <div v-else class="flex w-full gap-3">
           Theme:
           <Themes :activeTheme="settings.theme" :onlyActiveTheme="true" />
           <button class="dsy-btn" @click="showThemes = true" v-wave>

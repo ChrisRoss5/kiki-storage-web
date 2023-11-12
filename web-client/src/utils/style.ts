@@ -5,13 +5,13 @@ export function setDragOverStyle(e: DragEvent) {
   setTimeout(() => (isThrottled = false), 10);
   let target = e.target as HTMLElement;
   target =
-    target.closest("TR") ?? target.closest(".explorer-container") ?? target;
-  const willNeedRect = target.tagName == "TR";
+    target.closest(".expl-row") ?? target.closest(".expl-body") ?? target;
+  const willNeedRect = target.classList.contains("expl-row");
   if (willNeedRect && !target.classList.contains("folder"))
-    target = target.closest(".explorer-container")!;
+    target = target.closest(".expl-body")!;
   if (
     document.body.hasAttribute("dragging-items") &&
-    (target.classList.contains("explorer-container") ||
+    (target.classList.contains("expl-body") ||
       target.classList.contains("router-link-active") ||
       target.classList.contains("is-selected"))
   )
@@ -35,10 +35,10 @@ export function clearDragOverStyle(e: DragEvent) {
   let target = e.target as HTMLElement;
   if (target.nodeType != 1) return;
   if (typeof target == "string") return;
-  if (target.closest("TR:not(.folder)")) return;
+  if (target.closest(".expl-row:not(.folder)")) return;
   target =
     target.closest(".folder") ??
-    target.closest(".explorer-container") ??
+    target.closest(".expl-body") ??
     target;
   target.classList.remove("dragover");
   target.style.background = "";
