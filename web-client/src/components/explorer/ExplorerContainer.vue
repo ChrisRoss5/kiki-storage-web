@@ -42,7 +42,7 @@ const rectEl = ref<HTMLElement | null>(null);
     </div>
     <div
       ref="rectEl"
-      class="absolute border border-primary bg-primary/20 pointer-events-none z-50"
+      class="absolute border border-primary bg-primary/20 pointer-events-none z-10"
     ></div>
   </div>
 </template>

@@ -13,7 +13,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
   let explElRect = null as DOMRect | null;
   let startCoords = { x: 0, y: 0 };
   let startScrollTop = 0;
-  let startScrollHeight = 0;
+  let startMaxScrollTop = 0;
   let isCtrlOrShiftDown = false;
   let lastScrollDirection = null as "up" | "down" | null;
   let isThrottled = false;
@@ -49,7 +49,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     rectEl.value = _rectEl;
     explElRect = explEl.value.getBoundingClientRect();
     startScrollTop = explEl.value.scrollTop;
-    startScrollHeight = explEl.value.scrollHeight;
+    startMaxScrollTop = explEl.value.scrollHeight - explEl.value.offsetHeight;
     startCoords = {
       x: e.clientX - explElRect.left,
       y: e.clientY - explElRect.top + startScrollTop,
@@ -104,17 +104,23 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
       clearInterval(interval);
       if (!scrollDirection) return;
       interval = setInterval(() => {
-        const strength = Math.max(5, scrollStrength / 8);
+        const strength = Math.round(Math.max(5, scrollStrength / 8));
         const pixels = scrollDirection == "up" ? -strength : strength;
         if (
           scrollDirection == "down" &&
-          explEl.value!.scrollTop >=
-            startScrollHeight - explEl.value!.offsetHeight
-        )
+          explEl.value!.scrollTop + pixels >= startMaxScrollTop
+        ) {
+          explEl.value!.scrollTop = startMaxScrollTop;
           return clearInterval(interval);
+        }
         explEl.value!.scrollBy(0, pixels);
-        if (scrollDirection == "up") top += pixels;
-        height += Math.abs(pixels);
+        if (top >= startCoords.y) {
+          height += pixels;
+          if (scrollDirection == "up" && height < 0) top = startCoords.y - 1;
+        } else {
+          top += pixels;
+          height -= pixels;
+        }
         rectEl.value!.style.top = `${top}px`;
         rectEl.value!.style.height = `${height}px`;
         checkOverlap();

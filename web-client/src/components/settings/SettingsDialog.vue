@@ -67,7 +67,7 @@ const handleReset = () => {
           :handleThemeUpdate="handleThemeUpdate"
         />
         <div v-else class="flex gap-3 w-full">
-          Active theme:
+          Theme:
           <Themes :activeTheme="settings.theme" :onlyActiveTheme="true" />
           <button class="dsy-btn" @click="showThemes = true" v-wave>
             Change

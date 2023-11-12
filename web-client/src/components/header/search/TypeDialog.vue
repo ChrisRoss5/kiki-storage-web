@@ -30,7 +30,12 @@ const handleClear = () => {
 </script>
 
 <template>
-  <Dialog :show="props.show" :closeOutside="true" @close="emit('close')">
+  <Dialog
+    :show="props.show"
+    :closeOutside="true"
+    :modalBoxStyle="{ 'min-width': 'min(30rem, 100vw)' }"
+    @close="emit('close')"
+  >
     <template #content>
       <div class="py-4 flex items-center gap-3">
         <div>Search for:</div>

@@ -47,7 +47,7 @@ a {
   white-space: pre;
   &.dragover {
     transform: scale(1.25);
-    border: 2px dashed #fff;
+    border: 2px dashed hsl(var(--bc));
     + span {
       visibility: hidden;
     }

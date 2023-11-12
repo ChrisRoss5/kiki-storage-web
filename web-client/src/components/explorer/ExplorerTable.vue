@@ -88,104 +88,116 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 </script>
 
 <template>
-  <table class="dsy-table place-self-start">
-    <caption class="sr-only">
-      Explorer table
-    </caption>
-    <thead class="pointer-events-none">
-      <th class="w-full sticky top-0 bg-base-100 z-10">Name</th>
-      <th class="sticky top-0 bg-base-100 z-10">Size</th>
-      <th class="sticky top-0 bg-base-100 z-10">Type</th>
-      <th class="sticky top-0 bg-base-100 z-10">Date added</th>
-      <th class="sticky top-0 bg-base-100 z-10">Date modified</th>
-    </thead>
-    <tbody>
-      <tr
-        v-for="item in itemsSorted"
-        :key="item.id"
-        :ref="(el) => handleItemRef(item, el as HTMLElement)"
-        class="cursor-pointer hover:bg-base-200"
-        :class="{
-          '!bg-base-300': item.isSelected,
-          'is-selected': item.isSelected,
-          folder: item.isFolder,
-        }"
-        tabindex="0"
-        :draggable="item.isSelected"
-        @dragstart="handleDragStart(item, $event)"
-        @dragend="handleDragStop"
-        @drop.stop.prevent="handleDrop(item, $event)"
-        @click.stop="handleItemSelect(item, $event)"
-        @dblclick.stop="handleItemOpen(item)"
-        @keyup.space.stop="handleItemSelect(item, $event)"
-        @keyup.enter.stop="handleItemOpen(item)"
-      >
-        <td class="rounded-l-lg">
-          <div class="flex items-center">
-            <div
-              class="fiv-viv text-xl mr-3 flex-shrink-0"
-              :class="
-                item.isFolder
-                  ? 'fiv-icon-folder'
-                  : `fiv-icon-blank fiv-icon-${item.type}`
-              "
-            ></div>
-            <div
-              v-if="item.isRenaming"
-              class="inline-flex ml-2"
-              @mousedown.stop="null"
-              @click.stop="null"
-            >
-              <input
-                ref="renameInput"
-                v-model.trim="item.newName"
-                type="text"
-                :placeholder="`Enter a new ${
-                  item.isFolder ? 'folder' : 'file'
-                } name`"
-                class="dsy-join-item dsy-input dsy-input-secondary outline-none"
-                @keyup.enter.stop="itemsStore.renameItem(item)"
-                @keyup.esc.stop="item.isRenaming = false"
-                spellcheck="false"
-                autocomplete="off"
-              />
-              <button
-                class="dsy-join-item dsy-btn dsy-btn-secondary"
-                :class="{ 'dsy-btn-disabled': !item.newName }"
-                @click.stop="itemsStore.renameItem(item)"
-                v-wave
-              >
-                <span class="material-symbols-outlined"> check </span>
-              </button>
-              <button
-                class="dsy-join-item dsy-btn dsy-btn-secondary"
-                @click.stop="item.isRenaming = false"
-                v-wave
-              >
-                <span class="material-symbols-outlined"> close </span>
-              </button>
-            </div>
-            <div v-else>
-              <div class="whitespace-pre">
-                {{ item.name + (item.type ? `.${item.type}` : "") }}
-              </div>
-              <div v-if="isSearch" class="font-weight-bold">
-                Path: Personal drive/{{ item.path }}
-              </div>
-            </div>
+  <div
+    id="explorer-grid"
+    class="place-self-start grid w-full grid-cols-[auto_repeat(4,min-content)]"
+  >
+    <div
+      class="bg-base-100 text-base-content/60 font-bold sticky top-0 z-10 pointer-events-none col-span-full grid grid-cols-[subgrid]"
+    >
+      <div>Name</div>
+      <div>Size</div>
+      <div>Type</div>
+      <div>Date added</div>
+      <div>Date modified</div>
+    </div>
+    <div
+      v-for="item in itemsSorted"
+      :key="item.id"
+      :ref="(el) => handleItemRef(item, el as HTMLElement)"
+      class="cursor-pointer hover:bg-base-200 col-span-full grid grid-cols-[subgrid] rounded-l"
+      :class="{
+        '!bg-base-300': item.isSelected,
+        'is-selected': item.isSelected,
+        folder: item.isFolder,
+      }"
+      tabindex="0"
+      :draggable="item.isSelected"
+      @dragstart="handleDragStart(item, $event)"
+      @dragend="handleDragStop"
+      @drop.stop.prevent="handleDrop(item, $event)"
+      @click.stop="handleItemSelect(item, $event)"
+      @dblclick.stop="handleItemOpen(item)"
+      @keyup.space.stop="handleItemSelect(item, $event)"
+      @keyup.enter.stop="handleItemOpen(item)"
+    >
+      <div class="min-w-0 flex items-center">
+        <div
+          class="fiv-viv text-xl mr-3 flex-shrink-0"
+          :class="
+            item.isFolder
+              ? 'fiv-icon-folder'
+              : `fiv-icon-blank fiv-icon-${item.type}`
+          "
+        ></div>
+        <div
+          v-if="item.isRenaming"
+          class="inline-flex ml-2"
+          @mousedown.stop="null"
+          @click.stop="null"
+        >
+          <input
+            ref="renameInput"
+            v-model.trim="item.newName"
+            type="text"
+            :placeholder="`Enter a new ${
+              item.isFolder ? 'folder' : 'file'
+            } name`"
+            class="dsy-join-item dsy-input dsy-input-secondary outline-none"
+            @keyup.enter.stop="itemsStore.renameItem(item)"
+            @keyup.esc.stop="item.isRenaming = false"
+            spellcheck="false"
+            autocomplete="off"
+          />
+          <button
+            class="dsy-join-item dsy-btn dsy-btn-secondary"
+            :class="{ 'dsy-btn-disabled': !item.newName }"
+            @click.stop="itemsStore.renameItem(item)"
+            v-wave
+          >
+            <span class="material-symbols-outlined"> check </span>
+          </button>
+          <button
+            class="dsy-join-item dsy-btn dsy-btn-secondary"
+            @click.stop="item.isRenaming = false"
+            v-wave
+          >
+            <span class="material-symbols-outlined"> close </span>
+          </button>
+        </div>
+        <template v-else>
+          <div
+            class="whitespace-pre overflow-hidden text-ellipsis"
+            :class="{
+              'whitespace-pre-wrap':
+                item.isSelected &&
+                itemsStore.selectedItems.length == 1 &&
+                !selectionRectStore.isActive,
+            }"
+          >
+            {{ item.name + (item.type ? `.${item.type}` : "") }}
           </div>
-        </td>
-        <td class="whitespace-nowrap">
-          {{ item.isFolder ? "" : formatSize(item.size!) }}
-        </td>
-        <td>{{ item.isFolder ? "Folder" : item.type.toUpperCase() }}</td>
-        <td class="whitespace-nowrap">
-          {{ formatDate(item.dateModified, "hr") }}
-        </td>
-        <td class="whitespace-nowrap rounded-r-lg">
-          {{ formatDate(item.dateModified, "hr") }}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+          <div v-if="isSearch" class="font-weight-bold">
+            Path: Personal drive/{{ item.path }}
+          </div>
+        </template>
+      </div>
+      <div class="whitespace-nowrap">
+        {{ item.isFolder ? "" : formatSize(item.size!) }}
+      </div>
+      <div>{{ item.isFolder ? "Folder" : item.type.toUpperCase() }}</div>
+      <div class="whitespace-nowrap">
+        {{ formatDate(item.dateModified, "hr") }}
+      </div>
+      <div class="whitespace-nowrap">
+        {{ formatDate(item.dateModified, "hr") }}
+      </div>
+    </div>
+  </div>
 </template>
+
+<style>
+#explorer-grid > * > * {
+  padding: 15px;
+}
+</style>
