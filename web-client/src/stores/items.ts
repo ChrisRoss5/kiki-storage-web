@@ -2,20 +2,11 @@
 import api from "@/firebase/firestore-api";
 import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { useCurrentUser, useFirestore } from "vuefire";
 import { usePathStore } from "./path";
 import { useSearchStore } from "./search";
 import { useShortDialogStore } from "./short-dialog";
-import { itemConverter } from "@/firebase";
 
 const itemsStore = () => {
   const itemsManager = useItemsManager();
@@ -43,11 +34,26 @@ const itemsStore = () => {
     clearDragOverStyle(e);
     const itemsData = e.dataTransfer?.getData("items");
     if (itemsData) {
-      if (path == pathStore.currentPath) return;
+      if (path == pathStore.currentPath) return; // todo check if items are from outside window
       const newItems = JSON.parse(itemsData) as Item[];
       if (await areItemsInvalid(newItems, path)) return;
+      const folders = newItems.filter((i) => i.isFolder);
+      if (
+        folders.some((f) => f.path.length) ||
+        folders.some((f) => folders.some((f2) => f2.path.startsWith(f.path)))
+      )
+        return dialogStore.showError(
+          "You can't move a folder into its own subfolder.",
+        );
+      if (
+        folders.some((f) =>
+          folders.some((f2) => (f2.path + f2.name).startsWith(f.path + f.name)),
+        )
+      )
+        return dialogStore.showError(
+          "You can't move a folder and its subfolders at the same time.",
+        );
       api.moveItems(newItems, path);
-      items.value = items.value.filter((i) => !newItems.includes(i));
       // todo
     } else if (e.dataTransfer) createFiles(e.dataTransfer.files, path);
   };
