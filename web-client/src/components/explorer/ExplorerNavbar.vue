@@ -10,7 +10,7 @@ const pathStore = usePathStore();
 <template>
   <div class="flex items-center flex-wrap text-2xl">
     <RouterLink
-      to="/"
+      :to="pathStore.root"
       @drop.stop.prevent="itemsStore.handleDrop($event, '')"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"

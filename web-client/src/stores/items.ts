@@ -1,11 +1,21 @@
-import api from "@/firebase/api";
+//import api from "@/firebase/sql-server-api";
+import api from "@/firebase/firestore-api";
 import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+import { useCurrentUser, useFirestore } from "vuefire";
 import { usePathStore } from "./path";
 import { useSearchStore } from "./search";
 import { useShortDialogStore } from "./short-dialog";
+import { itemConverter } from "@/firebase";
 
 const itemsStore = () => {
   const itemsManager = useItemsManager();
@@ -18,7 +28,9 @@ const itemsStore = () => {
 
   const areItemsInvalid = async (newItems: Item[], path: string) => {
     const scopedItems =
-      path == pathStore.currentPath ? items.value : await api.getItems(path);
+      path == pathStore.currentPath
+        ? items.value
+        : await api.getItems(path, false, { once: true }).promise.value;
     return newItems.some((i) => isItemInvalid(i, scopedItems));
   };
   const isItemInvalid = (item: Item, _items?: Item[]) => {
@@ -43,7 +55,7 @@ const itemsStore = () => {
     const item = _createFolder(newFolderName.value, pathStore.currentPath);
     if (isItemInvalid(item)) return;
     newFolderName.value = "";
-    itemsManager.createItem(await api.createItem(item));
+    api.createItem(item);
   };
   const createFiles = async (files: FileList, path?: string) => {
     path ??= pathStore.currentPath;
@@ -51,17 +63,16 @@ const itemsStore = () => {
     if (!newItems.length)
       return dialogStore.showError("No valid files were selected.");
     if (await areItemsInvalid(newItems, path)) return;
-    itemsManager.createItems(await api.createItems(newItems), path);
+    api.createItems(newItems);
   };
   const deleteItems = async () => {
     const _items = selectedItems.value;
     const toDelete = _items.length > 1 ? `${_items.length} items` : "one item";
     const message = `Are you sure you want to delete ${toDelete}?`;
     if (!(await dialogStore.confirm(message))) return;
-    itemsManager.deleteItems(_items);
     api.deleteItems(_items);
   };
-  const renameItem = (item: Item) => {
+  const renameItem = async (item: Item) => {
     if (!item.newName) return;
     item.isRenaming = item.newName != item.name;
     if (!item.isRenaming || isItemInvalid({ ...item, name: item.newName }))
@@ -112,7 +123,7 @@ export const useItemsManager = defineStore("items-manager", () => {
   const deleteItems = (items: Item[]) => {
     itemsStore.items = itemsStore.items.filter((i) => !items.includes(i));
     searchItemsStore.items = searchItemsStore.items.filter(
-      (i) => !items.includes(i)
+      (i) => !items.includes(i),
     );
   };
 

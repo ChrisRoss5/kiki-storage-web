@@ -1,5 +1,5 @@
-interface ItemData {
-  id?: number;
+interface ItemCore {
+  id?: string;
   name: string;
   type: string;
   dateAdded: Date;
@@ -9,7 +9,7 @@ interface ItemData {
   size?: number;
 }
 
-interface Item extends ItemData {
+interface Item extends ItemCore {
   el?: HTMLElement;
   searchEl?: HTMLElement;
   isSelected?: boolean;
@@ -29,7 +29,7 @@ interface SearchFilters {
 }
 
 interface Settings {
-  theme: Theme
+  theme: Theme;
 }
 
 type Theme =

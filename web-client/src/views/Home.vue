@@ -14,14 +14,21 @@ const dialogStore = useShortDialogStore();
 const searchStore = useSearchStore();
 
 onBeforeMount(() => {
+  document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
+  document.addEventListener("mouseup", handleLeftMouseUp);
   document.addEventListener("keydown", handleKeydown);
   document.addEventListener("keyup", handleKeyUp);
 });
 onBeforeUnmount(() => {
+  document.removeEventListener("mousemove", selectionRectStore.handleMouseMove);
+  document.removeEventListener("mouseup", handleLeftMouseUp);
   document.removeEventListener("keydown", handleKeydown);
   document.removeEventListener("keyup", handleKeyUp);
 });
 
+const handleLeftMouseUp = (e: MouseEvent) => {
+  if (e.button == 0) selectionRectStore.handleLeftMouseUp();
+};
 const handleKeydown = (e: KeyboardEvent) => {
   const selectedItems = itemsStore.selectedItems;
   if (e.key == "Escape") {
@@ -66,12 +73,7 @@ const handleClickLeft = (e: MouseEvent) => {
 </script>
 
 <template>
-  <div
-    class="flex flex-col"
-    @mousemove="selectionRectStore.handleMouseMove"
-    @mouseup.left="selectionRectStore.handleLeftMouseUp"
-    @click.left="handleClickLeft"
-  >
+  <div class="flex flex-col" @click.left="handleClickLeft">
     <Header />
     <Explorer />
   </div>

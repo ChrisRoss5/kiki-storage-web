@@ -15,7 +15,6 @@ app.get("/searchItems", async (req, res) => {
   const maxSize = parseInt(req.query.maxSize as string);
   const type = req.query.type as string;
   const types = type.split(",").map((t) => t.trim());
-  const isFileOrFolder = /Files|Folders/.test(type);
   const result = await prisma.item.findMany({
     where: {
       name: { startsWith: query },
@@ -30,7 +29,7 @@ app.get("/searchItems", async (req, res) => {
       ...(type
         ? {
             isFolder: type == "Folders",
-            ...(isFileOrFolder ? { type: { in: types } } : {}),
+            ...(/Files|Folders/.test(type) ? { type: { in: types } } : {}),
           }
         : {}),
     },

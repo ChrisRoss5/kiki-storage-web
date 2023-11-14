@@ -42,7 +42,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     _rectEl: HTMLElement,
     _items: Item[],
     _isSearch: boolean,
-    e: MouseEvent
+    e: MouseEvent,
   ) => {
     items = _items.filter((i) => !(isCtrlOrShiftDown && i.isSelected));
     explEl.value = _explEl;
@@ -109,10 +109,8 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
         if (
           scrollDirection == "down" &&
           explEl.value!.scrollTop + pixels >= startMaxScrollTop
-        ) {
-          explEl.value!.scrollTop = startMaxScrollTop;
+        )
           return clearInterval(interval);
-        }
         explEl.value!.scrollBy(0, pixels);
         if (top >= startCoords.y) {
           height += pixels;

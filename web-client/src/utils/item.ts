@@ -1,4 +1,4 @@
-export function _createFolder(name: string, path: string) {
+export function _createFolder(name: string, path: string): ItemCore {
   return {
     name,
     type: "",

@@ -92,7 +92,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 
 <template>
   <div
-    class="expl-grid grid min-h-0 w-full select-none grid-cols-[auto_repeat(4,min-content)]"
+    class="expl-grid grid min-h-0 w-full select-none grid-cols-[auto_repeat(4,min-content)] grid-rows-[auto_1fr]"
   >
     <div
       class="expl-header pointer-events-none col-span-full grid grid-cols-[subgrid] bg-base-100 font-bold text-base-content/60"
@@ -105,7 +105,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     </div>
     <div
       ref="explorerBody"
-      class="expl-body relative col-span-full grid grid-cols-[subgrid] overflow-y-auto overflow-x-hidden rounded-l"
+      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-auto overflow-x-hidden rounded-l"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
@@ -124,7 +124,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
         v-for="item in itemsSorted"
         :key="item.id"
         :ref="(el) => handleItemRef(item, el as HTMLElement)"
-        class="expl-row col-span-full grid cursor-pointer grid-cols-[subgrid] rounded-l hover:bg-base-200"
+        class="expl-row col-span-full grid cursor-pointer grid-cols-[subgrid] rounded-l hover:bg-base-200 whitespace-nowrap"
         :class="{
           '!bg-base-300': item.isSelected,
           'is-selected': item.isSelected,
@@ -226,14 +226,11 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
   padding: 15px;
   align-self: center;
 }
-
 /* [dragging-items] .expl-row:not(.folder) {
   pointer-events: none;
   opacity: 0.25;
 } */
-
-.expl-row > * {
+[dragging-items] .expl-row > * {
   pointer-events: none;
-  white-space: nowrap;
 }
 </style>

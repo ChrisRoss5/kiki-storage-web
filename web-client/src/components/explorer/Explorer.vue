@@ -15,7 +15,7 @@ provide("isSearch", isSearch);
   <div class="flex-1 flex flex-col mx-5 mb-5 gap-5 min-h-0">
     <ExplorerNavbar />
     <template v-if="itemsStore.items.length">
-      <ExplorerGrid />
+      <ExplorerGrid class="flex-1" />
       <ExplorerFooter />
     </template>
     <div

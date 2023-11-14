@@ -1,4 +1,4 @@
-import api from "@/firebase/api";
+import api from "@/firebase/sql-server-api";
 import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
@@ -40,6 +40,7 @@ export const useSearchStore = defineStore("search", () => {
   const itemsStore = useItemsStore();
   const searchItemsStore = useSearchItemsStore();
 
+  // todo: https://stackoverflow.com/questions/46573804/firestore-query-documents-startswith-a-string
   const isOpen = ref(false);
   const query = ref("");
   const sizeFilter = ref<SizeFilter>({ ...initialSizeFilter });
@@ -60,7 +61,7 @@ export const useSearchStore = defineStore("search", () => {
 
   const updateSearchedItems = (newSearch?: Item[]) => {
     searchItemsStore.items = (newSearch ?? searchItemsStore.items).map(
-      (i) => itemsStore.items.find((_i) => _i.id == i.id) ?? i
+      (i) => itemsStore.items.find((_i) => _i.id == i.id) ?? i,
     );
   };
   const show = () => {

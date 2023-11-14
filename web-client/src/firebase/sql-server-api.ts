@@ -17,17 +17,17 @@ export default {
     return (await this.createItems([item]))[0];
   },
   createItems(items: Item[]) {
-    return _fetch<Item[]>("createItems", "POST", sanitize(items), true);
+    return _fetch<Item[]>("createItems", "POST", toDb(items), true);
   },
   moveItems(items: Item[], newPath: string) {
-    _fetch("moveItems", "PUT", { items: sanitize(items), newPath });
+    _fetch("moveItems", "PUT", { items: toDb(items), newPath });
   },
   renameItem(item: Item) {
     const { newName } = item;
-    _fetch("renameItem", "PUT", { item: sanitize(item), newName });
+    _fetch("renameItem", "PUT", { item: toDb(item), newName });
   },
   deleteItems(items: Item[]) {
-    _fetch("deleteItems", "DELETE", sanitize(items));
+    _fetch("deleteItems", "DELETE", toDb(items));
   },
 };
 
@@ -35,7 +35,7 @@ async function _fetch<T>(
   endpoint: string,
   method: string,
   body?: any,
-  doFormatDates?: boolean
+  doFormatDates?: boolean,
 ) {
   const res = await fetch(`${baseUrl}/${endpoint}`, {
     method,
@@ -43,10 +43,10 @@ async function _fetch<T>(
     body: body ? JSON.stringify(body) : undefined,
   });
   const json = (await res.json()) as T;
-  return doFormatDates ? formatItems(json as ItemData[]) : json;
+  return doFormatDates ? fromDb(json as ItemCore[]) : json;
 }
 
-function formatItems(items: ItemData[]): Item[] {
+function fromDb(items: ItemCore[]): Item[] {
   return items.map((i: Item) => {
     i.dateAdded = new Date(i.dateAdded);
     i.dateModified = new Date(i.dateModified);
@@ -54,10 +54,10 @@ function formatItems(items: ItemData[]): Item[] {
   });
 }
 
-function sanitize(item: Item): ItemData;
-function sanitize(items: Item[]): ItemData[];
-function sanitize(items: Item | Item[]): ItemData | ItemData[] {
-  const transform = (i: Item): ItemData => ({
+function toDb(item: Item): ItemCore;
+function toDb(items: Item[]): ItemCore[];
+function toDb(items: Item | Item[]): ItemCore | ItemCore[] {
+  const transform = (i: Item): ItemCore => ({
     id: i.id,
     name: i.name,
     path: i.path,
