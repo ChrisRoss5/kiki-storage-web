@@ -50,7 +50,7 @@ app.post("/createItems", async (req, res) => {
   const createdItems = await prisma.$transaction(
     items.map((item) => prisma.item.create({ data: item }))
   );
-  await utils.updateDateModified(items[0].path);
+  await utils.updateDateModified(items[0].path); // todo: fix;
   res.json(createdItems);
 });
 
@@ -72,7 +72,7 @@ app.put("/moveItems", async (req, res) => {
       data: { path: newPath },
     })
   ).count;
-  await utils.updateDateModified(newPath);
+  await utils.updateDateModified(newPath); // todo: fix;
   res.json({ count } satisfies Prisma.BatchPayload);
 });
 
@@ -90,7 +90,7 @@ app.put(`/renameItem`, async (req, res) => {
     where: { id },
     data: { name: newName },
   }));
-  await utils.updateDateModified(path);
+  await utils.updateDateModified(path); // todo: fix;
   res.json({ count } satisfies Prisma.BatchPayload);
 });
 
@@ -113,7 +113,7 @@ app.delete(`/deleteItems`, async (req, res) => {
       where: { id },
     }));
   }
-  await utils.updateDateModified(items[0].path);
+  await utils.updateDateModified(items[0].path); // todo: fix;
   res.json({ count } satisfies Prisma.BatchPayload);
 });
 

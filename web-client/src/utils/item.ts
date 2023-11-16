@@ -36,12 +36,13 @@ export function checkItem(item: Item, items: Item[]) {
   const fullName = `${item.name}.${item.type}`;
   const hasInvalidChars = /[\\/:*?"<>|]/.test(fullName);
   const type = item.isFolder ? "folder" : "file";
-  const error = !item.name
-    ? `A ${type} name can't be blank.`
-    : alreadyExists
-    ? `This destination already contains a ${type} named '${fullName}'.`
-    : hasInvalidChars
-    ? `A ${type} name can't contain any of the following characters: \\ / : * ? " < > |`
-    : undefined;
+  const error =
+    item.isFolder && !item.name
+      ? `A folder name can't be blank.`
+      : alreadyExists
+      ? `This destination already contains a ${type} named '${fullName}'.`
+      : hasInvalidChars
+      ? `A ${type} name can't contain any of the following characters: \\ / : * ? " < > |`
+      : undefined;
   return { error };
 }

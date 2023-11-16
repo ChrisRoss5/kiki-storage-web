@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
-import { useSearchItemsStore } from "@/stores/items";
+import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
+import { useSearchItemsStore } from "@/stores/items/items";
 import { useSearchStore } from "@/stores/search";
 import { provide } from "vue";
 import SearchOptions from "./SearchOptions.vue";
-import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
 
 provide("isSearch", true);
 
@@ -17,7 +17,7 @@ const searchItemsStore = useSearchItemsStore();
     <input
       type="text"
       placeholder="Search"
-      class="w-full dsy-input dsy-input-bordered dsy-input-primary"
+      class="dsy-input dsy-input-bordered dsy-input-primary w-full"
       v-model="searchStore.query"
       spellcheck="false"
       autocomplete="off"
@@ -25,7 +25,7 @@ const searchItemsStore = useSearchItemsStore();
     />
     <div
       v-if="searchStore.isOpen"
-      class="absolute top-full left-0 right-0 shadow-lg rounded-2xl bg-base-100 p-4 mt-3 z-10"
+      class="absolute left-0 right-0 top-full z-10 mt-3 rounded-2xl bg-base-100 p-4 shadow-lg"
     >
       <template v-if="searchItemsStore.items.length">
         <ExplorerGrid class="in-search max-h-[70vh]" />

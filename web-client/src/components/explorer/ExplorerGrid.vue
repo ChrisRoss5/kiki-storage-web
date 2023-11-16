@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore, useSearchItemsStore } from "@/stores/items";
+import { useItemsStore, useSearchItemsStore } from "@/stores/items/items";
 import { usePathStore } from "@/stores/path";
 import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
@@ -50,18 +50,18 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
     if (item.isSelected) item.isSelected = false;
     else {
       item.isSelected = true;
-      lastSelectedItemIdx = itemsStore.items.indexOf(item);
+      lastSelectedItemIdx = itemsSorted.value.indexOf(item);
     }
   } else if (e.shiftKey) {
     itemsStore.deselectAll();
-    const start = Math.min(lastSelectedItemIdx, itemsStore.items.indexOf(item));
-    const end = Math.max(lastSelectedItemIdx, itemsStore.items.indexOf(item));
-    for (let i = start; i <= Math.min(end, itemsStore.items.length - 1); i++)
-      itemsStore.items[i].isSelected = true;
+    const start = Math.min(lastSelectedItemIdx, itemsSorted.value.indexOf(item));
+    const end = Math.max(lastSelectedItemIdx, itemsSorted.value.indexOf(item));
+    for (let i = start; i <= Math.min(end, itemsSorted.value.length - 1); i++)
+      itemsSorted.value[i].isSelected = true;
   } else {
     itemsStore.deselectAll();
     item.isSelected = true;
-    lastSelectedItemIdx = itemsStore.items.indexOf(item);
+    lastSelectedItemIdx = itemsSorted.value.indexOf(item);
   }
   if (!item.isRenaming) itemsStore.clearRenaming();
 };
@@ -69,7 +69,7 @@ const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
     pathStore.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
     if (isSearch) searchStore.close();
-  } else dialogStore.showError("This item cannot be previewed.");
+  } else dialogStore.showError("This item cannot be previewed."); // todo: add previews
 };
 const handleDragStart = (item: Item, e: DragEvent) => {
   if (selectionRectStore.isActive || item.isRenaming) return e.preventDefault();
@@ -120,11 +120,16 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
         )
       "
     >
-      <div
+      <a
         v-for="item in itemsSorted"
         :key="item.id"
         :ref="(el) => handleItemRef(item, el as HTMLElement)"
-        class="expl-row col-span-full grid cursor-pointer grid-cols-[subgrid] rounded-l hover:bg-base-200 whitespace-nowrap"
+        :href="
+          item.isFolder
+            ? `${item.path ? `/${item.path}` : ''}/${item.name}`
+            : undefined
+        "
+        class="expl-row col-span-full grid cursor-pointer grid-cols-[subgrid] whitespace-nowrap rounded-l hover:bg-base-200"
         :class="{
           '!bg-base-300': item.isSelected,
           'is-selected': item.isSelected,
@@ -135,10 +140,10 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
         @dragstart="handleDragStart(item, $event)"
         @dragend="handleDragStop"
         @drop.stop.prevent="handleDrop(item, $event)"
-        @click.stop="handleItemSelect(item, $event)"
-        @dblclick.stop="handleItemOpen(item)"
-        @keyup.space.stop="handleItemSelect(item, $event)"
-        @keyup.enter.stop="handleItemOpen(item)"
+        @click.stop.prevent="handleItemSelect(item, $event)"
+        @dblclick.stop.prevent="handleItemOpen(item)"
+        @keyup.space.stop.prevent="handleItemSelect(item, $event)"
+        @keyup.enter.stop.prevent="handleItemOpen(item)"
       >
         <div class="flex min-w-0 items-center">
           <div
@@ -153,7 +158,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
             v-if="item.isRenaming"
             class="ml-2 inline-flex"
             @mousedown.stop="null"
-            @click.stop="null"
+            @click.stop.prevent="null"
           >
             <input
               ref="renameInput"
@@ -171,14 +176,14 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
             <button
               class="dsy-btn dsy-btn-secondary dsy-join-item"
               :class="{ 'dsy-btn-disabled': !item.newName }"
-              @click.stop="itemsStore.renameItem(item)"
+              @click="itemsStore.renameItem(item)"
               v-wave
             >
               <span class="material-symbols-outlined"> check </span>
             </button>
             <button
               class="dsy-btn dsy-btn-secondary dsy-join-item"
-              @click.stop="item.isRenaming = false"
+              @click="item.isRenaming = false"
               v-wave
             >
               <span class="material-symbols-outlined"> close </span>
@@ -211,7 +216,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
         <div>
           {{ formatDate(item.dateModified, "hr") }}
         </div>
-      </div>
+      </a>
       <div
         ref="rectEl"
         class="pointer-events-none absolute z-10 border border-primary bg-primary/20"

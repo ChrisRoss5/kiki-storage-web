@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore } from "@/stores/items";
+import { useItemsStore } from "@/stores/items/items";
 
 const itemsStore = useItemsStore();
 
@@ -15,13 +15,13 @@ const handleFileUpload = (e: Event) => {
       v-model.trim="itemsStore.newFolderName"
       type="text"
       placeholder="Add a new folder"
-      class="dsy-join-item dsy-input dsy-input-primary outline-none"
+      class="dsy-input dsy-join-item dsy-input-primary outline-none"
       @keyup.enter.stop="itemsStore.createFolder"
       spellcheck="false"
       autocomplete="off"
     />
     <button
-      class="dsy-join-item dsy-btn dsy-btn-primary"
+      class="dsy-btn dsy-btn-primary dsy-join-item"
       :class="{ 'dsy-btn-disabled': !itemsStore.newFolderName }"
       @click="itemsStore.createFolder"
       v-wave
@@ -33,8 +33,12 @@ const handleFileUpload = (e: Event) => {
     <label
       class="dsy-btn dsy-btn-primary"
       tabindex="0"
-      @keyup.enter.stop="($event) => (
-          ($event.target as HTMLElement).firstElementChild as HTMLElement).click()"
+      @keyup.enter.stop="
+        ($event) =>
+          (
+            ($event.target as HTMLElement).firstElementChild as HTMLElement
+          ).click()
+      "
       v-wave
     >
       <input type="file" class="hidden" multiple @change="handleFileUpload" />

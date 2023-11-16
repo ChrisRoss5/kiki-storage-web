@@ -1,17 +1,17 @@
 //import api from "@/firebase/sql-server-api";
-import api from "@/firebase/firestore-api";
+import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { usePathStore } from "./path";
-import { useSearchStore } from "./search";
-import { useShortDialogStore } from "./short-dialog";
+import { usePathStore } from "../path";
+import { useSearchStore } from "../search";
+import { useShortDialogStore } from "../short-dialog";
 
 const itemsStore = () => {
-  const itemsManager = useItemsManager();
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
+  const { api } = useItemsFirestoreStore();
 
   const items = ref<Item[]>([]);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
@@ -35,26 +35,17 @@ const itemsStore = () => {
     const itemsData = e.dataTransfer?.getData("items");
     if (itemsData) {
       if (path == pathStore.currentPath) return; // todo check if items are from outside window
-      const newItems = JSON.parse(itemsData) as Item[];
+      let newItems = JSON.parse(itemsData) as Item[];
       if (await areItemsInvalid(newItems, path)) return;
       const folders = newItems.filter((i) => i.isFolder);
-      if (
-        folders.some((f) => f.path.length) ||
-        folders.some((f) => folders.some((f2) => f2.path.startsWith(f.path)))
-      )
+      if (folders.some((f) => path!.startsWith(f.path)))
         return dialogStore.showError(
           "You can't move a folder into its own subfolder.",
         );
-      if (
-        folders.some((f) =>
-          folders.some((f2) => (f2.path + f2.name).startsWith(f.path + f.name)),
-        )
-      )
-        return dialogStore.showError(
-          "You can't move a folder and its subfolders at the same time.",
-        );
+      newItems = newItems.filter((i) => {
+        return !folders.some((f) => i.path.startsWith(f.path + f.name));
+      });
       api.moveItems(newItems, path);
-      // todo
     } else if (e.dataTransfer) createFiles(e.dataTransfer.files, path);
   };
   const createFolder = async () => {
@@ -85,7 +76,6 @@ const itemsStore = () => {
       return;
     api.renameItem(item);
     item.isRenaming = false;
-    item.name = item.newName;
   };
   const clearRenaming = () => {
     const renaming = items.value.find((i) => i.isRenaming);

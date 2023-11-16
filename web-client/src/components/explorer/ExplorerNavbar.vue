@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore } from "@/stores/items";
+import { useItemsStore } from "@/stores/items/items";
 import { usePathStore } from "@/stores/path";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 
@@ -8,7 +8,7 @@ const pathStore = usePathStore();
 </script>
 
 <template>
-  <div class="flex items-center flex-wrap text-2xl">
+  <div class="flex flex-wrap items-center text-2xl">
     <RouterLink
       :to="pathStore.root"
       @drop.stop.prevent="itemsStore.handleDrop($event, '')"
@@ -17,15 +17,15 @@ const pathStore = usePathStore();
       @dragend.stop.prevent="clearDragOverStyle"
       draggable="false"
     >
-      <span class="material-symbols-outlined pr-2 pointer-events-none">
+      <span class="material-symbols-outlined pointer-events-none pr-2">
         cloud
       </span>
-      <span class="pointer-events-none">Personal drive</span>
+      <span class="pointer-events-none">{{ pathStore.rootName }}</span>
     </RouterLink>
     <template v-for="path in pathStore.folderPaths">
       <span class="material-symbols-outlined"> chevron_right </span>
       <RouterLink
-        :to="`/${path}`"
+        :to="`${pathStore.root}/${path}`"
         class="whitespace-pre"
         @drop.stop.prevent="itemsStore.handleDrop($event, path)"
         @dragover.stop.prevent="setDragOverStyle"
@@ -41,7 +41,9 @@ const pathStore = usePathStore();
 
 <style scoped>
 a {
-  transition: transform 250ms, border 250ms;
+  transition:
+    transform 250ms,
+    border 250ms;
   border-width: 2px;
   border-color: transparent;
   white-space: pre;

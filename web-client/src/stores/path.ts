@@ -1,17 +1,17 @@
-import { itemConverter } from "@/firebase";
-import { collection, query, where } from "firebase/firestore";
 import { defineStore } from "pinia";
-import { computed, reactive, ref, watch, watchEffect } from "vue";
+import { WatchStopHandle, computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useCollection, useCurrentUser, useFirestore } from "vuefire";
-import { useItemsStore } from "./items";
+import { useItemsFirestoreStore } from "./items/firestore";
+import { useItemsStore } from "./items/items";
 import { useSearchStore } from "./search";
+import { _RefFirestore } from "vuefire";
 
 export const usePathStore = defineStore("path", () => {
   const route = useRoute();
   const router = useRouter();
   const itemsStore = useItemsStore();
   const searchStore = useSearchStore();
+  const { api } = useItemsFirestoreStore();
 
   const roots = reactive({
     "/drive": "Drive",
@@ -20,46 +20,45 @@ export const usePathStore = defineStore("path", () => {
   });
   const defaultRoot = "/drive" as keyof typeof roots;
   const root = ref<keyof typeof roots>(defaultRoot);
+  const rootName = computed(() => roots[root.value]);
   const folderPaths = ref<string[]>([]);
   const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
 
-  checkPath(route.path);
-
-  const user = useCurrentUser();
-  const db = useFirestore();
-  const dbPath = `app/drive/${user.value?.uid}`;
-
-  const items = useCollection(
-    query(
-      collection(db, dbPath),
-      where("path", "==", currentPath.value),
-    ).withConverter(itemConverter),
-  );
-
+  let unwatch: WatchStopHandle;
   watch(
-    items,
-    (items) => {
-      itemsStore.items = [...items].map((i) => ({ ...i }));
-    },
-    { deep: true },
-  );
+    () => route.path,
+    async (newPath, oldPath) => {
+      if (!route.meta.requiresAuth) return;
+      let _newPath = decodeURIComponent(newPath.replace(/\/+/g, "/"));
+      if (_newPath.endsWith("/")) _newPath = _newPath.slice(0, -1);
+      if (!checkPath(_newPath)) return;
+      const pathSplit = _newPath.split("/").slice(2);
+      folderPaths.value = pathSplit.map((_, i) =>
+        pathSplit.slice(0, i + 1).join("/"),
+      );
 
-  watchEffect(async () => {
-    if (!route.meta.requiresAuth) return;
-    let newPath = decodeURIComponent(route.path.replace(/\/+/g, "/"));
-    if (newPath.endsWith("/")) newPath = newPath.slice(0, -1);
-    if (!checkPath(newPath)) return;
-    console.log("NEW PATH: ", newPath); // todo
-    const pathSplit = newPath.split("/").slice(2);
-    folderPaths.value = pathSplit.map((_, i) =>
-      pathSplit.slice(0, i + 1).join("/"),
-    );
-    console.log("currentPath: ", currentPath.value); // todo
+      if (unwatch) unwatch();
+      if (oldPath) api.unuseSource(oldPath);
 
-    //const items = await
-    /* itemsStore.items = await api.getItems(newPath);
+      const items = api.getItems(currentPath.value);
+      unwatch = watch(
+        items,
+        (items) => {
+          console.log("UPDATING ITEMS: ", items); // todo
+          itemsStore.items = items.map((i) => ({
+            ...itemsStore.items.find((i2) => i2.id == i.id),
+            ...i,
+          }));
+        },
+        { deep: true },
+      );
+
+      //const items = await
+      /* itemsStore.items = await api.getItems(newPath);
     searchStore.updateSearchedItems(); */
-  });
+    },
+    { immediate: true },
+  );
 
   function checkPath(path: string) {
     if (Object.keys(roots).some((r) => path.startsWith(r))) {
@@ -74,8 +73,8 @@ export const usePathStore = defineStore("path", () => {
   function updatePaths() {}
 
   function push(path: string) {
-    router.push({ path: root + path });
+    router.push({ path: root.value + path });
   }
 
-  return { root, folderPaths, currentPath, push };
+  return { root, rootName, folderPaths, currentPath, push };
 });

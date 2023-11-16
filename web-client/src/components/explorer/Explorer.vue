@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { useItemsStore } from "@/stores/items/items";
 import { provide } from "vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
-import ExplorerNavbar from "./ExplorerNavbar.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
-import { useItemsStore } from "@/stores/items";
+import ExplorerNavbar from "./ExplorerNavbar.vue";
 
 const itemsStore = useItemsStore();
 
@@ -12,7 +12,7 @@ provide("isSearch", isSearch);
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col mx-5 mb-5 gap-5 min-h-0">
+  <div class="mx-5 mb-5 flex min-h-0 flex-1 flex-col gap-5">
     <ExplorerNavbar />
     <template v-if="itemsStore.items.length">
       <ExplorerGrid class="flex-1" />
@@ -20,7 +20,7 @@ provide("isSearch", isSearch);
     </template>
     <div
       v-else
-      class="flex-1 flex-center flex-col gap-3 border-2 border-base-content border-dashed rounded-2xl pointer-events-none"
+      class="flex-center pointer-events-none flex-1 flex-col gap-3 rounded-2xl border-2 border-dashed border-base-content"
     >
       <span class="material-symbols-outlined"> draft </span>
       <div class="text-2xl">Drop files or create a new folder</div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore, useSearchItemsStore } from "@/stores/items";
+import { useItemsStore, useSearchItemsStore } from "@/stores/items/items";
 import { formatSize } from "@/utils/format";
 import { computed, inject } from "vue";
 
@@ -7,7 +7,7 @@ const isSearch = inject<boolean>("isSearch")!;
 const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
 
 const selectedItems = computed(() =>
-  itemsStore.items.filter((i) => i.isSelected)
+  itemsStore.items.filter((i) => i.isSelected),
 );
 const selectedItemsSize = computed(() => {
   const showSize =
@@ -18,7 +18,7 @@ const selectedItemsSize = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-center bg-base-200 shadow-md px-6 rounded-2xl">
+  <div class="flex items-center rounded-2xl bg-base-200 px-6 shadow-md">
     <div class="p-4 pr-0">
       {{ itemsStore.items.length }}
       {{ itemsStore.items.length == 1 ? "item" : "items" }}
@@ -33,7 +33,7 @@ const selectedItemsSize = computed(() => {
     <Transition name="fade">
       <div class="ml-auto flex" v-if="selectedItems?.length">
         <div
-          class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
+          class="dsy-tooltip cursor-pointer p-4 hover:bg-base-300"
           data-tip="Download"
           @click.stop=""
           v-wave
@@ -41,7 +41,7 @@ const selectedItemsSize = computed(() => {
           <span class="material-symbols-outlined leading-4"> download </span>
         </div>
         <div
-          class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
+          class="dsy-tooltip cursor-pointer p-4 hover:bg-base-300"
           data-tip="Share"
           @click.stop=""
           v-wave
@@ -50,7 +50,7 @@ const selectedItemsSize = computed(() => {
         </div>
         <div
           v-show="selectedItems.length == 1"
-          class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
+          class="dsy-tooltip cursor-pointer p-4 hover:bg-base-300"
           data-tip="Rename"
           @click.stop="
             selectedItems[0].isRenaming = !selectedItems[0].isRenaming
@@ -60,7 +60,7 @@ const selectedItemsSize = computed(() => {
           <span class="material-symbols-outlined leading-4"> edit </span>
         </div>
         <div
-          class="dsy-tooltip p-4 cursor-pointer hover:bg-base-300"
+          class="dsy-tooltip cursor-pointer p-4 hover:bg-base-300"
           data-tip="Delete"
           @click.stop="itemsStore.deleteItems"
           v-wave

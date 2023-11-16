@@ -2,7 +2,7 @@ import api from "@/firebase/sql-server-api";
 import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
-import { useItemsStore, useSearchItemsStore } from "./items";
+import { useItemsStore, useSearchItemsStore } from "./items/items";
 
 export interface SizeFilter {
   min: number;
