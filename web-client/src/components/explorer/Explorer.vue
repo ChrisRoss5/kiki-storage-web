@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useItemsStore } from "@/stores/items/items";
+import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { provide } from "vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
@@ -20,10 +21,14 @@ provide("isSearch", isSearch);
     </template>
     <div
       v-else
-      class="flex-center pointer-events-none flex-1 flex-col gap-3 rounded-2xl border-2 border-dashed border-base-content"
+      class="flex-center flex-1 flex-col gap-3 rounded-2xl border-2 border-dashed border-base-content"
+      @drop.stop.prevent="itemsStore.handleDrop"
+      @dragover.stop.prevent="setDragOverStyle"
+      @dragleave.stop.prevent="clearDragOverStyle"
+      @dragend.stop.prevent="clearDragOverStyle"
     >
-      <span class="material-symbols-outlined"> draft </span>
-      <div class="text-2xl">Drop files or create a new folder</div>
+      <span class="material-symbols-outlined pointer-events-none"> draft </span>
+      <div class="text-2xl pointer-events-none">Drop files or create a new folder</div>
     </div>
   </div>
 </template>

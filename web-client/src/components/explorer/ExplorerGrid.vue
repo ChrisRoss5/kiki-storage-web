@@ -80,7 +80,7 @@ const handleDragStart = (item: Item, e: DragEvent) => {
 const handleDragStop = () => {
   document.body.removeAttribute("dragging-items");
 };
-const handleDrop = (item: Item, e: DragEvent) => {
+const handleDropOnItem = (item: Item, e: DragEvent) => {
   if (item.isFolder && !item.isSelected)
     itemsStore.handleDrop(e, `${item.path ? `${item.path}/` : ""}${item.name}`);
 };
@@ -139,7 +139,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
         :draggable="item.isSelected"
         @dragstart="handleDragStart(item, $event)"
         @dragend="handleDragStop"
-        @drop.stop.prevent="handleDrop(item, $event)"
+        @drop.stop.prevent="handleDropOnItem(item, $event)"
         @click.stop.prevent="handleItemSelect(item, $event)"
         @dblclick.stop.prevent="handleItemOpen(item)"
         @keyup.space.stop.prevent="handleItemSelect(item, $event)"
@@ -189,7 +189,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               <span class="material-symbols-outlined"> close </span>
             </button>
           </div>
-          <template v-else>
+          <div v-else>
             <div
               class="overflow-hidden text-ellipsis whitespace-pre"
               :class="{
@@ -204,7 +204,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
             <div v-if="isSearch" class="font-weight-bold">
               Path: Personal drive/{{ item.path }}
             </div>
-          </template>
+          </div>
         </div>
         <div>
           {{ item.isFolder ? "" : formatSize(item.size!) }}

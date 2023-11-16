@@ -47,6 +47,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     items = _items.filter((i) => !(isCtrlOrShiftDown && i.isSelected));
     explEl.value = _explEl;
     rectEl.value = _rectEl;
+    isSearch = _isSearch;
     explElRect = explEl.value.getBoundingClientRect();
     startScrollTop = explEl.value.scrollTop;
     startMaxScrollTop = explEl.value.scrollHeight - explEl.value.offsetHeight;

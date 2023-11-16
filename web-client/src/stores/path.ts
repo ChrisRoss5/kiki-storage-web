@@ -53,14 +53,13 @@ export const usePathStore = defineStore("path", () => {
         { deep: true },
       );
 
-      //const items = await
-      /* itemsStore.items = await api.getItems(newPath);
-    searchStore.updateSearchedItems(); */
+      /* todo  searchStore.updateSearchedItems(); */
     },
     { immediate: true },
   );
 
   function checkPath(path: string) {
+    console.log("CHECKING PATH: ", path);
     if (Object.keys(roots).some((r) => path.startsWith(r))) {
       const idx = path.indexOf("/", 1);
       const _root = path.slice(0, idx > 0 ? idx : undefined);

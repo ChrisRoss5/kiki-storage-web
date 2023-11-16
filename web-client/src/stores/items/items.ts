@@ -1,4 +1,3 @@
-//import api from "@/firebase/sql-server-api";
 import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
@@ -34,7 +33,6 @@ const itemsStore = () => {
     clearDragOverStyle(e);
     const itemsData = e.dataTransfer?.getData("items");
     if (itemsData) {
-      if (path == pathStore.currentPath) return; // todo check if items are from outside window
       let newItems = JSON.parse(itemsData) as Item[];
       if (await areItemsInvalid(newItems, path)) return;
       const folders = newItems.filter((i) => i.isFolder);
@@ -102,30 +100,3 @@ const itemsStore = () => {
 
 export const useItemsStore = defineStore("items", itemsStore);
 export const useSearchItemsStore = defineStore("search-items", itemsStore);
-export const useItemsManager = defineStore("items-manager", () => {
-  const itemsStore = useItemsStore();
-  const searchItemsStore = useSearchItemsStore();
-  const searchStore = useSearchStore();
-  const pathStore = usePathStore();
-
-  const createItem = (item: Item) => {
-    itemsStore.items.push(item);
-    if (searchStore.itemPassesFilters(item)) searchItemsStore.items.push(item);
-  };
-  const createItems = (items: Item[], path: string) => {
-    if (path == pathStore.currentPath) itemsStore.items.push(...items);
-    searchItemsStore.items.push(...items.filter(searchStore.itemPassesFilters));
-  };
-  const deleteItems = (items: Item[]) => {
-    itemsStore.items = itemsStore.items.filter((i) => !items.includes(i));
-    searchItemsStore.items = searchItemsStore.items.filter(
-      (i) => !items.includes(i),
-    );
-  };
-
-  return {
-    createItem,
-    createItems,
-    deleteItems,
-  };
-});

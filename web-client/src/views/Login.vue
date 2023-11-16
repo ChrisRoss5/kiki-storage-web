@@ -3,8 +3,10 @@ import Logo from "@/components/Logo.vue";
 import { useFirebaseUI } from "@/firebase";
 import "firebaseui/dist/firebaseui.css";
 import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 
 const ui = useFirebaseUI();
+const router = useRouter();
 
 onMounted(() => {
   ui.reset();
@@ -23,6 +25,7 @@ onMounted(() => {
     callbacks: {
       signInSuccessWithAuthResult: (r) => {
         console.log(r);  // todo
+        router.push("/");
         return false;
       },
     },

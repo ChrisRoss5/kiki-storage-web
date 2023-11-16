@@ -15,7 +15,6 @@ watch(user, async (currentUser) => {
   }
   if (typeof route.query.redirect == "string")
     return router.push(route.query.redirect);
-  return router.push("/");
 });
 </script>
 

@@ -29,7 +29,7 @@ const showSettingsDialog = ref(false);
       </label>
       <ul
         tabindex="0"
-        class="dsy-dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box right-0 w-max text-right"
+        class="dsy-dropdown-content z-10 p-2 shadow bg-base-100 rounded-box right-0 w-max text-right"
       >
         <li>
           <div

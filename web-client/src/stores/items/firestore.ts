@@ -71,7 +71,10 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
           constraints.push(where("isFolder", "==", true));
         else if (filters.type == "Files")
           constraints.push(where("isFolder", "==", false));
-        else constraints.push(where("type", "in", filters.type));
+        else {
+          const types = filters.type.split(",").map((t) => t.trim());
+          constraints.push(where("type", "in", types));
+        }
       }
       return useCollection(
         query(collection(db, dbPath), ...constraints).withConverter(
@@ -90,8 +93,8 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
           collection(db, dbPath),
           ...(nestedOnly
             ? [
-                where("path", ">=", `${path}/`),
-                where("path", "<=", `${path}/\uf8ff`),
+                where("path", ">=", `${path}`),
+                where("path", "<=", `${path}\uf8ff`),
               ]
             : [where("path", "==", path)]),
         ).withConverter(itemConverter),
@@ -122,8 +125,8 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateDoc(doc(db, dbPath, item.id!), { name: item.newName });
       if (item.isFolder)
         updatePaths(
-          `${item.path}/${item.name}`,
-          `${item.path}/${item.newName}`,
+          `${item.path ? `${item.path}/` : ""}${item.name}`,
+          `${item.path ? `${item.path}/` : ""}${item.newName}`,
         );
       updateParentDateModified(item);
     },
@@ -131,10 +134,12 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       for (const item of items) {
         deleteDoc(doc(db, dbPath, item.id!));
         if (item.isFolder)
-          api.getItems(item.path, true).promise.value.then((items) => {
-            for (const nestedItem of items)
-              deleteDoc(doc(db, dbPath, nestedItem.id!));
-          });
+          api
+            .getItems(item.path + item.name, true)
+            .promise.value.then((items) => {
+              for (const nestedItem of items)
+                deleteDoc(doc(db, dbPath, nestedItem.id!));
+            });
       }
       updateParentDateModified(...items);
     },

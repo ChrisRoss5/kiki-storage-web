@@ -27,8 +27,8 @@ watch(settings, (settings) => {
 const handleThemeUpdate = async (newTheme: Theme) => {
   set(dbRef(db, `${dbPath}/theme`), newTheme);
 };
-const handleReset = () => {
-  if (!dialogStore.confirm("Reset all settings to default?")) return;
+const handleReset = async () => {
+  if (!(await dialogStore.confirm("Reset all settings to default?"))) return;
   set(dbRef(db, dbPath), defaultSettings);
 };
 </script>
@@ -62,7 +62,11 @@ const handleReset = () => {
         />
         <div v-else class="flex w-full gap-3">
           Theme:
-          <Themes :activeTheme="settings.theme" :onlyActiveTheme="true" />
+          <Themes
+            class="pointer-events-none"
+            :activeTheme="settings.theme"
+            :onlyActiveTheme="true"
+          />
           <button class="dsy-btn" @click="showThemes = true" v-wave>
             Change
           </button>
