@@ -10,39 +10,41 @@ const handleFileUpload = (e: Event) => {
 </script>
 
 <template>
-  <div class="dsy-join">
-    <input
-      v-model.trim="itemsStore.newFolderName"
-      type="text"
-      placeholder="Add a new folder"
-      class="dsy-input dsy-join-item dsy-input-primary outline-none"
-      @keyup.enter.stop="itemsStore.createFolder"
-      spellcheck="false"
-      autocomplete="off"
-    />
-    <button
-      class="dsy-btn dsy-btn-primary dsy-join-item"
-      :class="{ 'dsy-btn-disabled': !itemsStore.newFolderName }"
-      @click="itemsStore.createFolder"
-      v-wave
-    >
-      <span class="material-symbols-outlined"> add </span>
-    </button>
-  </div>
-  <div class="dsy-tooltip dsy-tooltip-bottom" data-tip="Upload files">
-    <label
-      class="dsy-btn dsy-btn-primary"
-      tabindex="0"
-      @keyup.enter.stop="
-        ($event) =>
-          (
-            ($event.target as HTMLElement).firstElementChild as HTMLElement
-          ).click()
-      "
-      v-wave
-    >
-      <input type="file" class="hidden" multiple @change="handleFileUpload" />
-      <span class="material-symbols-outlined"> cloud_upload </span>
-    </label>
+  <div class="flex gap-5">
+    <div class="dsy-join">
+      <input
+        v-model.trim="itemsStore.newFolderName"
+        type="text"
+        placeholder="Add a new folder"
+        class="dsy-input dsy-join-item dsy-input-primary outline-none"
+        @keyup.enter.stop="itemsStore.createFolder"
+        spellcheck="false"
+        autocomplete="off"
+      />
+      <button
+        class="dsy-btn dsy-btn-primary dsy-join-item"
+        :class="{ 'dsy-btn-disabled': !itemsStore.newFolderName }"
+        @click="itemsStore.createFolder"
+        v-wave
+      >
+        <span class="material-symbols-outlined"> add </span>
+      </button>
+    </div>
+    <div class="dsy-tooltip dsy-tooltip-bottom" data-tip="Upload files">
+      <label
+        class="dsy-btn dsy-btn-primary"
+        tabindex="0"
+        @keyup.enter.stop="
+          ($event) =>
+            (
+              ($event.target as HTMLElement).firstElementChild as HTMLElement
+            ).click()
+        "
+        v-wave
+      >
+        <input type="file" class="hidden" multiple @change="handleFileUpload" />
+        <span class="material-symbols-outlined"> cloud_upload </span>
+      </label>
+    </div>
   </div>
 </template>

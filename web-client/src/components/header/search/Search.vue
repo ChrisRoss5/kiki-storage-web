@@ -13,7 +13,7 @@ const searchItemsStore = useSearchItemsStore();
 </script>
 
 <template>
-  <div class="relative">
+  <div>
     <input
       type="text"
       placeholder="Search"

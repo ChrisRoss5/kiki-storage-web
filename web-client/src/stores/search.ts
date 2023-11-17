@@ -49,13 +49,12 @@ export const useSearchStore = defineStore("search", () => {
         ...searchItemsStore.items.find((i2) => i2.id == i.id),
         ...i,
       }));
-      /* setTimeout(() => {
-        // replace items with those in itemsStore
-        searchItemsStore.items = searchItemsStore.items.map((i) => ({
-          ...itemsStore.items.find((i2) => i2.id == i.id),
-          ...i,
-        }));
-      }, 10); */
+      setTimeout(() => {
+        // replace items with those in itemsStore todo
+        searchItemsStore.items = searchItemsStore.items.map(
+          (i) => itemsStore.items.find((i2) => i2.id == i.id) || i,
+        );
+      }, 10);
     },
     { deep: true },
   );
@@ -66,7 +65,8 @@ export const useSearchStore = defineStore("search", () => {
     items.value = api.searchItems(filters.value);
   }
 
-  const updateSearchedItems = (newSearch?: Item[]) => {  // todo
+  const updateSearchedItems = (newSearch?: Item[]) => {
+    // todo
     searchItemsStore.items = (newSearch ?? searchItemsStore.items).map(
       (i) => itemsStore.items.find((_i) => _i.id == i.id) ?? i,
     );
