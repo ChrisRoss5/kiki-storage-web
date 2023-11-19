@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
-import { useSearchItemsStore } from "@/stores/items/items";
+import { useSearchItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";
 import { provide } from "vue";
 import SearchOptions from "./SearchOptions.vue";

@@ -38,19 +38,20 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     clearInterval(interval);
   };
   const handleLeftMouseDown = (
-    _explEl: HTMLElement,
-    _rectEl: HTMLElement,
+    _explEl: HTMLElement | null,
+    _rectEl: HTMLElement | null,
     _items: Item[],
     _isSearch: boolean,
     e: MouseEvent,
   ) => {
+    if (!_explEl || !_rectEl) return;
     items = _items.filter((i) => !(isCtrlOrShiftDown && i.isSelected));
     explEl.value = _explEl;
     rectEl.value = _rectEl;
     isSearch = _isSearch;
-    explElRect = explEl.value.getBoundingClientRect();
-    startScrollTop = explEl.value.scrollTop;
-    startMaxScrollTop = explEl.value.scrollHeight - explEl.value.offsetHeight;
+    explElRect = _explEl.getBoundingClientRect();
+    startScrollTop = _explEl.scrollTop;
+    startMaxScrollTop = _explEl.scrollHeight - _explEl.offsetHeight;
     startCoords = {
       x: e.clientX - explElRect.left,
       y: e.clientY - explElRect.top + startScrollTop,

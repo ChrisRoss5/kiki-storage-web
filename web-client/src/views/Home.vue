@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Explorer from "@/components/explorer/Explorer.vue";
 import Header from "@/components/header/Header.vue";
-import { useItemsStore, useSearchItemsStore } from "@/stores/items/items";
+import { useItemsStore, useSearchItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useShortDialogStore } from "@/stores/short-dialog";
@@ -30,7 +30,7 @@ const handleLeftMouseUp = (e: MouseEvent) => {
   if (e.button == 0) selectionRectStore.handleLeftMouseUp();
 };
 const handleKeydown = (e: KeyboardEvent) => {
-  const selectedItems = itemsStore.selectedItems;
+  const { selectedItems } = itemsStore;
   if (e.key == "Escape") {
     if (searchStore.isOpen) searchStore.close();
     else if (selectedItems.length) itemsStore.deselectAll();

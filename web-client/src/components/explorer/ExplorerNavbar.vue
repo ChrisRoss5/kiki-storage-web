@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore } from "@/stores/items/items";
+import { useItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 

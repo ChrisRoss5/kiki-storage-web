@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore } from "@/stores/items/items";
+import { useItemsStore } from "@/stores/items";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { provide } from "vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
@@ -28,7 +28,9 @@ provide("isSearch", isSearch);
       @dragend.stop.prevent="clearDragOverStyle"
     >
       <span class="material-symbols-outlined pointer-events-none"> draft </span>
-      <div class="text-2xl pointer-events-none">Drop files or create a new folder</div>
+      <div class="pointer-events-none text-2xl">
+        Drop files or create a new folder
+      </div>
     </div>
   </div>
 </template>

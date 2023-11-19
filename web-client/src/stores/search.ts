@@ -1,9 +1,9 @@
 import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
-import { useItemsStore, useSearchItemsStore } from "./items/items";
-import { useItemsFirestoreStore } from "./items/firestore";
 import { _RefFirestore } from "vuefire";
+import { useItemsStore, useSearchItemsStore } from "./items";
+import { useItemsFirestoreStore } from "./items/firestore";
 
 export interface SizeFilter {
   min: number;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore } from "@/stores/items/items";
+import { useItemsStore } from "@/stores/items";
 
 const itemsStore = useItemsStore();
 
@@ -10,13 +10,13 @@ const handleFileUpload = (e: Event) => {
 </script>
 
 <template>
-  <div class="flex gap-5">
-    <div class="dsy-join">
+  <div class="flex gap-3">
+    <div class="dsy-join w-full">
       <input
         v-model.trim="itemsStore.newFolderName"
         type="text"
         placeholder="Add a new folder"
-        class="dsy-input dsy-join-item dsy-input-primary outline-none"
+        class="dsy-input dsy-input-primary dsy-join-item w-full outline-none"
         @keyup.enter.stop="itemsStore.createFolder"
         spellcheck="false"
         autocomplete="off"

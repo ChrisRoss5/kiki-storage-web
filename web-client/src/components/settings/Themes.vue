@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import { useSettingsStore } from "@/stores/settings/index";
+import { computed } from "vue";
+
 defineProps<{
-  activeTheme: Theme;
   onlyActiveTheme?: boolean;
-  handleThemeUpdate?: (newTheme: Theme) => Promise<void>;
 }>();
+
+const settingsStore = useSettingsStore();
+
+const activeTheme = computed(() => settingsStore.settings.theme);
 
 const themes = [
   "light",
@@ -46,8 +51,8 @@ const themes = [
     <div
       v-for="theme in onlyActiveTheme ? [activeTheme] : themes"
       :key="theme"
-      @click="handleThemeUpdate && handleThemeUpdate(theme)"
-      class="border-base-content/20 hover:border-base-content/40 overflow-hidden rounded-lg border outline outline-2 outline-offset-2 outline-transparent"
+      @click="!onlyActiveTheme && settingsStore.setTheme(theme)"
+      class="overflow-hidden rounded-lg border border-base-content/20 outline outline-2 outline-offset-2 outline-transparent hover:border-base-content/40"
       :class="{
         'outline-2': theme == activeTheme && !onlyActiveTheme,
         'outline-offset-2': theme == activeTheme && !onlyActiveTheme,
@@ -57,13 +62,13 @@ const themes = [
     >
       <div
         :data-theme="theme"
-        class="bg-base-100 text-base-content w-full cursor-pointer font-sans"
+        class="w-full cursor-pointer bg-base-100 font-sans text-base-content"
       >
         <div class="grid grid-cols-5 grid-rows-3">
-          <div class="bg-base-200 col-start-1 row-span-2 row-start-1" />
-          <div class="bg-base-300 col-start-1 row-start-3" />
+          <div class="col-start-1 row-span-2 row-start-1 bg-base-200" />
+          <div class="col-start-1 row-start-3 bg-base-300" />
           <div
-            class="bg-base-100 col-span-4 col-start-2 row-span-3 row-start-1 flex flex-col gap-1 p-2"
+            class="col-span-4 col-start-2 row-span-3 row-start-1 flex flex-col gap-1 bg-base-100 p-2"
           >
             <div class="font-bold">{{ theme }}</div>
             <div class="flex flex-wrap gap-1">
@@ -79,27 +84,6 @@ const themes = [
                   </div>
                 </div>
               </div>
-
-              <!--               <div
-                class="bg-primary flex aspect-square w-5 items-center justify-center rounded lg:w-6"
-              >
-                <div class="text-primary-content text-sm font-bold">A</div>
-              </div>
-              <div
-                class="bg-secondary flex aspect-square w-5 items-center justify-center rounded lg:w-6"
-              >
-                <div class="text-secondary-content text-sm font-bold">A</div>
-              </div>
-              <div
-                class="bg-accent flex aspect-square w-5 items-center justify-center rounded lg:w-6"
-              >
-                <div class="text-accent-content text-sm font-bold">A</div>
-              </div>
-              <div
-                class="bg-neutral flex aspect-square w-5 items-center justify-center rounded lg:w-6"
-              >
-                <div class="text-neutral-content text-sm font-bold">A</div>
-              </div> -->
             </div>
           </div>
         </div>

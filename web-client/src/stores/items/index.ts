@@ -4,7 +4,6 @@ import { clearDragOverStyle } from "@/utils/style";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { usePathStore } from "../path";
-import { useSearchStore } from "../search";
 import { useShortDialogStore } from "../short-dialog";
 
 const itemsStore = () => {
@@ -36,7 +35,7 @@ const itemsStore = () => {
       let newItems = JSON.parse(itemsData) as Item[];
       if (await areItemsInvalid(newItems, path)) return;
       const folders = newItems.filter((i) => i.isFolder);
-      if (folders.some((f) => path!.startsWith(f.path)))
+      if (folders.some((f) => path!.startsWith(f.path + f.name)))
         return dialogStore.showError(
           "You can't move a folder into its own subfolder.",
         );
@@ -86,7 +85,6 @@ const itemsStore = () => {
     items,
     selectedItems,
     newFolderName,
-    isNameInvalid: isItemInvalid,
     handleDrop,
     createFolder,
     createFiles,

@@ -15,6 +15,7 @@ import { defineStore } from "pinia";
 import { Ref } from "vue";
 import {
   UseCollectionOptions,
+  _RefFirestore,
   useCollection,
   useCurrentUser,
   useFirestore,
@@ -39,7 +40,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const dbPath = `app/drive/${user.value?.uid}`;
   const sources = {} as Record<
     string,
-    { items: Ref<ItemCore[]>; subscribers: number }
+    { items: _RefFirestore<ItemCore[]>; subscribers: number }
   >;
 
   const api = {

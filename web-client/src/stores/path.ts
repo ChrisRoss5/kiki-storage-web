@@ -1,10 +1,9 @@
 import { defineStore } from "pinia";
 import { WatchStopHandle, computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
-import { useItemsStore } from "./items/items";
 import { useSearchStore } from "./search";
-import { _RefFirestore } from "vuefire";
 
 export const usePathStore = defineStore("path", () => {
   const route = useRoute();

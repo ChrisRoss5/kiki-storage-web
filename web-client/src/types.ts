@@ -30,6 +30,13 @@ interface SearchFilters {
 
 interface Settings {
   theme: Theme;
+  columns: ColumnSettings;
+}
+
+interface ColumnSettings {
+  order: Partial<keyof ItemCore>[];
+  orderBy: keyof ItemCore;
+  orderDesc: boolean;
 }
 
 type Theme =

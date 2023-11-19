@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore, useSearchItemsStore } from "@/stores/items/items";
+import { useItemsStore, useSearchItemsStore } from "@/stores/items";
 import { formatSize } from "@/utils/format";
 import { computed, inject } from "vue";
 
