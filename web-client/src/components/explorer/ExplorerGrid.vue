@@ -22,22 +22,6 @@ const explorerBody = ref<HTMLElement | null>(null);
 const rectEl = ref<HTMLElement | null>(null);
 const renameInput = ref<HTMLInputElement[] | null>(null);
 
-
-const itemsSorted = computed(() => {
-  const { orderBy, orderDesc } = columnSettings.value;
-  return itemsStore.items.sort((a, b) => {
-    const desc = orderDesc ? -1 : 1;
-    if (a.isFolder && !b.isFolder) return -desc;
-    if (!a.isFolder && b.isFolder) return desc;
-    if (orderBy == "size") {
-      if (!a.size || !b.size) return a.name.localeCompare(b.name) * desc;
-      return (a.size - b.size) * desc;
-    }
-    if (orderBy == "dateAdded" || orderBy == "dateModified")
-      return (a[orderBy].getTime() - b[orderBy].getTime()) * desc;
-    return a.name.localeCompare(b.name) * desc;
-  });
-});
 const columns: Partial<Record<keyof ItemCore, string>> = {
   name: "Name",
   size: "Size",
@@ -47,6 +31,25 @@ const columns: Partial<Record<keyof ItemCore, string>> = {
 };
 
 let lastSelectedItemIdx = 0;
+
+watch(
+  columnSettings,
+  ({ orderBy, orderDesc }) => {
+    itemsStore.items.sort((a, b) => {
+      const desc = orderDesc ? -1 : 1;
+      if (a.isFolder && !b.isFolder) return -desc;
+      if (!a.isFolder && b.isFolder) return desc;
+      if (orderBy == "size") {
+        if (!a.size || !b.size) return a.name.localeCompare(b.name) * desc;
+        return (a.size - b.size) * desc;
+      }
+      if (orderBy == "dateAdded" || orderBy == "dateModified")
+        return (a[orderBy].getTime() - b[orderBy].getTime()) * desc;
+      return a.name.localeCompare(b.name) * desc;
+    });
+  },
+  { deep: true },
+);
 watch(
   () => pathStore.currentPath,
   () => (lastSelectedItemIdx = 0),
@@ -69,21 +72,18 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
     if (item.isSelected) item.isSelected = false;
     else {
       item.isSelected = true;
-      lastSelectedItemIdx = itemsSorted.value.indexOf(item);
+      lastSelectedItemIdx = itemsStore.items.indexOf(item);
     }
   } else if (e.shiftKey) {
     itemsStore.deselectAll();
-    const start = Math.min(
-      lastSelectedItemIdx,
-      itemsSorted.value.indexOf(item),
-    );
-    const end = Math.max(lastSelectedItemIdx, itemsSorted.value.indexOf(item));
-    for (let i = start; i <= Math.min(end, itemsSorted.value.length - 1); i++)
-      itemsSorted.value[i].isSelected = true;
+    const start = Math.min(lastSelectedItemIdx, itemsStore.items.indexOf(item));
+    const end = Math.max(lastSelectedItemIdx, itemsStore.items.indexOf(item));
+    for (let i = start; i <= Math.min(end, itemsStore.items.length - 1); i++)
+      itemsStore.items[i].isSelected = true;
   } else {
     itemsStore.deselectAll();
     item.isSelected = true;
-    lastSelectedItemIdx = itemsSorted.value.indexOf(item);
+    lastSelectedItemIdx = itemsStore.items.indexOf(item);
   }
   if (!item.isRenaming) itemsStore.clearRenaming();
 };
@@ -166,7 +166,7 @@ const handleColumnClick = (key: keyof ItemCore) => {
     >
       <TransitionGroup name="explorer-body">
         <a
-          v-for="item in itemsSorted"
+          v-for="item in itemsStore.items"
           :key="item.id"
           :ref="(el) => handleItemRef(item, el as HTMLElement)"
           :href="
