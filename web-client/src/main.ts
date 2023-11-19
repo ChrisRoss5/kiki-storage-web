@@ -7,6 +7,7 @@ import router from "./router";
 import { VueFire, VueFireAuth } from "vuefire";
 import App from "./App.vue";
 import { firebaseApp } from "./firebase";
+import { plugin as Slicksort } from "vue-slicksort";
 
 const pinia = createPinia();
 const app = createApp(App);
@@ -17,6 +18,7 @@ app
     modules: [VueFireAuth()],
   })
   .use(pinia)
-  .use(VWave, {})
   .use(router)
+  .use(VWave, {})
+  .use(Slicksort)
   .mount("#app");

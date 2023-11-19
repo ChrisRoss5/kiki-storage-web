@@ -7,7 +7,8 @@ import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { formatDate, formatSize } from "@/utils/format";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
-import { computed, inject, nextTick, ref, watch } from "vue";
+import { computed, inject, nextTick, ref, watch, watchEffect } from "vue";
+import { DragHandle, SlickItem, SlickList } from "vue-slicksort";
 
 const isSearch = inject<boolean>("isSearch")!;
 const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
@@ -16,11 +17,24 @@ const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const searchStore = useSearchStore();
 const settingsStore = useSettingsStore();
-const columnSettings = computed(() => settingsStore.settings.columns);
 
+const columnSettings = computed(() => settingsStore.settings.columns);
+const columnOrder = computed({
+  get() {
+    console.log("getting column order");
+
+    return columnSettings.value.order;
+  },
+  set(newValue) {
+    settingsStore.updateColumns({ order: newValue });
+  },
+});
+//const columnOrder = ref<Partial<keyof ItemCore>[]>();
 const explorerBody = ref<HTMLElement | null>(null);
 const rectEl = ref<HTMLElement | null>(null);
 const renameInput = ref<HTMLInputElement[] | null>(null);
+const explorerBodyTransitionName = ref("explorer-body");
+const isDraggingColumn = ref(false);
 
 const columns: Partial<Record<keyof ItemCore, string>> = {
   name: "Name",
@@ -29,30 +43,38 @@ const columns: Partial<Record<keyof ItemCore, string>> = {
   dateAdded: "Date added",
   dateModified: "Date modified",
 };
+const columnsOrder = ref(["name", "size", "type", "dateAdded", "dateModified"]);
 
+setTimeout(() => {
+  columnsOrder.value = ["name", "size", "type", "dateModified", "dateAdded"];
+}, 2000);
 let lastSelectedItemIdx = 0;
 
-watch(
-  columnSettings,
-  ({ orderBy, orderDesc }) => {
-    itemsStore.items.sort((a, b) => {
-      const desc = orderDesc ? -1 : 1;
-      if (a.isFolder && !b.isFolder) return -desc;
-      if (!a.isFolder && b.isFolder) return desc;
-      if (orderBy == "size") {
-        if (!a.size || !b.size) return a.name.localeCompare(b.name) * desc;
-        return (a.size - b.size) * desc;
-      }
-      if (orderBy == "dateAdded" || orderBy == "dateModified")
-        return (a[orderBy].getTime() - b[orderBy].getTime()) * desc;
-      return a.name.localeCompare(b.name) * desc;
-    });
-  },
-  { deep: true },
-);
+watchEffect(() => {
+  const { orderBy, orderDesc } = columnSettings.value;
+  itemsStore.items.sort((a, b) => {
+    const desc = orderDesc ? -1 : 1;
+    if (a.isFolder && !b.isFolder) return -desc;
+    if (!a.isFolder && b.isFolder) return desc;
+    if (orderBy == "size") {
+      if (!a.size || !b.size) return a.name.localeCompare(b.name) * desc;
+      return (a.size - b.size) * desc;
+    }
+    if (orderBy == "dateAdded" || orderBy == "dateModified")
+      return (a[orderBy].getTime() - b[orderBy].getTime()) * desc;
+    return a.name.localeCompare(b.name) * desc;
+  });
+  nextTick(() => {
+    explorerBodyTransitionName.value = "explorer-body";
+  });
+});
 watch(
   () => pathStore.currentPath,
-  () => (lastSelectedItemIdx = 0),
+  () => {
+    lastSelectedItemIdx = 0;
+    explorerBodyTransitionName.value = "";
+  },
+  { flush: "pre" },
 );
 // autofocus attr on "renameInput" only works once so we need to watch for changes
 watch(
@@ -128,28 +150,46 @@ const handleColumnClick = (key: keyof ItemCore) => {
   <div
     class="expl-grid grid min-h-0 w-full select-none grid-cols-[auto_repeat(4,min-content)] grid-rows-[auto_1fr]"
   >
-    <div
-      class="expl-header col-span-full grid grid-cols-[subgrid] bg-base-100 font-bold text-base-content/60"
+    <SlickList
+      class="expl-header col-span-full grid grid-cols-[subgrid] items-center bg-base-100"
+      v-model:list="columnOrder"
+      axis="x"
+      lockAxis="x"
+      useDragHandle
+      helperClass="slick-item-dragging"
+      @sort-start="isDraggingColumn = true"
+      @sort-end="isDraggingColumn = false"
     >
-      <div
-        v-for="key in columnSettings.order"
+      <SlickItem
+        v-for="(key, i) in columnOrder"
         :key="key"
-        class="relative cursor-pointer"
+        :index="i"
+        class="group relative cursor-pointer rounded-xl bg-base-100 p-3 font-bold text-base-content/60 hover:bg-base-200"
+        :class="{ 'pointer-events-none': isDraggingColumn }"
         @click.stop="handleColumnClick(key)"
       >
-        <span
+        <DragHandle
+          class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 cursor-grab opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        >
+          drag_indicator
+        </DragHandle>
+        <div
           v-if="columnSettings.orderBy == key"
           class="material-symbols-outlined absolute left-1/2 top-0 -translate-x-1/2 transition-transform duration-300"
           :class="{ 'scale-y-[-1]': !columnSettings.orderDesc }"
         >
           expand_more
-        </span>
-        {{ columns[key] }}
-      </div>
-    </div>
+        </div>
+        <div
+          class="col-name transition-[padding-left] duration-300 group-hover:pl-3"
+        >
+          {{ columns[key] }}
+        </div>
+      </SlickItem>
+    </SlickList>
     <div
       ref="explorerBody"
-      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-auto overflow-x-hidden rounded-l"
+      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-auto overflow-x-hidden rounded-xl"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
@@ -164,7 +204,10 @@ const handleColumnClick = (key: keyof ItemCore) => {
         )
       "
     >
-      <TransitionGroup name="explorer-body">
+      <TransitionGroup
+        :name="explorerBodyTransitionName"
+        :css="!!explorerBodyTransitionName"
+      >
         <a
           v-for="item in itemsStore.items"
           :key="item.id"
@@ -174,7 +217,7 @@ const handleColumnClick = (key: keyof ItemCore) => {
               ? `${item.path ? `/${item.path}` : ''}/${item.name}`
               : undefined
           "
-          class="expl-row col-span-full grid cursor-pointer grid-cols-[subgrid] whitespace-nowrap rounded-l hover:bg-base-200"
+          class="expl-row col-span-full grid cursor-pointer grid-cols-[subgrid] whitespace-nowrap rounded-xl bg-base-100 hover:bg-base-200"
           :class="{
             '!bg-base-300': item.isSelected,
             'is-selected': item.isSelected,
@@ -190,77 +233,90 @@ const handleColumnClick = (key: keyof ItemCore) => {
           @keyup.space.stop.prevent="handleItemSelect(item, $event)"
           @keyup.enter.stop.prevent="handleItemOpen(item)"
         >
-          <div class="flex min-w-0 items-center">
+          <TransitionGroup :name="explorerBodyTransitionName">
             <div
-              class="fiv-viv mr-3 flex-shrink-0 text-xl"
-              :class="
-                item.isFolder
-                  ? 'fiv-icon-folder'
-                  : `fiv-icon-blank fiv-icon-${item.type}`
-              "
-            ></div>
-            <div
-              v-if="item.isRenaming"
-              class="ml-2 inline-flex"
-              @mousedown.stop="null"
-              @click.stop.prevent="null"
+              v-for="columnName in columnSettings.order"
+              :key="columnName"
+              class="expl-col"
             >
-              <input
-                ref="renameInput"
-                v-model.trim="item.newName"
-                type="text"
-                :placeholder="`Enter a new ${
-                  item.isFolder ? 'folder' : 'file'
-                } name`"
-                class="dsy-input dsy-join-item dsy-input-secondary outline-none"
-                @keyup.enter.stop="itemsStore.renameItem(item)"
-                @keydown.esc.stop="item.isRenaming = false"
-                spellcheck="false"
-                autocomplete="off"
-              />
-              <button
-                class="dsy-btn dsy-btn-secondary dsy-join-item"
-                :class="{ 'dsy-btn-disabled': !item.newName }"
-                @click="itemsStore.renameItem(item)"
-                v-wave
-              >
-                <span class="material-symbols-outlined"> check </span>
-              </button>
-              <button
-                class="dsy-btn dsy-btn-secondary dsy-join-item"
-                @click="item.isRenaming = false"
-                v-wave
-              >
-                <span class="material-symbols-outlined"> close </span>
-              </button>
-            </div>
-            <div v-else>
               <div
-                class="overflow-hidden text-ellipsis whitespace-pre"
-                :class="{
-                  'whitespace-pre-wrap':
-                    item.isSelected &&
-                    itemsStore.selectedItems.length == 1 &&
-                    !selectionRectStore.isActive,
-                }"
+                v-if="columnName == 'name'"
+                class="flex min-w-0 items-center"
               >
-                {{ item.name + (item.type ? `.${item.type}` : "") }}
+                <div
+                  class="fiv-viv mr-3 flex-shrink-0 text-xl"
+                  :class="
+                    item.isFolder
+                      ? 'fiv-icon-folder'
+                      : `fiv-icon-blank fiv-icon-${item.type}`
+                  "
+                ></div>
+                <div
+                  v-if="item.isRenaming"
+                  class="ml-2 inline-flex"
+                  @mousedown.stop="null"
+                  @click.stop.prevent="null"
+                >
+                  <input
+                    ref="renameInput"
+                    v-model.trim="item.newName"
+                    type="text"
+                    :placeholder="`Enter a new ${
+                      item.isFolder ? 'folder' : 'file'
+                    } name`"
+                    class="dsy-input dsy-join-item dsy-input-secondary outline-none"
+                    @keyup.enter.stop="itemsStore.renameItem(item)"
+                    @keydown.esc.stop="item.isRenaming = false"
+                    spellcheck="false"
+                    autocomplete="off"
+                  />
+                  <button
+                    class="dsy-btn dsy-btn-secondary dsy-join-item"
+                    :class="{ 'dsy-btn-disabled': !item.newName }"
+                    @click="itemsStore.renameItem(item)"
+                    v-wave
+                  >
+                    <span class="material-symbols-outlined"> check </span>
+                  </button>
+                  <button
+                    class="dsy-btn dsy-btn-secondary dsy-join-item"
+                    @click="item.isRenaming = false"
+                    v-wave
+                  >
+                    <span class="material-symbols-outlined"> close </span>
+                  </button>
+                </div>
+                <div v-else>
+                  <div
+                    class="overflow-hidden text-ellipsis whitespace-pre"
+                    :class="{
+                      'whitespace-pre-wrap':
+                        item.isSelected &&
+                        itemsStore.selectedItems.length == 1 &&
+                        !selectionRectStore.isActive,
+                    }"
+                  >
+                    {{ item.name + (item.type ? `.${item.type}` : "") }}
+                  </div>
+                  <div v-if="isSearch" class="font-weight-bold">
+                    Path: Personal drive/{{ item.path }}
+                  </div>
+                </div>
               </div>
-              <div v-if="isSearch" class="font-weight-bold">
-                Path: Personal drive/{{ item.path }}
-              </div>
+              <template v-else-if="columnName == 'size'">
+                {{ item.isFolder ? "" : formatSize(item.size!) }}
+              </template>
+              <template v-else-if="columnName == 'type'">
+                {{ item.isFolder ? "Folder" : item.type.toUpperCase() }}
+              </template>
+              <template v-else-if="columnName == 'dateAdded'">
+                {{ formatDate(item.dateAdded, "hr") }}
+              </template>
+              <template v-else-if="columnName == 'dateModified'">
+                {{ formatDate(item.dateModified, "hr") }}
+              </template>
             </div>
-          </div>
-          <div>
-            {{ item.isFolder ? "" : formatSize(item.size!) }}
-          </div>
-          <div>{{ item.isFolder ? "Folder" : item.type.toUpperCase() }}</div>
-          <div>
-            {{ formatDate(item.dateAdded, "hr") }}
-          </div>
-          <div>
-            {{ formatDate(item.dateModified, "hr") }}
-          </div>
+          </TransitionGroup>
         </a>
       </TransitionGroup>
       <div
@@ -272,13 +328,26 @@ const handleColumnClick = (key: keyof ItemCore) => {
 </template>
 
 <style>
-.expl-header > *,
+.slick-item-dragging {
+  cursor: grabbing !important;
+  background: hsl(var(--b2));
+  & .material-symbols-outlined {
+    opacity: 1;
+  }
+  & .col-name {
+    @apply pl-3 !important;
+  }
+}
+
 .expl-row > * {
   padding: 15px;
   align-self: center;
 }
-.expl-row {
-  transition: opacity 300ms;
+.expl-row,
+.expl-col {
+  transition:
+    opacity 300ms,
+    transform 300ms;
 }
 [dragging-items] .expl-row:not(.folder) {
   /* pointer-events: none; */
@@ -287,19 +356,13 @@ const handleColumnClick = (key: keyof ItemCore) => {
 [dragging-items] .expl-row > * {
   pointer-events: none;
 }
-.explorer-body-move,
-.explorer-body-enter-active,
-.explorer-body-leave-active {
-  transition: all 1s ease !important;
-}
-.explorer-body-enter-from,
-.explorer-body-leave-to {
+.explorer-body-enter-from {
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateX(3rem);
 }
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
 .explorer-body-leave-active {
+  opacity: 0;
   position: absolute;
+  transition: transform 300ms;
 }
 </style>
