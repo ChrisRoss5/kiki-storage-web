@@ -25,11 +25,12 @@ export const useSettingsStore = defineStore("settings", () => {
     },
   );
 
-  const updateColumns = async (columns: Partial<ColumnSettings>) => {
-    update(dbRef(db, `${dbPath}/columns`), columns);
+  const updateColumns = (columns: Partial<ColumnSettings>, isSearch?: boolean) => {
+    const path = isSearch ? "searchColumns" : "columns";
+    return update(dbRef(db, `${dbPath}/${path}`), columns);
   };
-  const setTheme = async (newTheme: Theme) => {
-    set(dbRef(db, `${dbPath}/theme`), newTheme);
+  const setTheme = (newTheme: Theme) => {
+    return set(dbRef(db, `${dbPath}/theme`), newTheme);
   };
   const reset = async () => {
     if (!(await dialogStore.confirm("Reset all settings to default?"))) return;

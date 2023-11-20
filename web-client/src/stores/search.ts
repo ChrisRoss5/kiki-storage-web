@@ -35,6 +35,9 @@ export const useSearchStore = defineStore("search", () => {
     maxSize: toBytes(sizeFilter.value.max, sizeFilter.value.maxSuffix),
     type: type.value,
   }));
+  const areFiltersActive = computed(() =>
+    Object.values(filters.value).some(Boolean),
+  );
 
   watch(filters, queryItems);
 
@@ -60,7 +63,7 @@ export const useSearchStore = defineStore("search", () => {
   );
 
   async function queryItems() {
-    isOpen.value = Object.values(filters.value).some(Boolean);
+    isOpen.value = areFiltersActive.value;
     if (!isOpen.value) return items.value?.stop();
     items.value = api.searchItems(filters.value);
   }
@@ -94,6 +97,7 @@ export const useSearchStore = defineStore("search", () => {
     sizeFilter,
     type,
     filters,
+    areFiltersActive,
     updateSearchedItems,
     show,
     close,

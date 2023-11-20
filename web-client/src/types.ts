@@ -31,6 +31,7 @@ interface SearchFilters {
 interface Settings {
   theme: Theme;
   columns: ColumnSettings;
+  searchColumns: ColumnSettings;
 }
 
 interface ColumnSettings {

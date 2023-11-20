@@ -45,6 +45,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     e: MouseEvent,
   ) => {
     if (!_explEl || !_rectEl) return;
+    isCtrlOrShiftDown = e.ctrlKey || e.shiftKey;
     items = _items.filter((i) => !(isCtrlOrShiftDown && i.isSelected));
     explEl.value = _explEl;
     rectEl.value = _rectEl;
@@ -57,7 +58,6 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
       y: e.clientY - explElRect.top + startScrollTop,
     };
     isLeftMouseDown.value = true;
-    isCtrlOrShiftDown = e.ctrlKey || e.shiftKey;
   };
   const handleMouseMove = (e: MouseEvent) => {
     if (!isLeftMouseDown.value) return;

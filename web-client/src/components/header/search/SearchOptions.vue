@@ -11,9 +11,9 @@ const showTypeDialog = ref(false);
 </script>
 
 <template>
-  <div class="absolute top-0 right-2 bottom-0 flex items-center gap-2">
+  <div class="absolute bottom-0 right-2 top-0 flex items-center gap-2">
     <div
-      class="cursor-pointer bg-base-200 hover:bg-base-300 rounded-full border border-primary p-1 px-2"
+      class="cursor-pointer rounded-full border border-primary bg-base-200 p-1 px-2 hover:bg-base-300"
       :class="{
         '!bg-primary': searchStore.sizeFilter.min || searchStore.sizeFilter.max,
       }"
@@ -33,7 +33,7 @@ const showTypeDialog = ref(false);
       <SizeDialog :show="showSizeDialog" @close="showSizeDialog = false" />
     </div>
     <div
-      class="cursor-pointer bg-base-200 hover:bg-base-300 rounded-full border border-primary p-1 px-2"
+      class="cursor-pointer rounded-full border border-primary bg-base-200 p-1 px-2 hover:bg-base-300"
       :class="{ '!bg-primary': searchStore.type }"
       @click="showTypeDialog = true"
     >
@@ -41,10 +41,11 @@ const showTypeDialog = ref(false);
       <TypeDialog :show="showTypeDialog" @close="showTypeDialog = false" />
     </div>
     <div
-      class="cursor-pointer bg-base-200 hover:bg-base-300 rounded-full border border-primary p-1 px-2"
+      class="material-symbols-outlined cursor-pointer rounded-full border border-primary bg-base-200 p-1 px-2 transition-opacity duration-300 hover:bg-base-300"
+      :class="[searchStore.areFiltersActive ? '' : ['pointer-events-none', 'opacity-30']]"
       @click="searchStore.reset"
     >
-      <span class="material-symbols-outlined"> close </span>
+      close
     </div>
   </div>
 </template>
