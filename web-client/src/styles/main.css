@@ -46,3 +46,14 @@ body {
 .flex-center {
   @apply flex items-center justify-center;
 }
+
+/* vue transitions */
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 300ms;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Explorer from "@/components/explorer/Explorer.vue";
 import Header from "@/components/header/Header.vue";
+import { useContextMenuStore } from "@/stores/context-menu";
 import { useItemsStore, useSearchItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
@@ -12,6 +13,7 @@ const searchItemsStore = useSearchItemsStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const searchStore = useSearchStore();
+const contextMenuStore = useContextMenuStore();
 
 onBeforeMount(() => {
   document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
@@ -27,7 +29,8 @@ onBeforeUnmount(() => {
 });
 
 const handleLeftMouseUp = (e: MouseEvent) => {
-  if (e.button == 0) selectionRectStore.handleLeftMouseUp();
+  if (e.button != 0) return;
+  selectionRectStore.handleLeftMouseUp();
 };
 const handleKeydown = (e: KeyboardEvent) => {
   const { selectedItems } = itemsStore;
@@ -73,7 +76,12 @@ const handleClickLeft = (e: MouseEvent) => {
 </script>
 
 <template>
-  <div class="flex flex-col" @click.left="handleClickLeft">
+  <div
+    class="flex flex-col"
+    @click.left="handleClickLeft"
+    @mousedown="contextMenuStore.hide()"
+    @contextmenu="contextMenuStore.hide()"
+  >
     <Header />
     <Explorer />
   </div>

@@ -3,6 +3,7 @@ import ShortDialog from "./components/ShortDialog.vue";
 import { watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useCurrentUser } from "vuefire";
+import ContextMenu from "./components/ContextMenu.vue";
 
 const user = useCurrentUser();
 const router = useRouter();
@@ -28,6 +29,7 @@ watch(user, async (currentUser) => {
     </Transition>
   </RouterView>
   <ShortDialog />
+  <ContextMenu />
 </template>
 
 <style scoped>

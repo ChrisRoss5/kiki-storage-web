@@ -11,3 +11,11 @@ export default {
     orderDesc: false,
   },
 } satisfies Settings;
+
+export const columnNames: Partial<Record<keyof ItemCore, string>> = {
+  name: "Name",
+  size: "Size",
+  type: "Type",
+  dateAdded: "Date added",
+  dateModified: "Date modified",
+};

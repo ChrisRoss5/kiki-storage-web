@@ -98,3 +98,6 @@ const itemsStore = () => {
 
 export const useItemsStore = defineStore("items", itemsStore);
 export const useSearchItemsStore = defineStore("search-items", itemsStore);
+export type ItemsStore = ReturnType<
+  typeof useItemsStore | typeof useSearchItemsStore
+>;

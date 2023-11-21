@@ -1,16 +1,28 @@
 import { defineStore } from "pinia";
-import { WatchStopHandle, computed, reactive, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useItemsStore } from "./items";
-import { useItemsFirestoreStore } from "./items/firestore";
-import { useSearchStore } from "./search";
+import { ref } from "vue";
+import { ItemsStore } from "./items";
+
+type ContextMenu = "item" | "column";
 
 export const useContextMenuStore = defineStore("context-menu", () => {
-  const route = useRoute();
-  const router = useRouter();
-  const itemsStore = useItemsStore();
-  const searchStore = useSearchStore();
-  const { api } = useItemsFirestoreStore();
+  const activeContextMenu = ref<ContextMenu | null>(null);
+  const itemsStore = ref<ItemsStore>();
+  const position = ref({ x: 0, y: 0 });
 
+  const show = (menu: ContextMenu, _store: ItemsStore, e: MouseEvent) => {
+    activeContextMenu.value = menu;
+    itemsStore.value = _store;
+    position.value = { x: e.clientX, y: e.clientY };
+  };
+  const hide = () => {
+    activeContextMenu.value = null;
+  };
 
+  return {
+    activeContextMenu,
+    position,
+    itemsStore,
+    show,
+    hide,
+  };
 });
