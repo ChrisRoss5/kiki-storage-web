@@ -74,15 +74,11 @@ const themes = [
             <div class="flex flex-wrap gap-1">
               <div
                 v-for="color in ['primary', 'secondary', 'accent', 'neutral']"
+                :class="`bg-${color} flex aspect-square w-5 items-center justify-center rounded lg:w-6`"
                 :key="color"
               >
-                <div
-                  :class="`bg-${color} flex aspect-square w-5 items-center justify-center rounded lg:w-6`"
-                >
-                  <div :class="`text-${color}-content text-sm font-bold`">
-                    A
-                  </div>
-                </div>
+                <!-- todo fix colors? -->
+                <div :class="`text-${color}-content text-sm font-bold`">A</div>
               </div>
             </div>
           </div>

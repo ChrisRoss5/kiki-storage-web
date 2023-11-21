@@ -10,6 +10,8 @@ export default {
     orderBy: "name",
     orderDesc: false,
   },
+  view: "list",
+  searchView: "list",
 } satisfies Settings;
 
 export const columnNames: Partial<Record<keyof ItemCore, string>> = {

@@ -11,12 +11,12 @@ const handleFileUpload = (e: Event) => {
 
 <template>
   <div class="flex gap-3">
-    <div class="dsy-join w-full">
+    <div class="dsy-join">
       <input
         v-model.trim="itemsStore.newFolderName"
         type="text"
         placeholder="Add a new folder"
-        class="dsy-input dsy-input-primary dsy-join-item w-full outline-none"
+        class="dsy-input dsy-join-item dsy-input-primary w-full outline-none"
         @keyup.enter.stop="itemsStore.createFolder"
         spellcheck="false"
         autocomplete="off"

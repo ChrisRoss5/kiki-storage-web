@@ -36,7 +36,7 @@ watchPostEffect(() => {
   el.style.left = `${x}px`;
   el.style.transition = "opacity 300ms, clip-path 300ms, transform 300ms";
   el.style.opacity = "1";
-  el.style.clipPath = "circle(141.4% at 0 0)";
+  el.style.clipPath = "circle(150% at 0 0)";
   el.style.transform = "translateY(0)";
 });
 

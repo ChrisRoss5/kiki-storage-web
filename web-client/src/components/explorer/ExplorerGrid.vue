@@ -6,18 +6,10 @@ import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
-import { formatDate, formatSize } from "@/utils/format";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
-import {
-  CSSProperties,
-  computed,
-  inject,
-  nextTick,
-  ref,
-  watch,
-  watchEffect,
-} from "vue";
-import ExplorerColumns from "./ExplorerColumns.vue";
+import { CSSProperties, computed, inject, ref, watch } from "vue";
+import ExplorerHead from "./ExplorerHead.vue";
+import ExplorerItems from "./ExplorerItems.vue";
 
 const isSearch = inject<boolean>("isSearch")!;
 const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
@@ -31,61 +23,52 @@ const contextMenuStore = useContextMenuStore();
 const columnSettings = computed(
   () => settingsStore.settings[isSearch ? "searchColumns" : "columns"],
 );
+const view = computed(() => settingsStore.settings.view);
 
 const gridStyle = computed<CSSProperties>(() => ({
-  gridTemplateColumns: columnSettings.value.order
-    .map((c) => (c == "name" ? "auto" : "min-content"))
-    .join(" "),
+  gridTemplateColumns:
+    view.value == "list"
+      ? columnSettings.value.order
+          .map((c) => (c == "name" ? "auto" : "min-content"))
+          .join(" ")
+      : "repeat(auto-fill, minmax(200px, 1fr))",
 }));
 
-const explorerBody = ref<HTMLElement | null>(null);
+const explBody = ref<HTMLElement | null>(null);
 const rectEl = ref<HTMLElement | null>(null);
-const renameInput = ref<HTMLInputElement[] | null>(null);
 const scrollTop = ref(0);
-const disablePathTransitions = ref(false);
-const disableStartupTransitions = ref(true);
-const disableTransitions = computed(() => {
-  return disablePathTransitions.value || disableStartupTransitions.value;
-});
 let lastSelectedItemIdx = 0;
 
-watchEffect(() => {
-  const { orderBy, orderDesc } = columnSettings.value;
-  itemsStore.items.sort((a, b) => {
-    const desc = orderDesc ? -1 : 1;
-    if (a.isFolder && !b.isFolder) return -desc;
-    if (!a.isFolder && b.isFolder) return desc;
-    if (orderBy == "size") {
-      if (!a.size || !b.size) return a.name.localeCompare(b.name) * desc;
-      return (a.size - b.size) * desc;
-    }
-    if (orderBy == "dateAdded" || orderBy == "dateModified")
-      return (a[orderBy].getTime() - b[orderBy].getTime()) * desc;
-    return (a[orderBy] as string).localeCompare(b[orderBy] as string) * desc;
-  });
-  if (disableStartupTransitions.value)
-    setTimeout(() => (disableStartupTransitions.value = false), 1000);
-  nextTick(() => (disablePathTransitions.value = false));
-});
+watch(
+  [
+    () => columnSettings.value.orderBy,
+    () => columnSettings.value.orderDesc,
+    () => itemsStore.items,
+  ],
+  () => {
+    const { orderBy, orderDesc } = columnSettings.value;
+    console.log("sorting", orderBy, orderDesc);
+    itemsStore.items.sort((a, b) => {
+      const desc = orderDesc ? -1 : 1;
+      if (a.isFolder && !b.isFolder) return -desc;
+      if (!a.isFolder && b.isFolder) return desc;
+      if (orderBy == "size") {
+        if (!a.size || !b.size) return a.name.localeCompare(b.name) * desc;
+        return (a.size - b.size) * desc;
+      }
+      if (orderBy == "dateAdded" || orderBy == "dateModified")
+        return (a[orderBy].getTime() - b[orderBy].getTime()) * desc;
+      return (a[orderBy] as string).localeCompare(b[orderBy] as string) * desc;
+    });
+  },
+  { immediate: true },
+);
 watch(
   () => pathStore.currentPath,
   () => {
     lastSelectedItemIdx = 0;
-    disablePathTransitions.value = true;
   },
   { flush: "pre" },
-);
-// autofocus attr on "renameInput" only works once so we need to watch for changes
-watch(
-  () => itemsStore.items.find((i) => i.isRenaming),
-  async (item) => {
-    if (!item) return;
-    item.newName = item.name;
-    renameInput.value![0].focus();
-    await nextTick();
-    renameInput.value![0].select();
-  },
-  { flush: "post" }, // wait for DOM to update first
 );
 
 const handleItemContextMenu = (item: Item, e: MouseEvent) => {
@@ -141,146 +124,81 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 <template>
   <div
     class="expl-grid grid min-h-0 w-full select-none grid-rows-[auto_1fr]"
+    :class="{ 'grid-rows-1': view == 'grid' }"
     :style="gridStyle"
   >
-    <ExplorerColumns :scroll-top="scrollTop" :items-store="itemsStore" />
+    <ExplorerHead
+      v-show="view == 'list'"
+      :scroll-top="scrollTop"
+      :items-store="itemsStore"
+    />
     <div
-      ref="explorerBody"
+      ref="explBody"
       class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-x-hidden overflow-y-scroll rounded-xl"
+      :class="{ 'gap-x-4 gap-y-1 items-start': view == 'grid' }"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
       @dragend.stop.prevent="clearDragOverStyle"
       @mousedown.left="
         selectionRectStore.handleLeftMouseDown(
-          explorerBody,
+          explBody,
           rectEl,
           itemsStore.items,
           isSearch,
           $event,
         )
       "
-      @scroll="scrollTop = explorerBody?.scrollTop ?? 0"
+      @scroll="scrollTop = explBody?.scrollTop ?? 0"
     >
-      <!-- <TransitionGroup
-        :name="disableTransitions ? '' : 'explorer-rows'"
-        :css="!disableTransitions"
-      > -->
-      <a
-        v-for="item in itemsStore.items"
-        :key="item.id"
-        :ref="(el) => handleItemRef(item, el as HTMLElement)"
-        :href="
-          item.isFolder
-            ? `${item.path ? `/${item.path}` : ''}/${item.name}`
-            : undefined
-        "
-        class="expl-row col-span-full grid cursor-pointer grid-cols-[subgrid] whitespace-nowrap rounded-xl bg-base-100 hover:bg-base-200"
-        :class="{ 'is-selected folder !bg-base-300': item.isSelected }"
-        tabindex="0"
-        :draggable="item.isSelected"
-        @dragstart="handleDragStart(item, $event)"
-        @dragend="handleDragStop"
-        @drop.stop.prevent="handleDropOnItem(item, $event)"
-        @click.stop.prevent="handleItemSelect(item, $event)"
-        @dblclick.stop.prevent="handleItemOpen(item)"
-        @keyup.space.stop.prevent="handleItemSelect(item, $event)"
-        @keyup.enter.stop.prevent="handleItemOpen(item)"
-        @contextmenu.stop.prevent="handleItemContextMenu(item, $event)"
-      >
-        <TransitionGroup
-          :name="disableTransitions ? '' : 'explorer-cols'"
-          :css="!disableTransitions"
+      <TransitionGroup :name="view == 'list' ? 'expl-rows' : 'expl-items'">
+        <a
+          v-for="item in itemsStore.items"
+          :key="item.id + isSearch.toString()"
+          :ref="(el) => handleItemRef(item, el as HTMLElement)"
+          :href="
+            item.isFolder
+              ? `${item.path ? `/${item.path}` : ''}/${item.name}`
+              : undefined
+          "
+          class="expl-item cursor-pointer whitespace-nowrap rounded-xl bg-base-100 hover:bg-base-200"
+          :class="{
+            'is-selected folder !bg-base-300': item.isSelected,
+            'col-span-full grid grid-cols-[subgrid]': view == 'list',
+          }"
+          tabindex="0"
+          :draggable="item.isSelected"
+          @dragstart="handleDragStart(item, $event)"
+          @dragend="handleDragStop"
+          @drop.stop.prevent="handleDropOnItem(item, $event)"
+          @click.stop.prevent="handleItemSelect(item, $event)"
+          @dblclick.stop.prevent="handleItemOpen(item)"
+          @keyup.space.stop.prevent="handleItemSelect(item, $event)"
+          @keyup.enter.stop.prevent="handleItemOpen(item)"
+          @contextmenu.stop.prevent="handleItemContextMenu(item, $event)"
         >
           <div
-            v-for="columnName in columnSettings.order"
+            v-for="columnName in view == 'list'
+              ? columnSettings.order
+              : (['name'] as (keyof ItemCore)[])"
             :key="columnName"
-            class="expl-col items-center"
+            class="items-center"
             :class="{
               'text-right': columnName == 'size',
-              'flex min-w-0': columnName == 'name',
+              'flex min-w-0 gap-3': columnName == 'name',
+              'flex-col text-center': view == 'grid',
             }"
           >
-            <template v-if="columnName == 'name'">
-              <div
-                class="fiv-viv mr-3 flex-shrink-0 text-xl"
-                :class="
-                  item.isFolder
-                    ? 'fiv-icon-folder'
-                    : `fiv-icon-blank fiv-icon-${item.type}`
-                "
-              ></div>
-              <div
-                v-if="item.isRenaming"
-                class="ml-2 inline-flex"
-                @mousedown.stop="null"
-                @click.stop.prevent="null"
-              >
-                <input
-                  ref="renameInput"
-                  v-model.trim="item.newName"
-                  type="text"
-                  :placeholder="`Enter a new ${
-                    item.isFolder ? 'folder' : 'file'
-                  } name`"
-                  class="dsy-input dsy-join-item dsy-input-secondary outline-none"
-                  @keyup.enter.stop="itemsStore.renameItem(item)"
-                  @keydown.esc.stop="item.isRenaming = false"
-                  spellcheck="false"
-                  autocomplete="off"
-                />
-                <button
-                  class="dsy-btn dsy-btn-secondary dsy-join-item"
-                  :class="{ 'dsy-btn-disabled': !item.newName }"
-                  @click="itemsStore.renameItem(item)"
-                  v-wave
-                >
-                  <span class="material-symbols-outlined"> check </span>
-                </button>
-                <button
-                  class="dsy-btn dsy-btn-secondary dsy-join-item"
-                  @click="item.isRenaming = false"
-                  v-wave
-                >
-                  <span class="material-symbols-outlined"> close </span>
-                </button>
-              </div>
-              <div class="overflow-hidden" v-else>
-                <div
-                  class="overflow-hidden text-ellipsis whitespace-pre"
-                  :class="{
-                    'whitespace-pre-wrap':
-                      item.isSelected &&
-                      itemsStore.selectedItems.length == 1 &&
-                      !selectionRectStore.isActive,
-                  }"
-                >
-                  {{ item.name + (item.type ? `.${item.type}` : "") }}
-                </div>
-                <div
-                  class="font-weight-bold overflow-hidden text-ellipsis"
-                  v-if="isSearch"
-                >
-                  Path: Personal drive/{{ item.path }}
-                </div>
-              </div>
-            </template>
-            <template v-else-if="columnName == 'size'">
-              {{ item.isFolder ? "" : formatSize(item.size!) }}
-            </template>
-            <template v-else-if="columnName == 'type'">
-              {{ item.isFolder ? "Folder" : item.type.toUpperCase() }}
-            </template>
-            <template v-else-if="columnName == 'dateAdded'">
-              {{ formatDate(item.dateAdded, "hr") }}
-            </template>
-            <template v-else-if="columnName == 'dateModified'">
-              {{ formatDate(item.dateModified, "hr") }}
-            </template>
+            <ExplorerItems
+              :is-search="isSearch"
+              :item="item"
+              :items-store="itemsStore"
+              :column-name="columnName"
+              :view="view"
+            />
           </div>
-        </TransitionGroup>
-      </a>
-      <!-- </TransitionGroup> -->
+        </a>
+      </TransitionGroup>
       <div
         ref="rectEl"
         class="pointer-events-none absolute z-10 border border-primary bg-primary/20"
@@ -290,39 +208,31 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 </template>
 
 <style>
-.expl-row > * {
+.expl-item > * {
   padding: 15px;
   align-self: center;
 }
-[dragging-items] .expl-row:not(.folder) {
+[dragging-items] .expl-item:not(.folder) {
   opacity: 0.25;
 }
-[dragging-items] .expl-row > * {
+[dragging-items] .expl-item > * {
   pointer-events: none;
 }
-.expl-row,
-.expl-col {
+.expl-rows-enter-active,
+.expl-rows-leave-active,
+.expl-rows-enter-active ~ .expl-rows-move,
+.expl-rows-leave-active ~ .expl-rows-move {
   transition:
-    opacity 3000ms,
-    transform 3000ms;
+    opacity 300ms,
+    transform 300ms;
 }
-.explorer-rows-enter-from {
+.expl-rows-enter-from {
   opacity: 0;
   transform: translateX(3rem);
 }
-.explorer-rows-leave-active {
+.expl-rows-leave-active {
   opacity: 0;
   position: absolute;
-  transition: transform 3000ms;
-}
-.explorer-cols-enter-active {
-  transition: none !important;
-}
-.explorer-cols-leave-active {
-  opacity: 0;
-  position: absolute;
-  transition: transform 3000ms;
-  transition: none !important;
-
+  transition: transform 300ms;
 }
 </style>

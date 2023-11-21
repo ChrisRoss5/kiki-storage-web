@@ -4,7 +4,7 @@ import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { provide } from "vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
-import ExplorerNavbar from "./ExplorerNavbar.vue";
+import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
 
 const itemsStore = useItemsStore();
 

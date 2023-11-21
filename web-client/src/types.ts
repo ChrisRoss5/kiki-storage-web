@@ -32,7 +32,11 @@ interface Settings {
   theme: Theme;
   columns: ColumnSettings;
   searchColumns: ColumnSettings;
+  view: ExplorerView;
+  searchView: ExplorerView;
 }
+
+type ExplorerView = "list" | "grid";
 
 interface ColumnSettings {
   order: Partial<keyof ItemCore>[];

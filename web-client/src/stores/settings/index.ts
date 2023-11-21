@@ -30,10 +30,14 @@ export const useSettingsStore = defineStore("settings", () => {
 
   const updateColumns = (
     columns: Partial<ColumnSettings>,
-    isSearch?: boolean,
+    isSearch: boolean,
   ) => {
-    const path = isSearch ? "searchColumns" : "columns";
+    const path: keyof Settings = isSearch ? "searchColumns" : "columns";
     return update(dbRef(db, `${dbPath.value}/${path}`), columns);
+  };
+  const setView = (view: ExplorerView, isSearch: boolean) => {
+    const path: keyof Settings = isSearch ? "searchView" : "view";
+    return set(dbRef(db, `${dbPath.value}/${path}`), view);
   };
   const setTheme = (newTheme: Theme) => {
     return set(dbRef(db, `${dbPath.value}/theme`), newTheme);
@@ -46,6 +50,7 @@ export const useSettingsStore = defineStore("settings", () => {
   return {
     settings,
     updateColumns,
+    setView,
     setTheme,
     reset,
   };
