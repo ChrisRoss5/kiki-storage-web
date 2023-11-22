@@ -34,7 +34,6 @@ const buttons: Button[] = [
       :key="label"
       class="dsy-tooltip dsy-tooltip-bottom"
       :data-tip="label"
-      v-wave
     >
       <button
         class="dsy-btn"

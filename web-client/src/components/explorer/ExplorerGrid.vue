@@ -8,8 +8,8 @@ import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { CSSProperties, computed, inject, ref, watch } from "vue";
-import ExplorerHead from "./ExplorerHead.vue";
-import ExplorerItems from "./ExplorerItems.vue";
+import ExplorerGridHead from "./ExplorerGridHead.vue";
+import ExplorerGridItems from "./ExplorerGridItems.vue";
 
 const isSearch = inject<boolean>("isSearch")!;
 const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
@@ -127,7 +127,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     :class="{ 'grid-rows-1': view == 'grid' }"
     :style="gridStyle"
   >
-    <ExplorerHead
+    <ExplorerGridHead
       v-show="view == 'list'"
       :scroll-top="scrollTop"
       :items-store="itemsStore"
@@ -135,7 +135,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     <div
       ref="explBody"
       class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-x-hidden overflow-y-scroll rounded-xl"
-      :class="{ 'gap-x-4 gap-y-1 items-start': view == 'grid' }"
+      :class="{ 'items-start gap-x-4 gap-y-1': view == 'grid' }"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
@@ -161,9 +161,10 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               ? `${item.path ? `/${item.path}` : ''}/${item.name}`
               : undefined
           "
-          class="expl-item cursor-pointer whitespace-nowrap rounded-xl bg-base-100 hover:bg-base-200"
+          class="expl-item cursor-pointer whitespace-nowrap rounded-xl hover:bg-base-200"
           :class="{
-            'is-selected folder !bg-base-300': item.isSelected,
+            folder: item.isFolder,
+            'is-selected !bg-base-300': item.isSelected,
             'col-span-full grid grid-cols-[subgrid]': view == 'list',
           }"
           tabindex="0"
@@ -189,7 +190,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               'flex-col text-center': view == 'grid',
             }"
           >
-            <ExplorerItems
+            <ExplorerGridItems
               :is-search="isSearch"
               :item="item"
               :items-store="itemsStore"
@@ -212,13 +213,16 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
   padding: 15px;
   align-self: center;
 }
-[dragging-items] .expl-item:not(.folder) {
-  opacity: 0.25;
+[dragging-items] .expl-item {
+  &:not(.folder) {
+    opacity: 0.25;
+    transition: opacity 300ms;
+    & > * {
+      pointer-events: none;
+    }
+  }
 }
-[dragging-items] .expl-item > * {
-  pointer-events: none;
-}
-.expl-rows-enter-active,
+[dragging-items] .expl-item .expl-rows-enter-active,
 .expl-rows-leave-active,
 .expl-rows-enter-active ~ .expl-rows-move,
 .expl-rows-leave-active ~ .expl-rows-move {

@@ -1,9 +1,17 @@
 import { defineStore } from "pinia";
-import { WatchStopHandle, computed, reactive, ref, watch } from "vue";
+import { WatchStopHandle, computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
 import { useSearchStore } from "./search";
+
+export const roots = {
+  drive: { name: "Drive", icon: "cloud" },
+  shared: { name: "Shared", icon: "cloud" },
+  bin: { name: "Bin", icon: "cloud" },
+};
+
+const defaultRoot = "drive" satisfies keyof typeof roots;
 
 export const usePathStore = defineStore("path", () => {
   const route = useRoute();
@@ -12,14 +20,7 @@ export const usePathStore = defineStore("path", () => {
   const searchStore = useSearchStore();
   const { api } = useItemsFirestoreStore();
 
-  const roots = reactive({
-    "/drive": "Drive",
-    "/shared": "Shared",
-    "/bin": "Bin",
-  });
-  const defaultRoot = "/drive" as keyof typeof roots;
   const root = ref<keyof typeof roots>(defaultRoot);
-  const rootName = computed(() => roots[root.value]);
   const folderPaths = ref<string[]>([]);
   const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
 
@@ -28,13 +29,19 @@ export const usePathStore = defineStore("path", () => {
     () => route.path,
     async (newPath, oldPath) => {
       if (!route.meta.requiresAuth) return;
-      let _newPath = decodeURIComponent(newPath.replace(/\/+/g, "/"));
-      if (_newPath.endsWith("/")) _newPath = _newPath.slice(0, -1);
-      if (!checkPath(_newPath)) return;
-      const pathSplit = _newPath.split("/").slice(2);
+      // regex to remove duplicate slashes and start/end slashes
+      newPath = newPath.replace(/\/+/g, "/").replace(/^\/|\/$/g, "");
+      newPath = decodeURIComponent(newPath);
+      if (!isPathValid(newPath)) return;
+
+      const pathSplit = newPath.split("/");
       folderPaths.value = pathSplit.map((_, i) =>
         pathSplit.slice(0, i + 1).join("/"),
       );
+
+      console.log(folderPaths.value);
+      return
+
 
       if (unwatch) unwatch();
       if (oldPath) api.unuseSource(oldPath);
@@ -57,15 +64,16 @@ export const usePathStore = defineStore("path", () => {
     { immediate: true },
   );
 
-  function checkPath(path: string) {
+  function isPathValid(path: string) {
     console.log("CHECKING PATH: ", path);
-    if (Object.keys(roots).some((r) => path.startsWith(r))) {
-      const idx = path.indexOf("/", 1);
-      const _root = path.slice(0, idx > 0 ? idx : undefined);
+    const idx = path.indexOf("/");
+    const _root = path.slice(0, idx > 0 ? idx : undefined);
+    if (_root in roots) {
       root.value = _root as keyof typeof roots;
       return true;
     }
-    router.replace({ path: `${defaultRoot}${path}` });
+    router.replace({ path: `${defaultRoot}/${path}` });
+    return false;
   }
 
   function updatePaths() {}
@@ -74,5 +82,5 @@ export const usePathStore = defineStore("path", () => {
     router.push({ path: root.value + path });
   }
 
-  return { root, rootName, folderPaths, currentPath, push };
+  return { root, folderPaths, currentPath, push };
 });

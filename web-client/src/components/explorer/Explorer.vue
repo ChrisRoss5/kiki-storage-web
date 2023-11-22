@@ -5,15 +5,16 @@ import { provide } from "vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
 import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
+import ExplorerCards from "./ExplorerCards.vue";
 
 const itemsStore = useItemsStore();
 
-const isSearch = false;
-provide("isSearch", isSearch);
+provide("isSearch", false);
 </script>
 
 <template>
   <div class="mx-5 mb-5 flex min-h-0 flex-1 flex-col gap-5">
+    <ExplorerCards />
     <ExplorerNavbar />
     <template v-if="itemsStore.items.length">
       <ExplorerGrid class="flex-1" />

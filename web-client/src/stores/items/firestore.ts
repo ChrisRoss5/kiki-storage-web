@@ -19,6 +19,7 @@ import {
   useCurrentUser,
   useFirestore,
 } from "vuefire";
+import { roots } from "../path";
 
 export interface DbItem {
   id?: string;
@@ -157,7 +158,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
 
   async function updateParentDateModified(...items: Item[]) {
     for (let path of new Set(items.map((i) => i.path))) {
-      if (!path) continue; // root folder
+      if (path in roots) continue;
       const name = path.split("/").pop()!;
       path = path.slice(0, -name.length - 1);
       useCollection(

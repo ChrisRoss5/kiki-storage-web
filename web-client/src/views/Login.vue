@@ -23,8 +23,7 @@ onMounted(() => {
     ],
     signInFlow: "popup",
     callbacks: {
-      signInSuccessWithAuthResult: (r) => {
-        console.log(r);  // todo
+      signInSuccessWithAuthResult: () => {
         router.push("/");
         return false;
       },

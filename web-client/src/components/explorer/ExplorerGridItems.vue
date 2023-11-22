@@ -2,6 +2,7 @@
 import { ItemsStore } from "@/stores/items";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { formatDate, formatSize } from "@/utils/format";
+import icons from "file-icon-vectors/dist/icons/vivid/catalog.json";
 import { computed, nextTick, ref, watch } from "vue";
 
 const props = defineProps<{
@@ -20,13 +21,20 @@ const showFullText = computed(
     props.itemsStore.selectedItems.length == 1 &&
     !selectionRectStore.isActive,
 );
+const imgSrc = computed(() => {
+  let path = "/node_modules/file-icon-vectors/dist/icons/vivid/";
+  if (props.item.isFolder) path += "folder.svg";
+  else if (!props.item.type || !icons.find((i) => i == props.item.type))
+    path += "blank.svg";
+  else path += `${props.item.type}.svg`;
+  return path;
+});
 
 watch(
   () => props.item.isRenaming,
   async (item) => {
     if (!item || !renameInput.value) return;
     props.item.newName = props.item.name;
-    renameInput.value.focus();
     await nextTick();
     renameInput.value.select();
   },
@@ -36,17 +44,16 @@ watch(
 
 <template>
   <template v-if="columnName == 'name'">
-    <div
+    <img
+      :src="imgSrc"
       class="fiv-viv flex-shrink-0 text-xl"
-      :class="
-        item.isFolder
-          ? 'fiv-icon-folder'
-          : `fiv-icon-blank fiv-icon-${item.type}`
-      "
-    ></div>
+      :class="{ 'w-full': view == 'grid' }"
+      alt=""
+    />
     <div
       v-if="item.isRenaming"
-      class="ml-2 inline-flex"
+      class="ml-2 inline-flex max-w-full flex-wrap"
+      :class="{ 'justify-center text-center': view == 'grid' }"
       @mousedown.stop="null"
       @click.stop.prevent="null"
     >
@@ -56,6 +63,7 @@ watch(
         type="text"
         :placeholder="`Enter a new ${item.isFolder ? 'folder' : 'file'} name`"
         class="dsy-input dsy-join-item dsy-input-secondary outline-none"
+        :class="{ 'max-w-full text-center': view == 'grid' }"
         @keyup.enter.stop="itemsStore.renameItem(item)"
         @keydown.esc.stop="item.isRenaming = false"
         spellcheck="false"
