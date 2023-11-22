@@ -40,8 +40,7 @@ export const usePathStore = defineStore("path", () => {
       );
 
       console.log(folderPaths.value);
-      return
-
+    
 
       if (unwatch) unwatch();
       if (oldPath) api.unuseSource(oldPath);

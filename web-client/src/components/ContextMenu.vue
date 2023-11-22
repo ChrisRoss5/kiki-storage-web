@@ -61,7 +61,7 @@ const handleColumnChange = (key: keyof ItemCore) => {
   >
     <ItemOptions
       v-if="contextMenuStore.activeContextMenu == 'item'"
-      class="rounded-lg bg-base-200 shadow-lg"
+      class="rounded-lg bg-base-200 shadow-lg overflow-hidden"
       :items-store="contextMenuStore.itemsStore!"
       :in-context-menu="true"
       @click="contextMenuStore.hide"

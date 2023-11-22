@@ -5,7 +5,6 @@ import { provide } from "vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
 import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
-import ExplorerCards from "./ExplorerCards.vue";
 
 const itemsStore = useItemsStore();
 
@@ -13,8 +12,7 @@ provide("isSearch", false);
 </script>
 
 <template>
-  <div class="mx-5 mb-5 flex min-h-0 flex-1 flex-col gap-5">
-    <ExplorerCards />
+  <div id="explorer" class="flex min-h-0 flex-1 flex-col gap-5 px-5 pb-2 pt-5">
     <ExplorerNavbar />
     <template v-if="itemsStore.items.length">
       <ExplorerGrid class="flex-1" />
@@ -35,3 +33,11 @@ provide("isSearch", false);
     </div>
   </div>
 </template>
+
+<style>
+#explorer {
+  background: linear-gradient(to bottom, hsl(var(--p) / 10%), transparent),
+    radial-gradient(ellipse at bottom right, hsl(var(--a) / 10%), transparent),
+    radial-gradient(ellipse at bottom left, hsl(var(--s) / 10%), transparent);
+}
+</style>

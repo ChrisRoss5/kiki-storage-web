@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Explorer from "@/components/explorer/Explorer.vue";
+import ExplorerCards from "@/components/explorer/ExplorerCards.vue";
 import Header from "@/components/header/Header.vue";
 import { useContextMenuStore } from "@/stores/context-menu";
 import { useItemsStore, useSearchItemsStore } from "@/stores/items";
@@ -83,6 +84,7 @@ const handleClickLeft = (e: MouseEvent) => {
     @contextmenu="contextMenuStore.hide()"
   >
     <Header />
+    <ExplorerCards />
     <Explorer />
   </div>
 </template>
