@@ -64,9 +64,7 @@ watch(
 );
 watch(
   () => pathStore.currentPath,
-  () => {
-    lastSelectedItemIdx = 0;
-  },
+  () => (lastSelectedItemIdx = 0),
   { flush: "pre" },
 );
 
@@ -96,7 +94,7 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
 };
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
-    pathStore.push(`${item.path ? `/${item.path}` : ""}/${item.name}`);
+    pathStore.pushOnTab(`${item.path ? `/${item.path}` : ""}/${item.name}`);
     if (isSearch) searchStore.close();
   } else dialogStore.showError("This item cannot be previewed."); // todo: add previews
 };

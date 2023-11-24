@@ -24,6 +24,15 @@ export const useSettingsStore = defineStore("settings", () => {
   const updateSettings = (newSettings: Partial<Settings>) => {
     return update(dbRef(db, dbPath.value), newSettings);
   };
+  const updateSetting = <K extends keyof Settings>(
+    key: K,
+    value: Partial<Settings[K]>,
+  ) => {
+    return update(dbRef(db, `${dbPath.value}/${key}`), value);
+  };
+  const setSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
+    return set(dbRef(db, `${dbPath.value}/${key}`), value);
+  };
 
   watch(
     () => settings.value?.theme,
@@ -34,26 +43,6 @@ export const useSettingsStore = defineStore("settings", () => {
     },
   );
 
-  const updateColumns = (
-    columns: Partial<ColumnSettings>,
-    isSearch: boolean,
-  ) => {
-    const path: keyof Settings = isSearch ? "searchColumns" : "columns";
-    return update(dbRef(db, `${dbPath.value}/${path}`), columns);
-  };
-  const setView = (view: ExplorerView, isSearch: boolean) => {
-    const path: keyof Settings = isSearch ? "searchView" : "view";
-    return set(dbRef(db, `${dbPath.value}/${path}`), view);
-  };
-  const setTheme = (newTheme: Theme) => {
-    return set(dbRef(db, `${dbPath.value}/theme`), newTheme);
-  };
-  const setTabs = (tabs: Tab[]) => {
-    return set(dbRef(db, `${dbPath.value}/tabs`), tabs);
-  };
-  const setActiveTabId = (id: TabId) => {
-    return set(dbRef(db, `${dbPath.value}/activeTabId`), id);
-  };
   const reset = async () => {
     if (!(await dialogStore.confirm("Reset all settings to default?"))) return;
     set(dbRef(db, dbPath.value), defaultSettings);
@@ -63,11 +52,8 @@ export const useSettingsStore = defineStore("settings", () => {
     dbSettings,
     settings,
     updateSettings,
-    updateColumns,
-    setView,
-    setTheme,
-    setTabs,
-    setActiveTabId,
+    updateSetting,
+    setSetting,
     reset,
   };
 });

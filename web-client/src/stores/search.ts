@@ -24,7 +24,6 @@ export const useSearchStore = defineStore("search", () => {
   const searchItemsStore = useSearchItemsStore();
   const { api } = useItemsFirestoreStore();
 
-  // todo: https://stackoverflow.com/questions/46573804/firestore-query-documents-startswith-a-string
   const isOpen = ref(false);
   const query = ref("");
   const sizeFilter = ref<SizeFilter>({ ...initialSizeFilter });
@@ -47,17 +46,17 @@ export const useSearchStore = defineStore("search", () => {
     items,
     (newItems) => {
       if (!newItems) return;
-     // console.log("UPDATING SEARCH ITEMS: ", newItems.value.length);
+     console.log("UPDATING SEARCH ITEMS: ", newItems.value.length);
       searchItemsStore.items = newItems.value.map((i) => ({
         ...searchItemsStore.items.find((i2) => i2.id == i.id),
         ...i,
       }));
-      setTimeout(() => {
+      /* setTimeout(() => {
         // replace items with those in itemsStore todo
         searchItemsStore.items = searchItemsStore.items.map(
           (i) => itemsStore.items.find((i2) => i2.id == i.id) || i,
         );
-      }, 10);
+      }, 10); */
     },
     { deep: true },
   );

@@ -4,19 +4,13 @@ import { useRoute, useRouter } from "vue-router";
 import { useItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
 import { useSearchStore } from "./search";
-
-export const roots = {
-  drive: { name: "Drive", icon: "cloud" },
-  shared: { name: "Shared", icon: "cloud" },
-  bin: { name: "Bin", icon: "cloud" },
-};
-
-export const defaultRoot = "drive" satisfies keyof typeof roots;
+import { useSettingsStore } from "./settings";
+import { defaultRoot, roots } from "./settings/default";
 
 export const getPathName = (path: string) => {
   if (path in roots) return roots[path as keyof typeof roots].name;
   return path.slice(path.lastIndexOf("/") + 1);
-}
+};
 
 export const usePathStore = defineStore("path", () => {
   const route = useRoute();
@@ -24,6 +18,21 @@ export const usePathStore = defineStore("path", () => {
   const itemsStore = useItemsStore();
   const searchStore = useSearchStore();
   const { api } = useItemsFirestoreStore();
+  const settingsStore = useSettingsStore();
+
+  const openPaths = computed(() =>
+    settingsStore.settings.tabs.map((t) => t.path),
+  );
+
+  const activeTab = computed(() =>
+    settingsStore.settings.tabs.find(
+      (t) => t.id == settingsStore.settings.activeTabId,
+    ),
+  );
+
+  watch(openPaths, (openPaths) => {
+    console.log("OPEN PATHS: ", openPaths);
+  });
 
   const root = ref<keyof typeof roots>(defaultRoot);
   const folderPaths = ref<string[]>([]);
@@ -35,7 +44,7 @@ export const usePathStore = defineStore("path", () => {
     async (newPath, oldPath) => {
       if (!route.meta.requiresAuth) return;
       // regex to remove duplicate slashes and start/end slashes
-      newPath = newPath.replace(/\/+/g, "/").replace(/^\/|\/$/g, "");
+      newPath = newPath.replace(/\/+/g, "/").replace(/(^\/)|(\/$)/g, "");
       newPath = decodeURIComponent(newPath);
       if (!isPathValid(newPath)) return;
 
@@ -45,7 +54,6 @@ export const usePathStore = defineStore("path", () => {
       );
 
       //console.log(folderPaths.value);
-
 
       if (unwatch) unwatch();
       if (oldPath) api.unuseSource(oldPath);
@@ -82,9 +90,12 @@ export const usePathStore = defineStore("path", () => {
 
   function updatePaths() {}
 
-  function push(path: string) {
-    router.push({ path: root.value + path });
+  function pushOnTab(path: string) {
+    const tabs = settingsStore.settings.tabs;
+    tabs.find(t => t.id == settingsStore.settings.activeTabId)!.path = path;
+    settingsStore.setSetting("tabs", tabs);
+    router.push({ path });
   }
 
-  return { root, folderPaths, currentPath, push };
+  return { root, folderPaths, currentPath, pushOnTab };
 });

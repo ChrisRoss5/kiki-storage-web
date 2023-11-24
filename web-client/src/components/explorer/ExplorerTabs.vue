@@ -38,7 +38,7 @@ const deleteTab = (tab: Tab) => {
   lastSelectedTabIdBeforeCreate = null;
 };
 const switchTab = (tab: Tab) => {
-  settingsStore.updateSettings({ activeTabId: tab.id });
+  settingsStore.setSetting("activeTabId", tab.id);
   lastSelectedTabIdBeforeCreate = null;
 };
 </script>

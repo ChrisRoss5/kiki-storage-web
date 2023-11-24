@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useItemsStore } from "@/stores/items";
-import { roots, usePathStore, getPathName } from "@/stores/path";
+import { getPathName, usePathStore } from "@/stores/path";
+import { roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { nextTick, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import CreateOrUpload from "./CreateOrUpload.vue";
 import ViewSelector from "./ViewSelector.vue";
-
 const itemsStore = useItemsStore();
 const pathStore = usePathStore();
 const router = useRouter();
@@ -72,19 +72,19 @@ const handlePathSubmit = () => {
         <span v-else class="material-symbols-outlined pointer-events-none pl-2">
           {{ roots[path as keyof typeof roots].icon }}
         </span>
-        <RouterLink
-          :to="`/${path}`"
+        <a
+          :href="`/${path}`"
           class="whitespace-pre rounded-lg px-2 py-1 hover:bg-base-300"
           @drop.stop.prevent="itemsStore.handleDrop($event, path)"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"
-          @click.stop="null"
+          @click.stop.prevent="pathStore.pushOnTab(path)"
           draggable="false"
           v-wave
         >
           {{ getPathName(path) }}
-        </RouterLink>
+        </a>
       </template>
     </div>
     <div class="flex gap-3">

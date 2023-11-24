@@ -1,4 +1,10 @@
-import { defaultRoot } from "@/stores/path";
+export const roots = {
+  drive: { name: "Drive", icon: "cloud" },
+  shared: { name: "Shared", icon: "cloud" },
+  bin: { name: "Bin", icon: "cloud" },
+};
+
+export const defaultRoot = "drive" satisfies keyof typeof roots;
 
 const defaultActiveTab = { path: defaultRoot, id: crypto.randomUUID() };
 

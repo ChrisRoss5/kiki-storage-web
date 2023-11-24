@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { computed, ref, watchPostEffect } from "vue";
-import ItemOptions from "./ItemOptions.vue";
 import { useSettingsStore } from "@/stores/settings";
 import defaultSettings, { columnNames } from "@/stores/settings/default";
+import { computed, ref, watchPostEffect } from "vue";
+import ItemOptions from "./ItemOptions.vue";
 
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
@@ -31,7 +31,7 @@ watchPostEffect(() => {
   el.style.opacity = "0";
   el.style.clipPath = "circle(0% at 0 0)";
   el.style.transform = "translateY(-10px)";
-  void el.offsetHeight;
+  el.offsetHeight; // nosonar: reflow
   el.style.top = `${y}px`;
   el.style.left = `${x}px`;
   el.style.transition = "opacity 300ms, clip-path 300ms, transform 300ms";
@@ -41,14 +41,11 @@ watchPostEffect(() => {
 });
 
 const handleColumnChange = (key: keyof ItemCore) => {
-  settingsStore.updateColumns(
-    {
-      order: activeColumnsOrder.value.includes(key)
-        ? activeColumnsOrder.value.filter((k) => k != key)
-        : [...activeColumnsOrder.value, key],
-    },
-    isSearch.value,
-  );
+  settingsStore.updateSetting(isSearch.value ? "searchColumns" : "columns", {
+    order: activeColumnsOrder.value.includes(key)
+      ? activeColumnsOrder.value.filter((k) => k != key)
+      : [...activeColumnsOrder.value, key],
+  });
 };
 </script>
 
@@ -61,7 +58,7 @@ const handleColumnChange = (key: keyof ItemCore) => {
   >
     <ItemOptions
       v-if="contextMenuStore.activeContextMenu == 'item'"
-      class="rounded-lg bg-base-200 shadow-lg overflow-hidden"
+      class="overflow-hidden rounded-lg bg-base-200 shadow-lg"
       :items-store="contextMenuStore.itemsStore!"
       :in-context-menu="true"
       @click="contextMenuStore.hide"

@@ -16,31 +16,33 @@ const settingsStore = useSettingsStore();
 const contextMenuStore = useContextMenuStore();
 
 const isDraggingColumn = ref(false);
-
 const columnSettings = computed(
   () => settingsStore.settings[isSearch ? "searchColumns" : "columns"],
 );
+
 let savingNewColumnOrder = false;
 const columnOrder = computed({
   get: () => columnSettings.value.order,
-  async set(order) {
-    if (savingNewColumnOrder) return;
+  set: async (order) => {
+    if (savingNewColumnOrder) return; // SlickSort bug
     savingNewColumnOrder = true;
-    await settingsStore.updateColumns({ order }, isSearch);
+    await settingsStore.updateSetting(isSearch ? "searchColumns" : "columns", {
+      order,
+    });
     savingNewColumnOrder = false;
   },
 });
 
 const handleColumnClick = (key: keyof ItemCore) => {
-  const newColumns: Partial<ColumnSettings> =
-    columnSettings.value.orderBy == key
+  settingsStore.updateSetting(isSearch ? "searchColumns" : "columns", {
+    ...(columnSettings.value.orderBy == key
       ? { orderDesc: !columnSettings.value.orderDesc }
       : {
           orderBy: key,
           orderDesc:
             key == "dateAdded" || key == "dateModified" || key == "size",
-        };
-  settingsStore.updateColumns(newColumns, isSearch);
+        }),
+  });
 };
 </script>
 

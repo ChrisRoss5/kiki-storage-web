@@ -1,3 +1,4 @@
+import { roots } from "@/stores/settings/default";
 import {
   FirestoreDataConverter,
   QueryConstraint,
@@ -19,7 +20,6 @@ import {
   useCurrentUser,
   useFirestore,
 } from "vuefire";
-import { roots } from "../path";
 
 export interface DbItem {
   id?: string;
@@ -38,7 +38,8 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const user = useCurrentUser();
   const db = useFirestore();
   const dbPath = `app/drive/${user.value?.uid}`;
-  const sources = {} as Record<  // todo
+  const sources = {} as Record<
+    // todo
     string,
     { items: _RefFirestore<ItemCore[]>; subscribers: number }
   >;
