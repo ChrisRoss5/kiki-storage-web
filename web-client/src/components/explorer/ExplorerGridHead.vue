@@ -3,7 +3,7 @@ import { useContextMenuStore } from "@/stores/context-menu";
 import { ItemsStore } from "@/stores/items";
 import { useSettingsStore } from "@/stores/settings";
 import { columnNames } from "@/stores/settings/default";
-import { inject, ref, computed } from "vue";
+import { computed, inject, ref } from "vue";
 import { DragHandle, SlickItem, SlickList } from "vue-slicksort";
 
 defineProps<{
@@ -23,10 +23,10 @@ const columnSettings = computed(
 let savingNewColumnOrder = false;
 const columnOrder = computed({
   get: () => columnSettings.value.order,
-  async set(newValue) {
+  async set(order) {
     if (savingNewColumnOrder) return;
     savingNewColumnOrder = true;
-    await settingsStore.updateColumns({ order: newValue }, isSearch);
+    await settingsStore.updateColumns({ order }, isSearch);
     savingNewColumnOrder = false;
   },
 });
@@ -46,7 +46,7 @@ const handleColumnClick = (key: keyof ItemCore) => {
 
 <template>
   <SlickList
-    class="expl-header duration-300] z-[1] col-span-full grid grid-cols-[subgrid] items-center rounded-xl bg-base-100 transition-[box-shadow]"
+    class="expl-header duration-300] z-[1] col-span-full grid grid-cols-[subgrid] items-center rounded-xl bg-base-100/25 transition-[box-shadow]"
     :class="{
       'pointer-events-none': isDraggingColumn,
       'shadow-md': scrollTop > 0,
@@ -55,7 +55,7 @@ const handleColumnClick = (key: keyof ItemCore) => {
     axis="x"
     lockAxis="x"
     useDragHandle
-    helperClass="slick-item-dragging"
+    helperClass="slick-col-dragging"
     @sort-start="isDraggingColumn = true"
     @sort-end="isDraggingColumn = false"
     @contextmenu.stop.prevent="
@@ -66,7 +66,7 @@ const handleColumnClick = (key: keyof ItemCore) => {
       v-for="(key, i) in columnOrder"
       :key="key"
       :index="i"
-      class="group relative z-[10] cursor-pointer rounded-xl bg-base-100 p-3 font-bold text-base-content/60 hover:bg-base-200"
+      class="group relative z-[10] cursor-pointer rounded-xl p-3 font-bold text-base-content/60 hover:bg-base-100/25"
       @click.stop="handleColumnClick(key)"
     >
       <DragHandle
@@ -91,7 +91,7 @@ const handleColumnClick = (key: keyof ItemCore) => {
 </template>
 
 <style>
-.slick-item-dragging {
+.slick-col-dragging {
   @apply cursor-grabbing bg-base-200;
   & .material-symbols-outlined {
     opacity: 1;

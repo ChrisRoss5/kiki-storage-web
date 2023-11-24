@@ -32,7 +32,7 @@ watch(user, async (currentUser) => {
   <ContextMenu />
 </template>
 
-<style scoped>
+<style>
 #app {
   overflow: hidden;
 }

@@ -18,7 +18,10 @@ const selectedItemsSize = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-center rounded-xl bg-base-200 px-6 shadow-md">
+  <div
+    class="flex items-center rounded-xl bg-base-100/50 px-6 shadow-[0_0_50px_0_hsl(var(--p)/30%)]"
+    :class="{ 'rounded-b-none': !isSearch }"
+  >
     <div class="p-4 pr-0">
       {{ itemsStore.items.length }}
       {{ itemsStore.items.length == 1 ? "item" : "items" }}

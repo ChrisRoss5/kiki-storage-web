@@ -8,7 +8,6 @@ interface ItemCore {
   isFolder: boolean;
   size?: number;
 }
-
 interface Item extends ItemCore {
   el?: HTMLElement;
   searchEl?: HTMLElement;
@@ -20,30 +19,32 @@ interface Item extends ItemCore {
   isSearched?: boolean;
   newName?: string;
 }
-
 interface SearchFilters {
   query: string;
   minSize: number;
   maxSize: number;
   type: string;
 }
-
 interface Settings {
   theme: Theme;
   columns: ColumnSettings;
   searchColumns: ColumnSettings;
   view: ExplorerView;
   searchView: ExplorerView;
+  tabs: Tab[];
+  activeTabId: TabId;
 }
-
+interface Tab {
+  id: TabId;
+  path: string;
+}
+type TabId = ReturnType<typeof crypto.randomUUID>;
 type ExplorerView = "list" | "grid";
-
 interface ColumnSettings {
   order: Partial<keyof ItemCore>[];
   orderBy: keyof ItemCore;
   orderDesc: boolean;
 }
-
 type Theme =
   | "light"
   | "dark"

@@ -11,7 +11,12 @@ export const roots = {
   bin: { name: "Bin", icon: "cloud" },
 };
 
-const defaultRoot = "drive" satisfies keyof typeof roots;
+export const defaultRoot = "drive" satisfies keyof typeof roots;
+
+export const getPathName = (path: string) => {
+  if (path in roots) return roots[path as keyof typeof roots].name;
+  return path.slice(path.lastIndexOf("/") + 1);
+}
 
 export const usePathStore = defineStore("path", () => {
   const route = useRoute();
@@ -39,8 +44,8 @@ export const usePathStore = defineStore("path", () => {
         pathSplit.slice(0, i + 1).join("/"),
       );
 
-      console.log(folderPaths.value);
-    
+      //console.log(folderPaths.value);
+
 
       if (unwatch) unwatch();
       if (oldPath) api.unuseSource(oldPath);
@@ -49,7 +54,7 @@ export const usePathStore = defineStore("path", () => {
       unwatch = watch(
         items,
         (items) => {
-          console.log("UPDATING ITEMS: ", items); // todo
+          //console.log("UPDATING ITEMS: ", items); // todo
           itemsStore.items = items.map((i) => ({
             ...itemsStore.items.find((i2) => i2.id == i.id),
             ...i,
@@ -64,7 +69,7 @@ export const usePathStore = defineStore("path", () => {
   );
 
   function isPathValid(path: string) {
-    console.log("CHECKING PATH: ", path);
+    //console.log("CHECKING PATH: ", path);
     const idx = path.indexOf("/");
     const _root = path.slice(0, idx > 0 ? idx : undefined);
     if (_root in roots) {

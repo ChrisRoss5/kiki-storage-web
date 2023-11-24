@@ -40,6 +40,7 @@ const buttons: Button[] = [
         :class="{
           'dsy-btn-secondary pointer-events-none':
             explorerView == dbExplorerView,
+          'bg-base-100/25 border-none': explorerView != dbExplorerView,
         }"
         @click="settingsStore.setView(explorerView, isSearch)"
         v-wave

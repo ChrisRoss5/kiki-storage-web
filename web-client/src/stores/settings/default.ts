@@ -1,3 +1,7 @@
+import { defaultRoot } from "@/stores/path";
+
+const defaultActiveTab = { path: defaultRoot, id: crypto.randomUUID() };
+
 export default {
   theme: "light",
   columns: {
@@ -11,7 +15,9 @@ export default {
     orderDesc: false,
   },
   view: "list",
-  searchView: "list",
+  searchView: "list", // todo?
+  tabs: [defaultActiveTab],
+  activeTabId: defaultActiveTab.id,
 } satisfies Settings;
 
 export const columnNames: Partial<Record<keyof ItemCore, string>> = {

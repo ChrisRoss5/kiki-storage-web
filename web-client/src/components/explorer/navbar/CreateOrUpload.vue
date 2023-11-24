@@ -16,7 +16,7 @@ const handleFileUpload = (e: Event) => {
         v-model.trim="itemsStore.newFolderName"
         type="text"
         placeholder="Add a new folder"
-        class="dsy-input dsy-join-item dsy-input-primary w-full outline-none"
+        class="dsy-input bg-base-100/50 dsy-join-item dsy-input-primary w-full outline-none"
         @keyup.enter.stop="itemsStore.createFolder"
         spellcheck="false"
         autocomplete="off"

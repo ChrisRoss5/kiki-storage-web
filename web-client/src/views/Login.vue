@@ -34,12 +34,12 @@ onMounted(() => {
 
 <template>
   <div id="login-grid" class="flex flex-col justify-center h-screen">
-    <Logo class="mb-5 flex-col gap-3" />
+    <Logo class="mb-5 flex-col gap-3 text-black" />
     <div id="firebaseui-auth-container"></div>
   </div>
 </template>
 
-<style scoped>
+<style>
 #login-grid {
   background: radial-gradient(#fff 20%, transparent),
     conic-gradient(

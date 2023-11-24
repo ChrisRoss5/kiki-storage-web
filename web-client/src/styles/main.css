@@ -19,7 +19,7 @@
   width: 0.65rem;
 }
 ::-webkit-scrollbar-track {
-  background: hsl(var(--b1));
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--p));
@@ -51,9 +51,9 @@ body {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 300ms;
+  transition: opacity 300ms !important;
 }
 .fade-enter-from,
 .fade-leave-to {
-  opacity: 0;
+  opacity: 0 !important;
 }

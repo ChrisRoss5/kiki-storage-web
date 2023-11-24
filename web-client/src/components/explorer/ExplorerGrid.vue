@@ -47,7 +47,6 @@ watch(
   ],
   () => {
     const { orderBy, orderDesc } = columnSettings.value;
-    console.log("sorting", orderBy, orderDesc);
     itemsStore.items.sort((a, b) => {
       const desc = orderDesc ? -1 : 1;
       if (a.isFolder && !b.isFolder) return -desc;
@@ -161,10 +160,10 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               ? `${item.path ? `/${item.path}` : ''}/${item.name}`
               : undefined
           "
-          class="expl-item cursor-pointer whitespace-nowrap rounded-xl hover:bg-base-200"
+          class="expl-item cursor-pointer whitespace-nowrap rounded-xl hover:bg-base-100/25"
           :class="{
             folder: item.isFolder,
-            'is-selected !bg-base-300': item.isSelected,
+            'is-selected !bg-base-100/50': item.isSelected,
             'col-span-full grid grid-cols-[subgrid]': view == 'list',
           }"
           tabindex="0"

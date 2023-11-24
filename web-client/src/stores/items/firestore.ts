@@ -88,7 +88,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       nestedOnly?: boolean,
       options?: UseCollectionOptions,
     ) {
-      console.log("GETTING ITEMS FOR PATH: ", path); // todo
+      //console.log("GETTING ITEMS FOR PATH: ", path); // todo
       return useCollection(
         query(
           collection(db, dbPath),

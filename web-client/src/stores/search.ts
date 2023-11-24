@@ -47,7 +47,7 @@ export const useSearchStore = defineStore("search", () => {
     items,
     (newItems) => {
       if (!newItems) return;
-      console.log("UPDATING SEARCH ITEMS: ", newItems.value.length);
+     // console.log("UPDATING SEARCH ITEMS: ", newItems.value.length);
       searchItemsStore.items = newItems.value.map((i) => ({
         ...searchItemsStore.items.find((i2) => i2.id == i.id),
         ...i,

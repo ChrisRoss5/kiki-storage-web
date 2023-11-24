@@ -12,7 +12,7 @@ provide("isSearch", false);
 </script>
 
 <template>
-  <div id="explorer" class="flex min-h-0 flex-1 flex-col gap-5 px-5 pb-2 pt-5">
+  <div id="explorer" class="flex min-h-0 flex-1 flex-col gap-3 px-5 pt-3">
     <ExplorerNavbar />
     <template v-if="itemsStore.items.length">
       <ExplorerGrid class="flex-1" />
@@ -36,8 +36,13 @@ provide("isSearch", false);
 
 <style>
 #explorer {
-  background: linear-gradient(to bottom, hsl(var(--p) / 10%), transparent),
-    radial-gradient(ellipse at bottom right, hsl(var(--a) / 10%), transparent),
-    radial-gradient(ellipse at bottom left, hsl(var(--s) / 10%), transparent);
+  background: linear-gradient(to bottom, hsl(var(--p) / 25%), transparent),
+    radial-gradient(ellipse at bottom left, hsl(var(--s) / 25%), transparent),
+    radial-gradient(ellipse at bottom right, hsl(var(--a) / 25%), transparent);
 }
+/* [data-theme="light"] #explorer {
+  background: linear-gradient(to bottom, hsl(var(--p) / 25%), transparent),
+    radial-gradient(ellipse at bottom left, hsl(var(--s) / 25%), transparent),
+    radial-gradient(ellipse at bottom right, hsl(var(--a) / 25%), transparent);
+} */
 </style>

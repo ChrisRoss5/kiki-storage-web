@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import Explorer from "@/components/explorer/Explorer.vue";
-import ExplorerCards from "@/components/explorer/ExplorerCards.vue";
+import ExplorerTabs from "@/components/explorer/ExplorerTabs.vue";
 import Header from "@/components/header/Header.vue";
 import { useContextMenuStore } from "@/stores/context-menu";
 import { useItemsStore, useSearchItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
+import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { onBeforeMount, onBeforeUnmount } from "vue";
 
@@ -15,6 +16,7 @@ const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const searchStore = useSearchStore();
 const contextMenuStore = useContextMenuStore();
+const settingsStore = useSettingsStore();
 
 onBeforeMount(() => {
   document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
@@ -77,14 +79,17 @@ const handleClickLeft = (e: MouseEvent) => {
 </script>
 
 <template>
-  <div
-    class="flex flex-col"
-    @click.left="handleClickLeft"
-    @mousedown="contextMenuStore.hide()"
-    @contextmenu="contextMenuStore.hide()"
-  >
-    <Header />
-    <ExplorerCards />
-    <Explorer />
-  </div>
+  <Transition name="fade">
+    <div
+      v-if="settingsStore.dbSettings"
+      class="flex flex-col"
+      @click.left="handleClickLeft"
+      @mousedown="contextMenuStore.hide()"
+      @contextmenu="contextMenuStore.hide()"
+    >
+      <Header />
+      <ExplorerTabs />
+      <Explorer />
+    </div>
+  </Transition>
 </template>

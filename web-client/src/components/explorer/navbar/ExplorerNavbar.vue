@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useItemsStore } from "@/stores/items";
-import { roots, usePathStore } from "@/stores/path";
+import { roots, usePathStore, getPathName } from "@/stores/path";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { nextTick, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import CreateOrUpload from "./CreateOrUpload.vue";
 import ViewSelector from "./ViewSelector.vue";
-import { useRouter } from "vue-router";
 
 const itemsStore = useItemsStore();
 const pathStore = usePathStore();
@@ -35,8 +35,8 @@ const handlePathSubmit = () => {
 <template>
   <div class="z-[2] flex gap-3" @click.stop="null">
     <div
-      class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-lg text-xl bg-base-200"
-      :class="{ 'bg-base-200': showPathInput }"
+      class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-lg bg-base-100/25 text-xl hover:bg-base-100/50"
+      :class="{ '!bg-base-100/50': showPathInput }"
       @click="showPathInput = true"
     >
       <template v-if="showPathInput">
@@ -44,7 +44,7 @@ const handlePathSubmit = () => {
           type="text"
           ref="pathInput"
           placeholder="Enter location"
-          class="dsy-input dsy-input-bordered dsy-input-primary w-full text-xl"
+          class="dsy-input dsy-input-bordered dsy-input-primary w-full bg-transparent text-xl"
           v-model="newPath"
           @keydown.stop.escape="showPathInput = false"
           @keyup.stop.enter="handlePathSubmit"
@@ -63,13 +63,18 @@ const handlePathSubmit = () => {
         </div>
       </template>
       <template v-else v-for="(path, i) in pathStore.folderPaths">
-        <span v-if="i" class="material-symbols-outlined flex justify-center w-3"> chevron_right </span>
+        <span
+          v-if="i"
+          class="material-symbols-outlined flex w-3 justify-center"
+        >
+          chevron_right
+        </span>
         <span v-else class="material-symbols-outlined pointer-events-none pl-2">
           {{ roots[path as keyof typeof roots].icon }}
         </span>
         <RouterLink
           :to="`/${path}`"
-          class="whitespace-pre hover:bg-base-300 rounded-lg px-2 py-1"
+          class="whitespace-pre rounded-lg px-2 py-1 hover:bg-base-300"
           @drop.stop.prevent="itemsStore.handleDrop($event, path)"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
@@ -78,11 +83,7 @@ const handlePathSubmit = () => {
           draggable="false"
           v-wave
         >
-          {{
-            i
-              ? path.slice(path.lastIndexOf("/") + 1)
-              : roots[path as keyof typeof roots].name
-          }}
+          {{ getPathName(path) }}
         </RouterLink>
       </template>
     </div>
