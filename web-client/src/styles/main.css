@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 * {
-  outline-color: hsl(var(--p));
+  outline-color: oklch(var(--p));
 }
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -22,7 +22,7 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--p));
+  background: oklch(var(--p));
   border-radius: 1rem;
   border: 0.15rem solid transparent;
   background-clip: padding-box;

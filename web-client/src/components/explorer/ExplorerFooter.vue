@@ -19,7 +19,7 @@ const selectedItemsSize = computed(() => {
 
 <template>
   <div
-    class="flex items-center rounded-box bg-base-100/50 px-6 shadow-[0_0_50px_0_hsl(var(--p)/30%)]"
+    class="rounded-box flex items-center bg-base-100/50 px-6 shadow-[0_0_50px_0_oklch(var(--p)/30%)]"
     :class="{ 'rounded-b-none': !isSearch }"
   >
     <div class="p-4 pr-0">

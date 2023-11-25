@@ -20,7 +20,7 @@ provide("isSearch", false);
     </template>
     <div
       v-else
-      class="flex-center flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content mb-3"
+      class="flex-center rounded-badge mb-3 flex-1 flex-col gap-3 border-2 border-dashed border-base-content"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
@@ -36,13 +36,13 @@ provide("isSearch", false);
 
 <style>
 #explorer {
-  background: linear-gradient(to bottom, hsl(var(--p) / 25%), transparent),
-    radial-gradient(ellipse at bottom left, hsl(var(--s) / 25%), transparent),
-    radial-gradient(ellipse at bottom right, hsl(var(--a) / 25%), transparent);
+  background: linear-gradient(to bottom, oklch(var(--p) / 25%), transparent),
+    radial-gradient(ellipse at bottom left, oklch(var(--s) / 25%), transparent),
+    radial-gradient(ellipse at bottom right, oklch(var(--a) / 25%), transparent);
 }
 /* [data-theme="light"] #explorer {
-  background: linear-gradient(to bottom, hsl(var(--p) / 25%), transparent),
-    radial-gradient(ellipse at bottom left, hsl(var(--s) / 25%), transparent),
-    radial-gradient(ellipse at bottom right, hsl(var(--a) / 25%), transparent);
+  background: linear-gradient(to bottom, oklch(var(--p) / 25%), transparent),
+    radial-gradient(ellipse at bottom left, oklch(var(--s) / 25%), transparent),
+    radial-gradient(ellipse at bottom right, oklch(var(--a) / 25%), transparent);
 } */
 </style>

@@ -21,7 +21,7 @@ const tabsStore = useTabsStore();
         v-for="(tab, i) in tabsStore.tabs"
         :key="tab.id"
         :index="i"
-        class="relative mb-2 ml-2 min-w-0 max-w-[20vw] flex-grow basis-0 cursor-pointer whitespace-nowrap rounded-box bg-base-200 py-1 text-lg hover:bg-base-300"
+        class="rounded-box relative mb-2 ml-2 min-w-0 max-w-[20vw] flex-grow basis-0 cursor-pointer whitespace-nowrap bg-base-200 py-1 text-lg hover:bg-base-300"
         :class="{
           'tab-active !mb-0 cursor-default rounded-b-none !bg-primary/30 pb-3':
             tab.id == tabsStore.activeTab.id,
@@ -29,10 +29,16 @@ const tabsStore = useTabsStore();
         @click="tabsStore.switchTab(tab)"
       >
         <div class="relative flex gap-1 overflow-hidden pl-3 pr-7">
-          <div v-if="tab.path in roots" class="material-symbols-outlined text-xl">
+          <div
+            v-if="tab.path in roots"
+            class="material-symbols-outlined text-xl"
+          >
             {{ roots[tab.path as keyof typeof roots].icon }}
           </div>
-          <div v-else class="fiv-viv fiv-icon-folder z-10 flex-shrink-0 text-xl"></div>
+          <div
+            v-else
+            class="fiv-viv fiv-icon-folder z-10 flex-shrink-0 text-xl"
+          ></div>
           <div class="mask flex-1 overflow-hidden">
             {{ getPathName(tab.path) }}
           </div>
@@ -41,7 +47,7 @@ const tabsStore = useTabsStore();
             class="flex-center absolute -right-1 bottom-0 top-0 z-10 w-10 text-right"
           >
             <div
-              class="material-symbols-outlined flex h-6 w-6 cursor-pointer items-center justify-center rounded-badge text-base hover:bg-base-100/50"
+              class="material-symbols-outlined rounded-badge flex h-6 w-6 cursor-pointer items-center justify-center text-base hover:bg-base-100/50"
               @click.stop="tabsStore.deleteTab(tab)"
             >
               close
@@ -52,7 +58,7 @@ const tabsStore = useTabsStore();
     </TransitionGroup>
     <div class="flex-center mb-2 ml-3">
       <div
-        class="material-symbols-outlined flex-center aspect-square h-full cursor-pointer rounded-badge bg-base-200 text-xl hover:bg-base-300"
+        class="material-symbols-outlined flex-center rounded-badge aspect-square h-full cursor-pointer bg-base-200 text-xl hover:bg-base-300"
         @click="() => tabsStore.createTab()"
       >
         add
@@ -105,7 +111,7 @@ const tabsStore = useTabsStore();
     background-image: radial-gradient(
       circle at 0 0,
       transparent var(--rounded-box),
-      hsl(var(--p) / 30%) 0.78rem
+      oklch(var(--p) / 30%) calc(var(--rounded-box) + 0.03rem)
     );
   }
   &::after {
@@ -113,7 +119,7 @@ const tabsStore = useTabsStore();
     background-image: radial-gradient(
       circle at 100% 0,
       transparent var(--rounded-box),
-      hsl(var(--p) / 30%) 0.78rem
+      oklch(var(--p) / 30%) calc(var(--rounded-box) + 0.03rem)
     );
   }
   /* The 0.03rem difference is just enough to simulate anti-aliasing! */

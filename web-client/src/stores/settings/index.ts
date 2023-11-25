@@ -1,7 +1,7 @@
 import { mergeDeep } from "@/utils";
 import { ref as dbRef, set, update } from "firebase/database";
 import { defineStore } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
 import { useCurrentUser, useDatabase, useDatabaseObject } from "vuefire";
 import { useShortDialogStore } from "../short-dialog";
 import defaultSettings from "./default";

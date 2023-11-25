@@ -25,9 +25,9 @@ export function setDragOverStyle(e: DragEvent) {
   target.classList.add("dragover");
   target.style.background = `radial-gradient(
     circle at ${x}px ${y}px,
-    hsl(var(--a) / 100%),
-    hsl(var(--a) / 50%) 50%,
-    hsl(var(--b1)) 70%
+    oklch(var(--a) / 100%),
+    oklch(var(--a) / 50%) 50%,
+    oklch(var(--b1)) 70%
   ) no-repeat`;
 }
 
@@ -36,10 +36,7 @@ export function clearDragOverStyle(e: DragEvent) {
   if (target.nodeType != 1) return;
   if (typeof target == "string") return;
   if (target.closest(".expl-row:not(.folder)")) return;
-  target =
-    target.closest(".folder") ??
-    target.closest(".expl-body") ??
-    target;
+  target = target.closest(".folder") ?? target.closest(".expl-body") ?? target;
   target.classList.remove("dragover");
   target.style.background = "";
 }
