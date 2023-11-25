@@ -25,15 +25,26 @@ export const usePathStore = defineStore("path", () => {
   const dialogStore = useShortDialogStore();
 
   const folderPaths = ref<string[]>([]);
-  const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
-  const openPaths = computed(() => tabsStore.tabs.map((t) => t.path));
+  const currentPath = ref("");
+  let isStartup = true;
 
   watch(
     () => tabsStore.activeTab,
-    (tab) => {
-      if (!settingsStore.dbSettings) return;
-      console.log("PUSHING  TAB: ", tab);
-      router.push({ path: `/${tab.path}` });
+    (activeTab) => {
+      if (!settingsStore.dbSettings || activeTab.path == currentPath.value)
+        return;
+      if (isStartup) {
+        isStartup = false;
+        const startupPath = sanitizePath(route.path);
+        if (activeTab.path != startupPath) {
+          const startupTab = tabsStore.tabs.find((t) => t.path == startupPath);
+          if (!startupTab) tabsStore.createTab(startupPath);
+          else tabsStore.switchTab(startupTab);
+          return ;
+        }
+      }
+      console.log("NEW ACTIVE TAB: ", activeTab);
+      push(activeTab.path);
     },
   );
 
@@ -45,16 +56,12 @@ export const usePathStore = defineStore("path", () => {
       newPath = sanitizePath(newPath);
       if (!isPathValid(newPath)) return;
 
+      console.log("NEW PATH: ", newPath);
+      currentPath.value = newPath;
       const pathSplit = newPath.split("/");
       folderPaths.value = pathSplit.map((_, i) =>
         pathSplit.slice(0, i + 1).join("/"),
       );
-
-      console.log("NEW PATH: ", newPath);
-      console.log("OPEN PATHS: ", openPaths.value);
-
-      if (!openPaths.value.includes(newPath))
-        return tabsStore.createTab(newPath);
 
       if (unwatch) unwatch();
       //if (oldPath) api.unuseSource(oldPath);
@@ -62,7 +69,7 @@ export const usePathStore = defineStore("path", () => {
       unwatch = watch(
         items,
         (items) => {
-          //console.log("UPDATING ITEMS: ", items); // todo
+          console.log("UPDATING ITEMS: ", items); // todo
           itemsStore.items = items.map((i) => ({
             ...itemsStore.items.find((i2) => i2.id == i.id),
             ...i,
@@ -97,11 +104,14 @@ export const usePathStore = defineStore("path", () => {
   const pushOnTab = (path: string) => {
     path = sanitizePath(path);
     if (!isPathValid(path)) return;
-    const tabs = settingsStore.settings.tabs;
-    tabs.find((t) => t.id == settingsStore.settings.activeTabId)!.path = path;
-    settingsStore.setSetting("tabs", tabs);
-    console.log("PUSHING ON TAB: ", path);
+    tabsStore.updateTab(tabsStore.activeTab, path);
+    push(path);
   };
+
+  const push = (path: string) => {
+    console.log("PUSHING: ", path);
+    router.push({ path: `/${path}` });
+  }
 
   return { folderPaths, currentPath, pushOnTab };
 });

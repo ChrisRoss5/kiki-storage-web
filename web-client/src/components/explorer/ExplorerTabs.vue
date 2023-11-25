@@ -19,6 +19,8 @@ const tabsStore = useTabsStore();
     <TransitionGroup name="expl-tab">
       <SlickItem
         v-for="(tab, i) in tabsStore.tabs"
+        tag="a"
+        :href="tab.path"
         :key="tab.id"
         :index="i"
         class="rounded-box relative mb-2 ml-2 min-w-0 max-w-[20vw] flex-grow basis-0 cursor-pointer whitespace-nowrap bg-base-200 py-1 text-lg hover:bg-base-300"
@@ -26,12 +28,12 @@ const tabsStore = useTabsStore();
           'tab-active !mb-0 cursor-default rounded-b-none !bg-primary/30 pb-3':
             tab.id == tabsStore.activeTab.id,
         }"
-        @click="tabsStore.switchTab(tab)"
+        @click.prevent="tabsStore.switchTab(tab)"
       >
         <div class="relative flex gap-1 overflow-hidden pl-3 pr-7">
           <div
             v-if="tab.path in roots"
-            class="material-symbols-outlined text-xl"
+            class="material-symbols-outlined !text-xl"
           >
             {{ roots[tab.path as keyof typeof roots].icon }}
           </div>
@@ -47,8 +49,8 @@ const tabsStore = useTabsStore();
             class="flex-center absolute -right-1 bottom-0 top-0 z-10 w-10 text-right"
           >
             <div
-              class="material-symbols-outlined rounded-badge flex h-6 w-6 cursor-pointer items-center justify-center text-base hover:bg-base-100/50"
-              @click.stop="tabsStore.deleteTab(tab)"
+              class="material-symbols-outlined rounded-badge flex h-6 w-6 cursor-pointer items-center justify-center !text-base hover:bg-base-100/50"
+              @click.stop.prevent="tabsStore.deleteTab(tab)"
             >
               close
             </div>
@@ -58,7 +60,7 @@ const tabsStore = useTabsStore();
     </TransitionGroup>
     <div class="flex-center mb-2 ml-3">
       <div
-        class="material-symbols-outlined flex-center rounded-badge aspect-square h-full cursor-pointer bg-base-200 text-xl hover:bg-base-300"
+        class="material-symbols-outlined flex-center rounded-badge aspect-square h-full cursor-pointer bg-base-200 !text-xl hover:bg-base-300"
         @click="() => tabsStore.createTab()"
       >
         add

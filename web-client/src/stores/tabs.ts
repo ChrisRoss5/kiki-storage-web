@@ -19,8 +19,6 @@ export const useTabsStore = defineStore("tabs", () => {
   const createTab = (path?: string) => {
     lastSelectedTabIdBeforeCreate = activeTab.value.id;
     const newTab = { path: path ?? defaultRoot, id: crypto.randomUUID() };
-    console.log("CREATING TAB: ", newTab);
-    
     settingsStore.updateSettings({
       activeTabId: newTab.id,
       tabs: [...tabs.value, newTab],
@@ -46,6 +44,12 @@ export const useTabsStore = defineStore("tabs", () => {
     settingsStore.setSetting("activeTabId", tab.id);
     lastSelectedTabIdBeforeCreate = null;
   };
+  const updateTab = (tab: Tab, newPath: string) => {
+    settingsStore.setSetting(
+      "tabs",
+      tabs.value.map((t) => (t.id == tab.id ? { ...t, path: newPath } : t)),
+    );
+  };
 
   return {
     tabs,
@@ -53,5 +57,6 @@ export const useTabsStore = defineStore("tabs", () => {
     createTab,
     deleteTab,
     switchTab,
+    updateTab,
   };
 });

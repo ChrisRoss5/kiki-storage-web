@@ -14,7 +14,7 @@ export const firebaseApp = initializeApp({
   appId: "1:251749769626:web:01acdca36bf995f6b3da23",
 });
 
-setLogLevel("debug"); // todo
+//setLogLevel("debug"); // todo
 
 let ui: auth.AuthUI;
 

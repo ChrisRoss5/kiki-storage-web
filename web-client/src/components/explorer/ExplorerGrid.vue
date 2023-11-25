@@ -90,7 +90,6 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
     item.isSelected = true;
     lastSelectedItemIdx = itemsStore.items.indexOf(item);
   }
-  if (!item.isRenaming) itemsStore.clearRenaming();
 };
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) {

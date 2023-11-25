@@ -6,10 +6,12 @@ import { computed, ref } from "vue";
 import { usePathStore } from "../path";
 import { useShortDialogStore } from "../short-dialog";
 
-const itemsStore = () => {
+function itemsStore(this: { isSearch: boolean }) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
   const { api } = useItemsFirestoreStore();
+  const otherStore = this.isSearch ? useItemsStore() : useSearchItemsStore();
+  console.log("otherStore: ", otherStore);
 
   const items = ref<Item[]>([]);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
@@ -74,10 +76,6 @@ const itemsStore = () => {
     api.renameItem(item);
     item.isRenaming = false;
   };
-  const clearRenaming = () => {
-    const renaming = items.value.find((i) => i.isRenaming);
-    if (renaming) renaming.isRenaming = false;
-  };
   const selectAll = () => items.value.forEach((i) => (i.isSelected = true));
   const deselectAll = () => items.value.forEach((i) => (i.isSelected = false));
 
@@ -89,15 +87,20 @@ const itemsStore = () => {
     createFolder,
     createFiles,
     deleteItems,
+    renameItem,
     selectAll,
     deselectAll,
-    clearRenaming,
-    renameItem,
   };
-};
+}
 
-export const useItemsStore = defineStore("items", itemsStore);
-export const useSearchItemsStore = defineStore("search-items", itemsStore);
+export const useItemsStore = defineStore(
+  "items",
+  itemsStore.bind({ isSearch: false }),
+);
+export const useSearchItemsStore = defineStore(
+  "search-items",
+  itemsStore.bind({ isSearch: true }),
+);
 export type ItemsStore = ReturnType<
   typeof useItemsStore | typeof useSearchItemsStore
 >;

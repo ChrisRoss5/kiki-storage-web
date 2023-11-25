@@ -66,23 +66,17 @@ watch(
         :class="{ 'max-w-full text-center': view == 'grid' }"
         @keyup.enter.stop="itemsStore.renameItem(item)"
         @keydown.esc.stop="item.isRenaming = false"
+        @blur="item.isRenaming = false"
         spellcheck="false"
         autocomplete="off"
       />
       <button
         class="dsy-btn dsy-btn-secondary dsy-join-item"
         :class="{ 'dsy-btn-disabled': !item.newName }"
-        @click="itemsStore.renameItem(item)"
+        @mousedown="itemsStore.renameItem(item)"
         v-wave
       >
         <span class="material-symbols-outlined"> check </span>
-      </button>
-      <button
-        class="dsy-btn dsy-btn-secondary dsy-join-item"
-        @click="item.isRenaming = false"
-        v-wave
-      >
-        <span class="material-symbols-outlined"> close </span>
       </button>
     </div>
     <div class="w-full overflow-hidden" v-else>

@@ -54,7 +54,6 @@ const handleKeydown = (e: KeyboardEvent) => {
     e.preventDefault();
     document.body.style.userSelect = "none";
     itemsStore.selectAll();
-    itemsStore.clearRenaming();
     document.body.style.userSelect = "";
   }
 };
@@ -74,7 +73,6 @@ const handleClickLeft = (e: MouseEvent) => {
   if (!searchItemsStore.items.length) searchStore.close();
   if (e.ctrlKey || e.shiftKey) return;
   itemsStore.deselectAll();
-  itemsStore.clearRenaming();
 };
 </script>
 
