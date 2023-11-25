@@ -32,6 +32,7 @@ export interface DbItem {
   size?: number;
 }
 
+
 // Vuefire Issue #1315 - SSR console warning
 
 export const useItemsFirestoreStore = defineStore("items-firestore", () => {

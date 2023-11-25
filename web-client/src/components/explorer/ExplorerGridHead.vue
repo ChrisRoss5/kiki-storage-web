@@ -48,7 +48,7 @@ const handleColumnClick = (key: keyof ItemCore) => {
 
 <template>
   <SlickList
-    class="expl-header duration-300] z-[1] col-span-full grid grid-cols-[subgrid] items-center rounded-xl bg-base-100/25 transition-[box-shadow]"
+    class="z-[1] col-span-full grid grid-cols-[subgrid] items-center rounded-box bg-base-100/25 transition-[box-shadow]"
     :class="{
       'pointer-events-none': isDraggingColumn,
       'shadow-md': scrollTop > 0,
@@ -68,7 +68,7 @@ const handleColumnClick = (key: keyof ItemCore) => {
       v-for="(key, i) in columnOrder"
       :key="key"
       :index="i"
-      class="group relative z-[10] cursor-pointer rounded-xl p-3 font-bold text-base-content/60 hover:bg-base-100/25"
+      class="group relative z-[10] cursor-pointer rounded-box p-3 font-bold text-base-content/60 hover:bg-base-100/25"
       @click.stop="handleColumnClick(key)"
     >
       <DragHandle

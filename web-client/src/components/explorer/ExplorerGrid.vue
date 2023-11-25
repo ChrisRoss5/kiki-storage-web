@@ -94,7 +94,7 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
 };
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
-    pathStore.pushOnTab(`${item.path ? `/${item.path}` : ""}/${item.name}`);
+    pathStore.pushOnTab(`${item.path}/${item.name}`);
     if (isSearch) searchStore.close();
   } else dialogStore.showError("This item cannot be previewed."); // todo: add previews
 };
@@ -120,18 +120,21 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 
 <template>
   <div
-    class="expl-grid grid min-h-0 w-full select-none grid-rows-[auto_1fr]"
-    :class="{ 'grid-rows-1': view == 'grid' }"
+    class="grid min-h-0 w-full select-none"
+    :class="{
+      'grid-rows-1': view == 'grid',
+      'grid-rows-[auto_1fr]': view == 'list',
+    }"
     :style="gridStyle"
   >
     <ExplorerGridHead
-      v-show="view == 'list'"
+      v-if="view == 'list'"
       :scroll-top="scrollTop"
       :items-store="itemsStore"
     />
     <div
       ref="explBody"
-      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-x-hidden overflow-y-scroll rounded-xl"
+      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-x-hidden overflow-y-scroll rounded-box"
       :class="{ 'items-start gap-x-4 gap-y-1': view == 'grid' }"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
@@ -158,7 +161,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               ? `${item.path ? `/${item.path}` : ''}/${item.name}`
               : undefined
           "
-          class="expl-item cursor-pointer whitespace-nowrap rounded-xl hover:bg-base-100/25"
+          class="expl-item cursor-pointer whitespace-nowrap rounded-box hover:bg-base-100/25"
           :class="{
             folder: item.isFolder,
             'is-selected !bg-base-100/50': item.isSelected,

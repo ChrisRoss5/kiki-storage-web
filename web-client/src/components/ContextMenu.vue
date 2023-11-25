@@ -51,14 +51,14 @@ const handleColumnChange = (key: keyof ItemCore) => {
 
 <template>
   <div
-    class="fixed z-10 select-none rounded-lg bg-base-200 shadow-md"
+    class="fixed z-10 select-none rounded-btn bg-base-200 shadow-md"
     ref="ctxmenu"
     @click.stop="null"
     @contextmenu.prevent="contextMenuStore.hide"
   >
     <ItemOptions
       v-if="contextMenuStore.activeContextMenu == 'item'"
-      class="overflow-hidden rounded-lg bg-base-200 shadow-lg"
+      class="overflow-hidden rounded-btn bg-base-200 shadow-lg"
       :items-store="contextMenuStore.itemsStore!"
       :in-context-menu="true"
       @click="contextMenuStore.hide"
@@ -67,7 +67,7 @@ const handleColumnChange = (key: keyof ItemCore) => {
       <label
         v-for="key in allColumnsOrder"
         :key="key"
-        class="flex cursor-pointer items-center rounded-lg px-3 py-2 hover:bg-base-300"
+        class="flex cursor-pointer items-center rounded-btn px-3 py-2 hover:bg-base-300"
       >
         <input
           type="checkbox"

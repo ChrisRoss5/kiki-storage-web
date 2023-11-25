@@ -25,7 +25,7 @@ const searchItemsStore = useSearchItemsStore();
     />
     <div
       v-if="searchStore.isOpen"
-      class="absolute left-0 right-0 top-full z-10 mt-3 rounded-2xl bg-base-100 p-4 shadow-lg"
+      class="absolute left-0 right-0 top-full z-10 mt-3 rounded-box bg-base-100 p-4 shadow-lg"
     >
       <template v-if="searchItemsStore.items.length">
         <ExplorerGrid class="in-search max-h-[70vh]" />

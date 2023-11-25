@@ -52,7 +52,7 @@ const themes = [
       v-for="theme in onlyActiveTheme ? [activeTheme] : themes"
       :key="theme"
       @click="!onlyActiveTheme && settingsStore.setSetting('theme', theme)"
-      class="overflow-hidden rounded-lg border border-base-content/20 outline outline-2 outline-offset-2 outline-transparent hover:border-base-content/40"
+      class="overflow-hidden rounded-btn border border-base-content/20 outline outline-2 outline-offset-2 outline-transparent hover:border-base-content/40"
       :class="{
         'outline-2': theme == activeTheme && !onlyActiveTheme,
         'outline-offset-2': theme == activeTheme && !onlyActiveTheme,

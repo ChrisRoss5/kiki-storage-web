@@ -5,7 +5,9 @@ import { useItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
 import { useSearchStore } from "./search";
 import { useSettingsStore } from "./settings";
-import { defaultRoot, roots } from "./settings/default";
+import { roots } from "./settings/default";
+import { useShortDialogStore } from "./short-dialog";
+import { useTabsStore } from "./tabs";
 
 export const getPathName = (path: string) => {
   if (path in roots) return roots[path as keyof typeof roots].name;
@@ -19,33 +21,28 @@ export const usePathStore = defineStore("path", () => {
   const searchStore = useSearchStore();
   const { api } = useItemsFirestoreStore();
   const settingsStore = useSettingsStore();
+  const tabsStore = useTabsStore();
+  const dialogStore = useShortDialogStore();
 
-  const openPaths = computed(() =>
-    settingsStore.settings.tabs.map((t) => t.path),
-  );
-
-  const activeTab = computed(() =>
-    settingsStore.settings.tabs.find(
-      (t) => t.id == settingsStore.settings.activeTabId,
-    ),
-  );
-
-  watch(openPaths, (openPaths) => {
-    console.log("OPEN PATHS: ", openPaths);
-  });
-
-  const root = ref<keyof typeof roots>(defaultRoot);
   const folderPaths = ref<string[]>([]);
   const currentPath = computed(() => folderPaths.value.at(-1) ?? "");
+  const openPaths = computed(() => tabsStore.tabs.map((t) => t.path));
+
+  watch(
+    () => tabsStore.activeTab,
+    (tab) => {
+      if (!settingsStore.dbSettings) return;
+      console.log("PUSHING  TAB: ", tab);
+      router.push({ path: `/${tab.path}` });
+    },
+  );
 
   let unwatch: WatchStopHandle;
   watch(
-    () => route.path,
-    async (newPath, oldPath) => {
-      if (!route.meta.requiresAuth) return;
-      // regex to remove duplicate slashes and start/end slashes
-      newPath = newPath.replace(/\/+/g, "/").replace(/(^\/)|(\/$)/g, "");
-      newPath = decodeURIComponent(newPath);
+    [() => route.path, () => settingsStore.dbSettings?.id],
+    async ([newPath, dbSettingsId]) => {
+      if (!dbSettingsId || !route.meta.requiresAuth) return;
+      newPath = sanitizePath(newPath);
       if (!isPathValid(newPath)) return;
 
       const pathSplit = newPath.split("/");
@@ -53,11 +50,14 @@ export const usePathStore = defineStore("path", () => {
         pathSplit.slice(0, i + 1).join("/"),
       );
 
-      //console.log(folderPaths.value);
+      console.log("NEW PATH: ", newPath);
+      console.log("OPEN PATHS: ", openPaths.value);
+
+      if (!openPaths.value.includes(newPath))
+        return tabsStore.createTab(newPath);
 
       if (unwatch) unwatch();
-      if (oldPath) api.unuseSource(oldPath);
-
+      //if (oldPath) api.unuseSource(oldPath);
       const items = api.getItems(currentPath.value);
       unwatch = watch(
         items,
@@ -70,32 +70,38 @@ export const usePathStore = defineStore("path", () => {
         },
         { deep: true },
       );
-
       /* todo  searchStore.updateSearchedItems(); */
     },
     { immediate: true },
   );
 
-  function isPathValid(path: string) {
-    //console.log("CHECKING PATH: ", path);
+  function loadItems() {}
+
+  const isPathValid = (path: string) => {
     const idx = path.indexOf("/");
     const _root = path.slice(0, idx > 0 ? idx : undefined);
-    if (_root in roots) {
-      root.value = _root as keyof typeof roots;
-      return true;
+    const isValid = _root in roots;
+    if (!isValid) {
+      dialogStore.showError("Invalid path.");
     }
-    router.replace({ path: `${defaultRoot}/${path}` });
-    return false;
-  }
+    return isValid;
+  };
 
-  function updatePaths() {}
+  const sanitizePath = (path: string) => {
+    // regex to remove duplicate slashes and start/end slashes
+    path = path.replace(/\/+/g, "/").replace(/(^\/)|(\/$)/g, "");
+    path = decodeURIComponent(path);
+    return path;
+  };
 
-  function pushOnTab(path: string) {
+  const pushOnTab = (path: string) => {
+    path = sanitizePath(path);
+    if (!isPathValid(path)) return;
     const tabs = settingsStore.settings.tabs;
-    tabs.find(t => t.id == settingsStore.settings.activeTabId)!.path = path;
+    tabs.find((t) => t.id == settingsStore.settings.activeTabId)!.path = path;
     settingsStore.setSetting("tabs", tabs);
-    router.push({ path });
-  }
+    console.log("PUSHING ON TAB: ", path);
+  };
 
-  return { root, folderPaths, currentPath, pushOnTab };
+  return { folderPaths, currentPath, pushOnTab };
 });

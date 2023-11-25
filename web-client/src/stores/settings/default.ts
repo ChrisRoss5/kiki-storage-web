@@ -1,7 +1,7 @@
 export const roots = {
   drive: { name: "Drive", icon: "cloud" },
-  shared: { name: "Shared", icon: "cloud" },
-  bin: { name: "Bin", icon: "cloud" },
+  shared: { name: "Shared", icon: "group" },
+  bin: { name: "Bin", icon: "delete" },
 };
 
 export const defaultRoot = "drive" satisfies keyof typeof roots;

@@ -4,12 +4,10 @@ import { getPathName, usePathStore } from "@/stores/path";
 import { roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { nextTick, ref, watch } from "vue";
-import { useRouter } from "vue-router";
 import CreateOrUpload from "./CreateOrUpload.vue";
 import ViewSelector from "./ViewSelector.vue";
 const itemsStore = useItemsStore();
 const pathStore = usePathStore();
-const router = useRouter();
 
 const pathInput = ref<HTMLInputElement | null>(null);
 const showPathInput = ref(false);
@@ -28,14 +26,14 @@ watch(
 
 const handlePathSubmit = () => {
   showPathInput.value = false;
-  router.push({ path: `/${newPath.value}` });
+  pathStore.pushOnTab(newPath.value);
 };
 </script>
 
 <template>
   <div class="z-[2] flex gap-3" @click.stop="null">
     <div
-      class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-lg bg-base-100/25 text-xl hover:bg-base-100/50"
+      class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-btn bg-base-100/25 text-xl hover:bg-base-100/50"
       :class="{ '!bg-base-100/50': showPathInput }"
       @click="showPathInput = true"
     >
@@ -54,7 +52,7 @@ const handlePathSubmit = () => {
         />
         <div class="absolute bottom-0 right-2 top-0 flex items-center gap-2">
           <div
-            class="material-symbols-outlined cursor-pointer rounded-full border border-primary bg-base-200 p-1 px-2 transition-opacity duration-300 hover:bg-base-300"
+            class="material-symbols-outlined cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 transition-opacity duration-300 hover:bg-base-300"
             :class="{ 'pointer-events-none opacity-30': !newPath }"
             @mousedown="handlePathSubmit"
           >
@@ -74,7 +72,7 @@ const handlePathSubmit = () => {
         </span>
         <a
           :href="`/${path}`"
-          class="whitespace-pre rounded-lg px-2 py-1 hover:bg-base-300"
+          class="whitespace-pre rounded-btn px-2 py-1 hover:bg-base-300"
           @drop.stop.prevent="itemsStore.handleDrop($event, path)"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"

@@ -20,7 +20,7 @@ provide("isSearch", false);
     </template>
     <div
       v-else
-      class="flex-center flex-1 flex-col gap-3 rounded-2xl border-2 border-dashed border-base-content mb-3"
+      class="flex-center flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content mb-3"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
