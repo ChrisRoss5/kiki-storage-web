@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
-import { useSearchItemsStore } from "@/stores/items";
+import { useItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";
 import { provide } from "vue";
 import SearchOptions from "./SearchOptions.vue";
@@ -9,7 +9,7 @@ import SearchOptions from "./SearchOptions.vue";
 provide("isSearch", true);
 
 const searchStore = useSearchStore();
-const searchItemsStore = useSearchItemsStore();
+const searchItemsStore = useItemsStore(true);
 </script>
 
 <template>
@@ -25,7 +25,7 @@ const searchItemsStore = useSearchItemsStore();
     />
     <div
       v-if="searchStore.isOpen"
-      class="absolute left-0 right-0 top-full z-10 mt-3 rounded-box bg-base-100 p-4 shadow-lg"
+      class="rounded-box absolute left-0 right-0 top-full z-10 mt-3 bg-base-100 p-4 shadow-lg"
     >
       <template v-if="searchItemsStore.items.length">
         <ExplorerGrid class="in-search max-h-[70vh]" />

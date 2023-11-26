@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { useItemsStore, useSearchItemsStore } from "@/stores/items";
+import { useItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
@@ -12,7 +12,7 @@ import ExplorerGridHead from "./ExplorerGridHead.vue";
 import ExplorerGridItems from "./ExplorerGridItems.vue";
 
 const isSearch = inject<boolean>("isSearch")!;
-const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
+const itemsStore = useItemsStore(isSearch);
 const pathStore = usePathStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
@@ -133,7 +133,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     />
     <div
       ref="explBody"
-      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-x-hidden overflow-y-scroll rounded-box"
+      class="expl-body rounded-box relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-x-hidden overflow-y-scroll"
       :class="{ 'items-start gap-x-4 gap-y-1': view == 'grid' }"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
@@ -160,7 +160,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               ? `${item.path ? `/${item.path}` : ''}/${item.name}`
               : undefined
           "
-          class="expl-item cursor-pointer whitespace-nowrap rounded-box hover:bg-base-100/25"
+          class="expl-item rounded-box cursor-pointer whitespace-nowrap hover:bg-base-100/25"
           :class="{
             folder: item.isFolder,
             'is-selected !bg-base-100/50': item.isSelected,

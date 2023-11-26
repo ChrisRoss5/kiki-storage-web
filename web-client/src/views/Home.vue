@@ -3,15 +3,15 @@ import Explorer from "@/components/explorer/Explorer.vue";
 import ExplorerTabs from "@/components/explorer/ExplorerTabs.vue";
 import Header from "@/components/header/Header.vue";
 import { useContextMenuStore } from "@/stores/context-menu";
-import { useItemsStore, useSearchItemsStore } from "@/stores/items";
+import { useItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { onBeforeMount, onBeforeUnmount } from "vue";
 
-const itemsStore = useItemsStore();
-const searchItemsStore = useSearchItemsStore();
+const itemsStore = useItemsStore(false);
+const searchItemsStore = useItemsStore(true);
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const searchStore = useSearchStore();

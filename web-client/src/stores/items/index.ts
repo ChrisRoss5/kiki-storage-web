@@ -6,11 +6,11 @@ import { computed, ref } from "vue";
 import { usePathStore } from "../path";
 import { useShortDialogStore } from "../short-dialog";
 
-function itemsStore(this: { isSearch: boolean }) {
+function createItemsStore(this: { isSearch: boolean }) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
   const { api } = useItemsFirestoreStore();
-  const otherStore = this.isSearch ? useItemsStore() : useSearchItemsStore();
+  const otherStore = useItemsStore(!this.isSearch);
   console.log("otherStore: ", otherStore);
 
   const items = ref<Item[]>([]);
@@ -93,14 +93,16 @@ function itemsStore(this: { isSearch: boolean }) {
   };
 }
 
-export const useItemsStore = defineStore(
+export const itemsStore = defineStore(
   "items",
-  itemsStore.bind({ isSearch: false }),
+  createItemsStore.bind({ isSearch: false }),
 );
-export const useSearchItemsStore = defineStore(
+export const searchItemsStore = defineStore(
   "search-items",
-  itemsStore.bind({ isSearch: true }),
+  createItemsStore.bind({ isSearch: true }),
 );
-export type ItemsStore = ReturnType<
-  typeof useItemsStore | typeof useSearchItemsStore
->;
+
+export const useItemsStore = (isSearch = false) =>
+  isSearch ? searchItemsStore() : itemsStore();
+
+export type ItemsStore = ReturnType<typeof useItemsStore>;

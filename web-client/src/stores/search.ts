@@ -2,7 +2,7 @@ import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { _RefFirestore } from "vuefire";
-import { useItemsStore, useSearchItemsStore } from "./items";
+import { useItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
 
 export interface SizeFilter {
@@ -20,8 +20,8 @@ const initialSizeFilter: SizeFilter = {
 };
 
 export const useSearchStore = defineStore("search", () => {
-  const itemsStore = useItemsStore();
-  const searchItemsStore = useSearchItemsStore();
+  const itemsStore = useItemsStore(false);
+  const searchItemsStore = useItemsStore(true);
   const { api } = useItemsFirestoreStore();
 
   const isOpen = ref(false);
@@ -46,7 +46,7 @@ export const useSearchStore = defineStore("search", () => {
     items,
     (newItems) => {
       if (!newItems) return;
-     console.log("UPDATING SEARCH ITEMS: ", newItems.value.length);
+      console.log("UPDATING SEARCH ITEMS: ", newItems.value.length);
       searchItemsStore.items = newItems.value.map((i) => ({
         ...searchItemsStore.items.find((i2) => i2.id == i.id),
         ...i,

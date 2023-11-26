@@ -58,6 +58,7 @@ export const usePathStore = defineStore("path", () => {
 
       console.log("NEW PATH: ", newPath);
       currentPath.value = newPath;
+      tabsStore.updateTab(tabsStore.activeTab, newPath);
       const pathSplit = newPath.split("/");
       folderPaths.value = pathSplit.map((_, i) =>
         pathSplit.slice(0, i + 1).join("/"),
@@ -93,21 +94,18 @@ export const usePathStore = defineStore("path", () => {
     }
     return isValid;
   };
-
   const sanitizePath = (path: string) => {
     // regex to remove duplicate slashes and start/end slashes
     path = path.replace(/\/+/g, "/").replace(/(^\/)|(\/$)/g, "");
     path = decodeURIComponent(path);
     return path;
   };
-
   const pushOnTab = (path: string) => {
     path = sanitizePath(path);
     if (!isPathValid(path)) return;
     tabsStore.updateTab(tabsStore.activeTab, path);
     push(path);
   };
-
   const push = (path: string) => {
     console.log("PUSHING: ", path);
     router.push({ path: `/${path}` });

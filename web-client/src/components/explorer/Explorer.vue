@@ -40,9 +40,13 @@ provide("isSearch", false);
     radial-gradient(ellipse at bottom left, oklch(var(--s) / 25%), transparent),
     radial-gradient(ellipse at bottom right, oklch(var(--a) / 25%), transparent);
 }
-/* [data-theme="light"] #explorer {
-  background: linear-gradient(to bottom, oklch(var(--p) / 25%), transparent),
-    radial-gradient(ellipse at bottom left, oklch(var(--s) / 25%), transparent),
-    radial-gradient(ellipse at bottom right, oklch(var(--a) / 25%), transparent);
-} */
+[data-theme="light"] {
+  & .bg-base-100\/25 {
+    @apply bg-base-100 !important;
+  }
+
+  & #explorer {
+    @apply bg-none;
+  }
+}
 </style>

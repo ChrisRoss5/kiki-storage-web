@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useItemsStore, useSearchItemsStore } from "@/stores/items";
+import { useItemsStore } from "@/stores/items";
 import { formatSize } from "@/utils/format";
 import { computed, inject } from "vue";
 import ItemOptions from "../ItemOptions.vue";
 
 const isSearch = inject<boolean>("isSearch")!;
-const itemsStore = isSearch ? useSearchItemsStore() : useItemsStore();
+const itemsStore = useItemsStore(isSearch);
 
 const selectedItemsSize = computed(() => {
   const showSize =
