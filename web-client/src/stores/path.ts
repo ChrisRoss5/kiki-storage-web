@@ -78,7 +78,6 @@ export const usePathStore = defineStore("path", () => {
         },
         { deep: true },
       );
-      /* todo  searchStore.updateSearchedItems(); */
     },
     { immediate: true },
   );

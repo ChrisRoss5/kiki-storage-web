@@ -12,6 +12,7 @@ import ExplorerGridHead from "./ExplorerGridHead.vue";
 import ExplorerGridItems from "./ExplorerGridItems.vue";
 
 const isSearch = inject<boolean>("isSearch")!;
+const isThemeLight = inject<boolean>("isThemeLight")!;
 const itemsStore = useItemsStore(isSearch);
 const pathStore = usePathStore();
 const selectionRectStore = useSelectionRectStore();
@@ -133,7 +134,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     />
     <div
       ref="explBody"
-      class="expl-body rounded-box relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-x-hidden overflow-y-scroll"
+      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-x-hidden overflow-y-scroll rounded-box"
       :class="{ 'items-start gap-x-4 gap-y-1': view == 'grid' }"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
@@ -160,11 +161,15 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               ? `${item.path ? `/${item.path}` : ''}/${item.name}`
               : undefined
           "
-          class="expl-item rounded-box cursor-pointer whitespace-nowrap hover:bg-base-100/25"
+          class="expl-item cursor-pointer whitespace-nowrap rounded-box"
           :class="{
             folder: item.isFolder,
-            'is-selected !bg-base-100/50': item.isSelected,
+            'is-selected': item.isSelected,
             'col-span-full grid grid-cols-[subgrid]': view == 'list',
+            'hover:bg-base-200': isThemeLight,
+            'hover:bg-base-100/25': !isThemeLight,
+            '!bg-base-300': isThemeLight && item.isSelected,
+            '!bg-base-100/50': !isThemeLight && item.isSelected,
           }"
           tabindex="0"
           :draggable="item.isSelected"

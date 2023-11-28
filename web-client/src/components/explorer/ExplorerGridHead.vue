@@ -12,6 +12,7 @@ defineProps<{
 }>();
 
 const isSearch = inject<boolean>("isSearch")!;
+const isThemeLight = inject<boolean>("isThemeLight")!;
 const settingsStore = useSettingsStore();
 const contextMenuStore = useContextMenuStore();
 
@@ -48,10 +49,12 @@ const handleColumnClick = (key: keyof ItemCore) => {
 
 <template>
   <SlickList
-    class="z-[1] col-span-full grid grid-cols-[subgrid] items-center rounded-box bg-base-100/25 transition-[box-shadow]"
+    class="z-[1] col-span-full grid grid-cols-[subgrid] items-center rounded-box transition-[box-shadow]"
     :class="{
       'pointer-events-none': isDraggingColumn,
       'shadow-md': scrollTop > 0,
+      'bg-base-200': isThemeLight,
+      'bg-base-100/25': !isThemeLight,
     }"
     v-model:list="columnOrder"
     axis="x"
@@ -68,7 +71,11 @@ const handleColumnClick = (key: keyof ItemCore) => {
       v-for="(key, i) in columnOrder"
       :key="key"
       :index="i"
-      class="group relative z-[10] cursor-pointer rounded-box p-3 font-bold text-base-content/60 hover:bg-base-100/25"
+      class="group relative z-[10] cursor-pointer rounded-box p-3 font-bold text-base-content/60"
+      :class="{
+        'hover:bg-base-300': isThemeLight,
+        'hover:bg-base-100/25': !isThemeLight,
+      }"
       @click.stop="handleColumnClick(key)"
     >
       <DragHandle

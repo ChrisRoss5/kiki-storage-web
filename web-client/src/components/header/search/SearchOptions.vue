@@ -15,7 +15,7 @@ const showTypeDialog = ref(false);
     <div
       class="cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 hover:bg-base-300"
       :class="{
-        '!bg-primary': searchStore.sizeFilter.min || searchStore.sizeFilter.max,
+        '!bg-secondary text-secondary-content border-secondary': searchStore.sizeFilter.min || searchStore.sizeFilter.max,
       }"
       @click="showSizeDialog = true"
     >

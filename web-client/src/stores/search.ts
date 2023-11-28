@@ -20,11 +20,11 @@ const initialSizeFilter: SizeFilter = {
 };
 
 export const useSearchStore = defineStore("search", () => {
-  const itemsStore = useItemsStore(false);
   const searchItemsStore = useItemsStore(true);
   const { api } = useItemsFirestoreStore();
 
   const isOpen = ref(false);
+  const isFocused = ref(false);
   const query = ref("");
   const sizeFilter = ref<SizeFilter>({ ...initialSizeFilter });
   const type = ref<string>("");
@@ -40,46 +40,18 @@ export const useSearchStore = defineStore("search", () => {
 
   watch(filters, queryItems);
 
-  const items = ref<_RefFirestore<ItemCore[]>>();
-
-  watch(
-    items,
-    (newItems) => {
-      if (!newItems) return;
-      console.log("UPDATING SEARCH ITEMS: ", newItems.value.length);
-      searchItemsStore.items = newItems.value.map((i) => ({
-        ...searchItemsStore.items.find((i2) => i2.id == i.id),
-        ...i,
-      }));
-      /* setTimeout(() => {
-        // replace items with those in itemsStore todo
-        searchItemsStore.items = searchItemsStore.items.map(
-          (i) => itemsStore.items.find((i2) => i2.id == i.id) || i,
-        );
-      }, 10); */
-    },
-    { deep: true },
-  );
-
   async function queryItems() {
-    isOpen.value = areFiltersActive.value;
-    if (!isOpen.value) return items.value?.stop();
-    items.value = api.searchItems(filters.value);
+    isOpen.value = isFocused.value = areFiltersActive.value;
+    if (!isOpen.value) return searchItemsStore.stopDbItems();
+    searchItemsStore.setDbItems(api.searchItems(filters.value));
   }
-
-  const updateSearchedItems = (newSearch?: Item[]) => {
-    // todo
-    searchItemsStore.items = (newSearch ?? searchItemsStore.items).map(
-      (i) => itemsStore.items.find((_i) => _i.id == i.id) ?? i,
-    );
-  };
   const show = () => {
-    if (!isOpen.value) queryItems();
-    else isOpen.value = true;
+    if (!isOpen.value) return queryItems();
+    isOpen.value = isFocused.value = true;
   };
   const close = () => {
-    items.value?.stop();
-    isOpen.value = false;
+    searchItemsStore.stopDbItems();
+    isOpen.value = isFocused.value = false;
   };
   const resetSizeFilter = () => {
     sizeFilter.value = { ...initialSizeFilter };
@@ -93,11 +65,11 @@ export const useSearchStore = defineStore("search", () => {
   return {
     query,
     isOpen,
+    isFocused,
     sizeFilter,
     type,
     filters,
     areFiltersActive,
-    updateSearchedItems,
     show,
     close,
     resetSizeFilter,

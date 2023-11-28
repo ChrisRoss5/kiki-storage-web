@@ -7,6 +7,7 @@ import { provide } from "vue";
 import SearchOptions from "./SearchOptions.vue";
 
 provide("isSearch", true);
+provide("isThemeLight", true);
 
 const searchStore = useSearchStore();
 const searchItemsStore = useItemsStore(true);
@@ -17,25 +18,40 @@ const searchItemsStore = useItemsStore(true);
     <input
       type="text"
       placeholder="Search"
-      class="dsy-input dsy-input-bordered dsy-input-primary w-full"
+      class="dsy-input dsy-input-bordered dsy-input-primary w-full bg-base-100"
       v-model="searchStore.query"
       spellcheck="false"
       autocomplete="off"
       @focus="searchStore.show()"
     />
-    <div
-      v-if="searchStore.isOpen"
-      class="rounded-box absolute left-0 right-0 top-full z-10 mt-3 bg-base-100 p-4 shadow-lg"
-    >
-      <template v-if="searchItemsStore.items.length">
-        <ExplorerGrid class="in-search max-h-[70vh]" />
-        <ExplorerFooter class="mt-3" />
-      </template>
-      <div v-else class="flex-center flex-col gap-3">
-        <span class="material-symbols-outlined"> search </span>
-        <div>No results found</div>
+    <Transition name="slide-down">
+      <div
+        id="search-results"
+        v-if="searchStore.isOpen"
+        class="absolute left-0 right-0 top-full z-10 mt-3 rounded-box bg-base-100 p-4 shadow-lg"
+      >
+        <template v-if="searchItemsStore.items.length">
+          <ExplorerGrid class="in-search max-h-[70vh]" />
+          <ExplorerFooter class="mt-3" />
+        </template>
+        <div v-else class="flex-center flex-col gap-3">
+          <span class="material-symbols-outlined"> search </span>
+          <div>No results found</div>
+        </div>
       </div>
-    </div>
+    </Transition>
     <SearchOptions />
   </div>
 </template>
+
+<style scoped>
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: opacity 300ms, transform 300ms;
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>

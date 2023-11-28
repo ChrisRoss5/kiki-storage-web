@@ -48,6 +48,27 @@ body {
   @apply flex items-center justify-center;
 }
 
+/* daisyui */
+
+html:not([data-theme="light"]) {
+  & #explorer {
+    background: linear-gradient(to bottom, oklch(var(--p) / 25%), transparent),
+      radial-gradient(
+        ellipse at bottom left,
+        oklch(var(--s) / 25%),
+        transparent
+      ),
+      radial-gradient(
+        ellipse at bottom right,
+        oklch(var(--a) / 25%),
+        transparent
+      );
+  }
+  & #search-results {
+    @apply bg-base-100/75 backdrop-blur-xl;
+  }
+}
+
 /* vue transitions */
 
 .fade-enter-active,

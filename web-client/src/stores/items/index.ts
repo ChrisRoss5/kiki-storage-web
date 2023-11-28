@@ -2,7 +2,8 @@ import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import { _RefFirestore } from "vuefire";
 import { usePathStore } from "../path";
 import { useShortDialogStore } from "../short-dialog";
 
@@ -11,11 +12,35 @@ function createItemsStore(this: { isSearch: boolean }) {
   const pathStore = usePathStore();
   const { api } = useItemsFirestoreStore();
   const otherStore = useItemsStore(!this.isSearch);
-  console.log("otherStore: ", otherStore);
 
+  const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
   const newFolderName = ref("");
+
+  const setDbItems = (newItems: _RefFirestore<ItemCore[]>) =>
+    (dbItems.value = newItems);
+  const stopDbItems = () => dbItems.value?.stop();
+
+  watch(
+    dbItems,
+    (newDbItems) => {
+      if (!newDbItems) return;
+      console.log(
+        `UPDATING ${this.isSearch ? "SEARCH" : ""} ITEMS: `,
+        newDbItems.value.length,
+      );
+      items.value = newDbItems.value.map(
+        (newDbItem) =>
+          otherStore.items.find((i) => i.id == newDbItem.id) ?? {
+            ...items.value.find((i) => i.id == newDbItem.id),
+            ...newDbItem, // ItemCore will overwrite Item's previous Core values while keeping state
+          },
+      );
+      //.map((i) => otherStore.items.find((i2) => i2.id == i.id) || i);
+    },
+    { deep: true },
+  );
 
   const areItemsInvalid = async (newItems: Item[], path: string) => {
     const scopedItems =
@@ -80,6 +105,9 @@ function createItemsStore(this: { isSearch: boolean }) {
   const deselectAll = () => items.value.forEach((i) => (i.isSelected = false));
 
   return {
+    dbItems,
+    setDbItems,
+    stopDbItems,
     items,
     selectedItems,
     newFolderName,

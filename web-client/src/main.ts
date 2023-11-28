@@ -1,13 +1,14 @@
 import "file-icon-vectors/dist/file-icon-vivid.min.css";
+import "./styles/main.css"; // do not reorder (keep blank line)!
+
 import { createPinia } from "pinia";
 import VWave from "v-wave";
 import { createApp } from "vue";
-import "./styles/main.css";
-import router from "./router";
+import { plugin as Slicksort } from "vue-slicksort";
 import { VueFire, VueFireAuth } from "vuefire";
 import App from "./App.vue";
 import { firebaseApp } from "./firebase";
-import { plugin as Slicksort } from "vue-slicksort";
+import router from "./router";
 
 const pinia = createPinia();
 const app = createApp(App);

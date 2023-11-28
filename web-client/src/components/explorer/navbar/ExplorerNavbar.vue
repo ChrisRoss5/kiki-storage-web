@@ -3,9 +3,12 @@ import { useItemsStore } from "@/stores/items";
 import { getPathName, usePathStore } from "@/stores/path";
 import { roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
-import { nextTick, ref, watch } from "vue";
+import { inject, nextTick, ref, watch } from "vue";
 import CreateOrUpload from "./CreateOrUpload.vue";
 import ViewSelector from "./ViewSelector.vue";
+
+const isThemeLight = inject<boolean>("isThemeLight")!;
+
 const itemsStore = useItemsStore();
 const pathStore = usePathStore();
 
@@ -33,8 +36,13 @@ const handlePathSubmit = () => {
 <template>
   <div class="z-[2] flex gap-3" @click.stop="null">
     <div
-      class="rounded-btn relative flex flex-1 cursor-pointer flex-wrap items-center bg-base-100/25 text-xl hover:bg-base-100/50"
-      :class="{ '!bg-base-100/50': showPathInput }"
+      class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-btn text-xl"
+      :class="{
+        'bg-base-200 hover:bg-base-300': isThemeLight,
+        'bg-base-300': isThemeLight && showPathInput,
+        'bg-base-100/25 hover:bg-base-100/50': !isThemeLight,
+        'bg-base-100/50': !isThemeLight && showPathInput,
+      }"
       @click="showPathInput = true"
     >
       <template v-if="showPathInput">
@@ -52,7 +60,7 @@ const handlePathSubmit = () => {
         />
         <div class="absolute bottom-0 right-2 top-0 flex items-center gap-2">
           <div
-            class="material-symbols-outlined rounded-badge cursor-pointer border border-primary bg-base-200 p-1 px-2 transition-opacity duration-300 hover:bg-base-300"
+            class="material-symbols-outlined cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 transition-opacity duration-300 hover:bg-base-300"
             :class="{ 'pointer-events-none opacity-30': !newPath }"
             @mousedown="handlePathSubmit"
           >
@@ -72,7 +80,11 @@ const handlePathSubmit = () => {
         </span>
         <a
           :href="`/${path}`"
-          class="rounded-btn whitespace-pre px-2 py-1 hover:bg-base-300"
+          class="whitespace-pre rounded-btn px-2 py-1"
+          :class="{
+            'hover:bg-base-100': isThemeLight,
+            'hover:bg-base-300': !isThemeLight,
+          }"
           @drop.stop.prevent="itemsStore.handleDrop($event, path)"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
@@ -95,8 +107,8 @@ const handlePathSubmit = () => {
 <style scoped>
 a {
   transition:
-    transform 250ms,
-    border 250ms;
+    transform 300ms,
+    border 300ms;
   border-width: 2px;
   border-color: transparent;
   white-space: pre;

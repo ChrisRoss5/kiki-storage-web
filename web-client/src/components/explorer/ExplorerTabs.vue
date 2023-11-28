@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import { getPathName } from "@/stores/path";
+import { useSettingsStore } from "@/stores/settings";
 import { roots } from "@/stores/settings/default";
 import { useTabsStore } from "@/stores/tabs";
+import { computed } from "vue";
 import { SlickItem, SlickList } from "vue-slicksort";
 
 const tabsStore = useTabsStore();
+const settingsStore = useSettingsStore();
+
+const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 </script>
 
 <template>
   <SlickList
     class="flex -translate-x-2 select-none px-5 pt-3"
+    :class="{
+      'mb-2 border-b-[0.25rem] border-base-300': isThemeLight,
+    }"
     v-model:list="tabsStore.tabs"
     axis="x"
     lockAxis="x"
@@ -23,11 +31,12 @@ const tabsStore = useTabsStore();
         :href="tab.path"
         :key="tab.id"
         :index="i"
-        class="rounded-box relative mb-2 ml-2 min-w-0 max-w-[20vw] flex-grow basis-0 cursor-pointer whitespace-nowrap bg-base-200 py-1 text-lg hover:bg-base-300"
+        class="relative mb-2 ml-2 min-w-0 max-w-[20vw] flex-grow basis-0 cursor-pointer whitespace-nowrap rounded-box bg-base-200 py-1 text-lg hover:bg-base-300"
         :class="{
-          'tab-active !mb-0 cursor-default rounded-b-none !bg-primary/30 pb-3':
+          'tab-active !mb-0 cursor-default rounded-b-none pb-3':
             tab.id == tabsStore.activeTab.id,
         }"
+        draggable="false"
         @click.prevent="tabsStore.switchTab(tab)"
       >
         <div class="relative flex gap-1 overflow-hidden pl-3 pr-7">
@@ -49,8 +58,13 @@ const tabsStore = useTabsStore();
             class="flex-center absolute -right-1 bottom-0 top-0 z-10 w-10 text-right"
           >
             <div
-              class="material-symbols-outlined rounded-badge flex h-6 w-6 cursor-pointer items-center justify-center !text-base hover:bg-base-100/50"
+              class="material-symbols-outlined flex h-6 w-6 cursor-pointer items-center justify-center rounded-badge !text-base"
+              :class="{
+                'hover:bg-base-100': isThemeLight,
+                'hover:bg-base-100/50': !isThemeLight,
+              }"
               @click.stop.prevent="tabsStore.deleteTab(tab)"
+              v-wave
             >
               close
             </div>
@@ -60,8 +74,9 @@ const tabsStore = useTabsStore();
     </TransitionGroup>
     <div class="flex-center mb-2 ml-3">
       <div
-        class="material-symbols-outlined flex-center rounded-badge aspect-square h-full cursor-pointer bg-base-200 !text-xl hover:bg-base-300"
+        class="material-symbols-outlined flex-center aspect-square h-full cursor-pointer rounded-badge bg-base-200 !text-xl hover:bg-base-300"
         @click="() => tabsStore.createTab()"
+        v-wave
       >
         add
       </div>
@@ -99,7 +114,12 @@ const tabsStore = useTabsStore();
     transparent
   );
 }
+[data-theme="light"] .tab-active {
+  --tab-bg: oklch(var(--b3));
+}
 .tab-active {
+  --tab-bg: oklch(var(--p) / 30%);
+  background-color: var(--tab-bg) !important;
   &::before,
   &::after {
     content: "";
@@ -113,7 +133,7 @@ const tabsStore = useTabsStore();
     background-image: radial-gradient(
       circle at 0 0,
       transparent var(--rounded-box),
-      oklch(var(--p) / 30%) calc(var(--rounded-box) + 0.03rem)
+      var(--tab-bg) calc(var(--rounded-box) + 0.03rem)
     );
   }
   &::after {
@@ -121,7 +141,7 @@ const tabsStore = useTabsStore();
     background-image: radial-gradient(
       circle at 100% 0,
       transparent var(--rounded-box),
-      oklch(var(--p) / 30%) calc(var(--rounded-box) + 0.03rem)
+      var(--tab-bg) calc(var(--rounded-box) + 0.03rem)
     );
   }
   /* The 0.03rem difference is just enough to simulate anti-aliasing! */

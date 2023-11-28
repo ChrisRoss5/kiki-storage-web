@@ -60,12 +60,12 @@ const handleClear = () => {
       <div class="py-4 flex items-center gap-3">
         <div>Set maximum size:</div>
         <div class="flex-1 dsy-join border border-primary">
-          <div class="relative dsy-join-item w-full">
+          <div class="relative w-full">
             <input
               v-model="sizeFilter.max"
               min="0"
               type="number"
-              class="w-full text-right p-1 pr-0"
+              class="w-full dsy-join-item text-right p-1 pr-0"
             />
             <div
               v-if="!sizeFilter.max"
