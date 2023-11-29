@@ -30,9 +30,9 @@ const gridStyle = computed<CSSProperties>(() => ({
   gridTemplateColumns:
     view.value == "list"
       ? columnSettings.value.order
-          .map((c) => (c == "name" ? "auto" : "min-content"))
+          .map((c) => (c == "name" ? "minmax(10rem, auto)" : "min-content"))
           .join(" ")
-      : "repeat(auto-fill, minmax(200px, 1fr))",
+      : "repeat(auto-fill, minmax(10rem, 1fr))",
 }));
 
 const explBody = ref<HTMLElement | null>(null);
@@ -125,7 +125,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 
 <template>
   <div
-    class="grid min-h-0 w-full select-none"
+    class="grid min-h-0 w-full select-none overflow-x-auto"
     :class="{
       'grid-rows-1': view == 'grid',
       'grid-rows-[auto_1fr]': view == 'list',
@@ -139,7 +139,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     />
     <div
       ref="explBody"
-      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-x-hidden overflow-y-scroll rounded-box"
+      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll rounded-box"
       :class="{ 'items-start gap-x-4 gap-y-1': view == 'grid' }"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"

@@ -36,11 +36,19 @@ function createItemsStore(this: { isSearch: boolean }) {
         newDbItem,
       ),
     );
+    /*       .map((i) => {
+        if (i.isFolder) return i;
+        const ref = storageRef(storage, storagePath + i.id);
+        console.log(ref);
+        i.storageFile = useStorageFile(storageRef(storage, storagePath + i.id));
+        console.log(i.storageFile);
+        return i;
+      }); */
     // ItemCore will overwrite Item's previous Core values while keeping state
   };
 
   // VUEFIRE BUG: pending is false when it should be true!
-  watch(() => dbItems.value?.pending, setItems); // BUG FIX!
+  watch(() => dbItems.value?.pending, setItems); // BUGFIX!
   watch(() => dbItems.value?.data, setItems, { deep: true });
 
   const areItemsInvalid = async (newItems: Item[], path: string) => {
@@ -55,30 +63,30 @@ function createItemsStore(this: { isSearch: boolean }) {
     if (error) dialogStore.showError(error);
     return !!error;
   };
-  const handleDrop = async (e: DragEvent, path?: string) => {
+  const handleDrop = (e: DragEvent, path?: string) => {
     path ??= pathStore.currentPath;
     clearDragOverStyle(e);
     const itemsData = e.dataTransfer?.getData("items");
-    if (itemsData) {
-      let newItems = JSON.parse(itemsData) as Item[];
-      if (await areItemsInvalid(newItems, path)) return;
-      const folders = newItems.filter((i) => i.isFolder);
-      if (
-        folders.some((f) =>
-          path!.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
-        )
+    if (itemsData) handleMove(JSON.parse(itemsData), path);
+    else if (e.dataTransfer) createFiles(e.dataTransfer.files, path);
+  };
+  const handleMove = async (items: Item[], path: string) => {
+    if (await areItemsInvalid(items, path)) return;
+    const folders = items.filter((i) => i.isFolder);
+    const msg = "You can't move a folder into its own subfolder.";
+    if (
+      folders.some((f) =>
+        path!.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
       )
-        return dialogStore.showError(
-          "You can't move a folder into its own subfolder.",
-        );
-      newItems = newItems.filter(
-        (i) =>
-          !folders.some((f) =>
-            i.path.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
-          ),
-      );
-      api.moveItems(newItems, path);
-    } else if (e.dataTransfer) createFiles(e.dataTransfer.files, path);
+    )
+      return dialogStore.showError(msg);
+    items = items.filter(
+      (i) =>
+        !folders.some((f) =>
+          i.path.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
+        ),
+    );
+    api.moveItems(items, path);
   };
   const createFolder = async () => {
     const item = _createFolder(newFolderName.value, pathStore.currentPath);
@@ -92,6 +100,7 @@ function createItemsStore(this: { isSearch: boolean }) {
     if (!newItems.length)
       return dialogStore.showError("No valid files were selected.");
     if (await areItemsInvalid(newItems, path)) return;
+
     api.createItems(newItems);
   };
   const deleteItems = async () => {

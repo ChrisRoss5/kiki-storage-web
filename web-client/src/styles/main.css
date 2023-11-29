@@ -17,6 +17,7 @@
 }
 ::-webkit-scrollbar {
   width: 0.65rem;
+  height: 0.65rem;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -34,10 +35,6 @@ a {
   font-weight: 500;
   text-decoration: inherit;
   cursor: pointer;
-}
-body {
-  margin: 0;
-  overflow: hidden;
 }
 .material-symbols-outlined {
   font-size: 1.5rem;

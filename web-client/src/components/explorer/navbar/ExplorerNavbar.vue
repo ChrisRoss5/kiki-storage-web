@@ -34,7 +34,7 @@ const handlePathSubmit = () => {
 </script>
 
 <template>
-  <div class="z-[2] flex gap-3" @click.stop="null">
+  <div class="z-[2] flex gap-3 flex-wrap" @click.stop="null">
     <div
       class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-btn text-xl"
       :class="{
@@ -98,9 +98,9 @@ const handlePathSubmit = () => {
         </a>
       </template>
     </div>
-    <div class="flex gap-3">
+    <div class="flex gap-3 w-full lg:w-auto">
       <ViewSelector />
-      <CreateOrUpload />
+      <CreateOrUpload class="ml-auto" />
     </div>
   </div>
 </template>

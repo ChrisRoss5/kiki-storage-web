@@ -94,7 +94,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
           collection(db, dbPath),
           where("path", "==", path),
           where("name", "==", name),
-          limit(1), // this costs one read no matter how many items are returned
+          limit(1), // this costs one read no matter how many items match
         ).withConverter(itemConverter),
         { once: true },
       ).promise.value;
