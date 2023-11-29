@@ -18,29 +18,30 @@ function createItemsStore(this: { isSearch: boolean }) {
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
   const newFolderName = ref("");
 
-  const setDbItems = (newItems: _RefFirestore<ItemCore[]>) =>
-    (dbItems.value = newItems);
   const stopDbItems = () => dbItems.value?.stop();
+  const setDbItems = (newItems: _RefFirestore<ItemCore[]>) => {
+    dbItems.value = newItems;
+  };
+  const setItems = () => {
+    const newDbItems = dbItems.value?.value;
+    if (!newDbItems || dbItems.value?.pending) return;
+    console.log(
+      `UPDATING ${this.isSearch ? "SEARCH " : ""}ITEMS: `,
+      newDbItems.length,
+    );
+    items.value = newDbItems.map((newDbItem) =>
+      Object.assign(
+        otherStore.items.find((i) => i.id == newDbItem.id) ??
+          items.value.find((i) => i.id == newDbItem.id) ?? { ...newDbItem },
+        newDbItem,
+      ),
+    );
+    // ItemCore will overwrite Item's previous Core values while keeping state
+  };
 
-  watch(
-    dbItems,
-    (newDbItems) => {
-      if (!newDbItems) return;
-      console.log(
-        `UPDATING ${this.isSearch ? "SEARCH" : ""} ITEMS: `,
-        newDbItems.value.length,
-      );
-      items.value = newDbItems.value.map(
-        (newDbItem) =>
-          otherStore.items.find((i) => i.id == newDbItem.id) ?? {
-            ...items.value.find((i) => i.id == newDbItem.id),
-            ...newDbItem, // ItemCore will overwrite Item's previous Core values while keeping state
-          },
-      );
-      //.map((i) => otherStore.items.find((i2) => i2.id == i.id) || i);
-    },
-    { deep: true },
-  );
+  // VUEFIRE BUG: pending is false when it should be true!
+  watch(() => dbItems.value?.pending, setItems); // Extra check to fix bug!
+  watch(() => dbItems.value?.data, setItems, { deep: true });
 
   const areItemsInvalid = async (newItems: Item[], path: string) => {
     const scopedItems =
@@ -101,6 +102,10 @@ function createItemsStore(this: { isSearch: boolean }) {
     api.renameItem(item);
     item.isRenaming = false;
   };
+  const stopRenaming = () => {
+    const item = items.value.find((i) => i.isRenaming);
+    if (item) item.isRenaming = false;
+  };
   const selectAll = () => items.value.forEach((i) => (i.isSelected = true));
   const deselectAll = () => items.value.forEach((i) => (i.isSelected = false));
 
@@ -116,6 +121,7 @@ function createItemsStore(this: { isSearch: boolean }) {
     createFiles,
     deleteItems,
     renameItem,
+    stopRenaming,
     selectAll,
     deselectAll,
   };

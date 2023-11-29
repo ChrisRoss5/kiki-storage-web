@@ -5,15 +5,13 @@ export function setDragOverStyle(e: DragEvent) {
   setTimeout(() => (isThrottled = false), 10);
   let target = e.target as HTMLElement;
   target =
-    target.closest(".expl-row") ?? target.closest(".expl-body") ?? target;
-  const willNeedRect = target.classList.contains("expl-row");
+    target.closest(".expl-item") ?? target.closest(".expl-body") ?? target;
+  const willNeedRect = target.classList.contains("expl-item");
   if (willNeedRect && !target.classList.contains("folder"))
     target = target.closest(".expl-body")!;
   if (
     document.body.hasAttribute("dragging-items") &&
-    (target.classList.contains("expl-body") ||
-      target.classList.contains("router-link-active") ||
-      target.classList.contains("is-selected"))
+    target.classList.contains("expl-body")
   )
     return;
   let { offsetX: x, offsetY: y } = e;

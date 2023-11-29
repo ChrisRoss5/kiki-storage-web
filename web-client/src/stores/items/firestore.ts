@@ -15,7 +15,6 @@ import {
 import { defineStore } from "pinia";
 import {
   UseCollectionOptions,
-  _RefFirestore,
   useCollection,
   useCurrentUser,
   useFirestore,
@@ -32,31 +31,14 @@ export interface DbItem {
   size?: number;
 }
 
-
 // Vuefire Issue #1315 - SSR console warning
 
 export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const user = useCurrentUser();
   const db = useFirestore();
   const dbPath = `app/drive/${user.value?.uid}`;
-  const sources = {} as Record<
-    // todo
-    string,
-    { items: _RefFirestore<ItemCore[]>; subscribers: number }
-  >;
 
   const api = {
-    async useSource(path: string) {
-      if (!sources[path])
-        sources[path] = { items: this.getItems(path), subscribers: 0 };
-      sources[path].subscribers++;
-      return sources[path].items;
-    },
-    unuseSource(path: string) {
-      if (!sources[path]) return;
-      sources[path].subscribers--;
-      if (!sources[path].subscribers) delete sources[path];
-    },
     searchItems(filters: SearchFilters) {
       const constraints: QueryConstraint[] = [];
       if (filters.query) {
@@ -90,7 +72,6 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       nestedOnly?: boolean,
       options?: UseCollectionOptions,
     ) {
-      //console.log("GETTING ITEMS FOR PATH: ", path); // todo
       return useCollection(
         query(
           collection(db, dbPath),
@@ -103,6 +84,21 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         ).withConverter(itemConverter),
         { ...options },
       );
+    },
+    async getParentItem(path: string) {
+      if (path in roots) return null;
+      const name = path.split("/").pop()!;
+      path = path.slice(0, -name.length - 1);
+      const items = await useCollection(
+        query(
+          collection(db, dbPath),
+          where("path", "==", path),
+          where("name", "==", name),
+          limit(1), // this costs one read no matter how many items are returned
+        ).withConverter(itemConverter),
+        { once: true },
+      ).promise.value;
+      return items.at(0) ?? null;
     },
     createItem(item: Item) {
       addDoc(collection(db, dbPath).withConverter(itemConverter), item);
@@ -160,20 +156,10 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
 
   async function updateParentDateModified(...items: Item[]) {
     for (let path of new Set(items.map((i) => i.path))) {
-      if (path in roots) continue;
-      const name = path.split("/").pop()!;
-      path = path.slice(0, -name.length - 1);
-      useCollection(
-        query(
-          collection(db, dbPath),
-          where("path", "==", path),
-          where("name", "==", name),
-          limit(1), // this costs one read no matter how many items are returned
-        ).withConverter(itemConverter),
-      ).promise.value.then((items) => {
-        const updateData = { dateModified: Timestamp.now() };
-        updateDoc(doc(db, dbPath, items[0].id!), updateData);
-      });
+      const parent = await api.getParentItem(path);
+      if (!parent) continue;
+      const updateData = { dateModified: Timestamp.now() };
+      updateDoc(doc(db, dbPath, parent.id!), updateData);
     }
   }
 

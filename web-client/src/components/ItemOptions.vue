@@ -32,8 +32,7 @@ const options = computed<Option[]>(() => [
           icon: "edit",
           label: "Rename",
           onClick: () => {
-            props.itemsStore.selectedItems[0].isRenaming =
-              !props.itemsStore.selectedItems[0].isRenaming;
+            props.itemsStore.selectedItems[0].isRenaming = true;
           },
         },
       ]

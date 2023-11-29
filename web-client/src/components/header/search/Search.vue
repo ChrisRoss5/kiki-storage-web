@@ -28,7 +28,8 @@ const searchItemsStore = useItemsStore(true);
       <div
         id="search-results"
         v-if="searchStore.isOpen"
-        class="absolute left-0 right-0 top-full z-10 mt-3 rounded-box bg-base-100 p-4 shadow-lg"
+        class="absolute left-0 right-0 top-full z-10 mt-3 rounded-box bg-base-100 p-4 shadow-lg transition-shadow duration-300"
+        :class="{ 'shadow-base-content/50': searchStore.isFocused }"
       >
         <template v-if="searchItemsStore.items.length">
           <ExplorerGrid class="in-search max-h-[70vh]" />
@@ -47,7 +48,9 @@ const searchItemsStore = useItemsStore(true);
 <style scoped>
 .slide-down-enter-active,
 .slide-down-leave-active {
-  transition: opacity 300ms, transform 300ms;
+  transition:
+    opacity 300ms,
+    transform 300ms;
 }
 .slide-down-enter-from,
 .slide-down-leave-to {

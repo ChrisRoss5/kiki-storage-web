@@ -1,9 +1,8 @@
 import { defineStore } from "pinia";
-import { WatchStopHandle, computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
-import { useSearchStore } from "./search";
 import { useSettingsStore } from "./settings";
 import { roots } from "./settings/default";
 import { useShortDialogStore } from "./short-dialog";
@@ -18,7 +17,6 @@ export const usePathStore = defineStore("path", () => {
   const route = useRoute();
   const router = useRouter();
   const itemsStore = useItemsStore();
-  const searchStore = useSearchStore();
   const { api } = useItemsFirestoreStore();
   const settingsStore = useSettingsStore();
   const tabsStore = useTabsStore();
@@ -40,58 +38,47 @@ export const usePathStore = defineStore("path", () => {
           const startupTab = tabsStore.tabs.find((t) => t.path == startupPath);
           if (!startupTab) tabsStore.createTab(startupPath);
           else tabsStore.switchTab(startupTab);
-          return ;
+          return;
         }
       }
-      console.log("NEW ACTIVE TAB: ", activeTab);
       push(activeTab.path);
     },
   );
 
-  let unwatch: WatchStopHandle;
   watch(
     [() => route.path, () => settingsStore.dbSettings?.id],
     async ([newPath, dbSettingsId]) => {
       if (!dbSettingsId || !route.meta.requiresAuth) return;
       newPath = sanitizePath(newPath);
       if (!isPathValid(newPath)) return;
-
-      console.log("NEW PATH: ", newPath);
       currentPath.value = newPath;
       tabsStore.updateTab(tabsStore.activeTab, newPath);
       const pathSplit = newPath.split("/");
       folderPaths.value = pathSplit.map((_, i) =>
         pathSplit.slice(0, i + 1).join("/"),
       );
-
-      if (unwatch) unwatch();
-      //if (oldPath) api.unuseSource(oldPath);
-      const items = api.getItems(currentPath.value);
-      unwatch = watch(
-        items,
-        (items) => {
-          console.log("UPDATING ITEMS: ", items); // todo
-          itemsStore.items = items.map((i) => ({
-            ...itemsStore.items.find((i2) => i2.id == i.id),
-            ...i,
-          }));
-        },
-        { deep: true },
-      );
+      itemsStore.setDbItems(api.getItems(newPath));
     },
     { immediate: true },
   );
 
-  function loadItems() {}
-
-  const isPathValid = (path: string) => {
+  const isPathValid = async (path: string) => {
+    const prevPath = currentPath.value;
     const idx = path.indexOf("/");
     const _root = path.slice(0, idx > 0 ? idx : undefined);
-    const isValid = _root in roots;
-    if (!isValid) {
-      dialogStore.showError("Invalid path.");
+    if (!(_root in roots)) {
+      dialogStore.showError("Invalid root folder path.");
+      return false;
     }
-    return isValid;
+    if (path != _root)
+      api.getParentItem(path).then((parentItem) => {
+        if (parentItem) return;
+        dialogStore.showError(
+          "Invalid path. The parent folder does not exist.",
+        );
+        replace(prevPath);
+      });
+    return true;
   };
   const sanitizePath = (path: string) => {
     // regex to remove duplicate slashes and start/end slashes
@@ -106,9 +93,11 @@ export const usePathStore = defineStore("path", () => {
     push(path);
   };
   const push = (path: string) => {
-    console.log("PUSHING: ", path);
     router.push({ path: `/${path}` });
-  }
+  };
+  const replace = (path: string) => {
+    router.replace({ path: `/${path}` });
+  };
 
   return { folderPaths, currentPath, pushOnTab };
 });

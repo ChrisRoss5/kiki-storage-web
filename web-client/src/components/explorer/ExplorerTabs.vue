@@ -37,7 +37,9 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
             tab.id == tabsStore.activeTab.id,
         }"
         draggable="false"
+        @auxclick.prevent.middle="tabsStore.deleteTab(tab)"
         @click.prevent="tabsStore.switchTab(tab)"
+        @dragover="tabsStore.switchTab(tab)"
       >
         <div class="relative flex gap-1 overflow-hidden pl-3 pr-7">
           <div

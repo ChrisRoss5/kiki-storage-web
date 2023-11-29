@@ -9,7 +9,6 @@ import Search from "./search/Search.vue";
     <Logo />
     <Search
       class="relative order-1 flex-1 basis-full lg:basis-auto"
-      @click.stop="null"
     />
     <UserIcon class="lg:order-1 z-20 order-0 ml-auto self-start" />
   </div>

@@ -7,7 +7,7 @@ import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
-import { CSSProperties, computed, inject, ref, watch } from "vue";
+import { CSSProperties, computed, inject, nextTick, ref, watch } from "vue";
 import ExplorerGridHead from "./ExplorerGridHead.vue";
 import ExplorerGridItems from "./ExplorerGridItems.vue";
 
@@ -38,6 +38,7 @@ const gridStyle = computed<CSSProperties>(() => ({
 const explBody = ref<HTMLElement | null>(null);
 const rectEl = ref<HTMLElement | null>(null);
 const scrollTop = ref(0);
+const preventTransition = ref(false);
 let lastSelectedItemIdx = 0;
 
 watch(
@@ -60,12 +61,16 @@ watch(
         return (a[orderBy].getTime() - b[orderBy].getTime()) * desc;
       return (a[orderBy] as string).localeCompare(b[orderBy] as string) * desc;
     });
+    nextTick(() => (preventTransition.value = false));
   },
   { immediate: true },
 );
 watch(
   () => pathStore.currentPath,
-  () => (lastSelectedItemIdx = 0),
+  () => {
+    lastSelectedItemIdx = 0;
+    preventTransition.value = true;
+  },
   { flush: "pre" },
 );
 
@@ -151,7 +156,16 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
       "
       @scroll="scrollTop = explBody?.scrollTop ?? 0"
     >
-      <TransitionGroup :name="view == 'list' ? 'expl-rows' : 'expl-items'">
+      <TransitionGroup
+        :name="
+          !preventTransition
+            ? view == 'list'
+              ? 'expl-rows'
+              : 'expl-items'
+            : ''
+        "
+        :css="!preventTransition"
+      >
         <a
           v-for="item in itemsStore.items"
           :key="item.id + isSearch.toString()"
@@ -189,6 +203,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
             :key="columnName"
             class="items-center"
             :class="{
+              'is-renaming': item.isRenaming && columnName == 'name',
               'text-right': columnName == 'size',
               'flex min-w-0 gap-3': columnName == 'name',
               'flex-col text-center': view == 'grid',
@@ -216,17 +231,18 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 .expl-item > * {
   padding: 15px;
   align-self: center;
+  &:not(.is-renaming) {
+    pointer-events: none;
+  }
 }
-[dragging-items] .expl-item {
+body[dragging-items] .expl-item,
+.expl-body.dragover .expl-item {
   &:not(.folder) {
     opacity: 0.25;
     transition: opacity 300ms;
-    & > * {
-      pointer-events: none;
-    }
   }
 }
-[dragging-items] .expl-item .expl-rows-enter-active,
+.expl-rows-enter-active,
 .expl-rows-leave-active,
 .expl-rows-enter-active ~ .expl-rows-move,
 .expl-rows-leave-active ~ .expl-rows-move {
@@ -239,8 +255,6 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
   transform: translateX(3rem);
 }
 .expl-rows-leave-active {
-  opacity: 0;
-  position: absolute;
-  transition: transform 300ms;
+  display: none;
 }
 </style>

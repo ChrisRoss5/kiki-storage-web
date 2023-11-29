@@ -52,6 +52,7 @@ watch(
     />
     <div
       v-if="item.isRenaming"
+      id="rename-container"
       class="ml-2 inline-flex max-w-full flex-wrap"
       :class="{ 'justify-center text-center': view == 'grid' }"
       @mousedown.stop="null"
@@ -66,14 +67,13 @@ watch(
         :class="{ 'max-w-full text-center': view == 'grid' }"
         @keyup.enter.stop="itemsStore.renameItem(item)"
         @keydown.esc.stop="item.isRenaming = false"
-        @blur="item.isRenaming = false"
         spellcheck="false"
         autocomplete="off"
       />
       <button
         class="dsy-btn dsy-btn-secondary dsy-join-item"
         :class="{ 'dsy-btn-disabled': !item.newName }"
-        @mousedown="itemsStore.renameItem(item)"
+        @click="itemsStore.renameItem(item)"
         v-wave
       >
         <span class="material-symbols-outlined"> check </span>
