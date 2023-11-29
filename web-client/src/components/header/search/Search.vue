@@ -28,10 +28,18 @@ const searchItemsStore = useItemsStore(true);
       <div
         id="search-results"
         v-if="searchStore.isOpen"
-        class="absolute left-0 right-0 top-full z-10 mt-3 rounded-box bg-base-100 p-4 shadow-lg transition-shadow duration-300"
+        class="absolute left-0 right-0 top-full z-10 mt-3 rounded-box bg-base-100 p-4 pt-0 shadow-lg transition-shadow duration-300"
         :class="{ 'shadow-base-content/50': searchStore.isFocused }"
       >
         <template v-if="searchItemsStore.items.length">
+          <div
+            @click.stop="searchStore.hide"
+            class="z-10 cursor-pointer text-base-content/50 text-center pb-3"
+          >
+          <span class="material-symbols-outlined"> expand_less </span>
+            Press esc to hide or click here
+            <span class="material-symbols-outlined"> expand_less </span>
+          </div>
           <ExplorerGrid class="in-search max-h-[70vh]" />
           <ExplorerFooter class="mt-3" />
         </template>

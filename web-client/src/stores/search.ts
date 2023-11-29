@@ -49,7 +49,7 @@ export const useSearchStore = defineStore("search", () => {
     if (!isOpen.value) return queryItems();
     isOpen.value = isFocused.value = true;
   };
-  const close = () => {
+  const hide = () => {
     searchItemsStore.stopDbItems();
     isOpen.value = isFocused.value = false;
   };
@@ -71,7 +71,7 @@ export const useSearchStore = defineStore("search", () => {
     filters,
     areFiltersActive,
     show,
-    close,
+    hide,
     resetSizeFilter,
     reset,
   };

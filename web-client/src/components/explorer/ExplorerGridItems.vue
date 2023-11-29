@@ -90,7 +90,7 @@ watch(
         {{ item.name + (item.type ? `.${item.type}` : "") }}
       </div>
       <div class="overflow-hidden text-ellipsis font-bold" v-if="isSearch">
-        Path: Personal drive/{{ item.path }}
+        Path: {{ item.path }}
       </div>
     </div>
   </template>

@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { auth } from "firebaseui";
-import { setLogLevel } from "firebase/firestore";
+//import { setLogLevel } from "firebase/firestore";
 import { useFirebaseAuth } from "vuefire";
 
 export const firebaseApp = initializeApp({

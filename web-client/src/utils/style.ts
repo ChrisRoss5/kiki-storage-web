@@ -11,7 +11,9 @@ export function setDragOverStyle(e: DragEvent) {
     target = target.closest(".expl-body")!;
   if (
     document.body.hasAttribute("dragging-items") &&
-    target.classList.contains("expl-body")
+    (target.classList.contains("expl-body") ||
+      target.classList.contains("is-current-path") ||
+      target.classList.contains("is-selected"))
   )
     return;
   let { offsetX: x, offsetY: y } = e;

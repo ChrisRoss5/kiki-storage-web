@@ -100,7 +100,7 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
     pathStore.pushOnTab(`${item.path}/${item.name}`);
-    if (isSearch) searchStore.close();
+    if (isSearch) searchStore.hide();
   } else dialogStore.showError("This item cannot be previewed."); // todo: add previews
 };
 const handleDragStart = (item: Item, e: DragEvent) => {

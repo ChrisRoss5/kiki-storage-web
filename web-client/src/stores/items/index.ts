@@ -40,7 +40,7 @@ function createItemsStore(this: { isSearch: boolean }) {
   };
 
   // VUEFIRE BUG: pending is false when it should be true!
-  watch(() => dbItems.value?.pending, setItems); // Extra check to fix bug!
+  watch(() => dbItems.value?.pending, setItems); // BUG FIX!
   watch(() => dbItems.value?.data, setItems, { deep: true });
 
   const areItemsInvalid = async (newItems: Item[], path: string) => {
@@ -63,13 +63,20 @@ function createItemsStore(this: { isSearch: boolean }) {
       let newItems = JSON.parse(itemsData) as Item[];
       if (await areItemsInvalid(newItems, path)) return;
       const folders = newItems.filter((i) => i.isFolder);
-      if (folders.some((f) => path!.startsWith(f.path + f.name)))
+      if (
+        folders.some((f) =>
+          path!.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
+        )
+      )
         return dialogStore.showError(
           "You can't move a folder into its own subfolder.",
         );
-      newItems = newItems.filter((i) => {
-        return !folders.some((f) => i.path.startsWith(f.path + f.name));
-      });
+      newItems = newItems.filter(
+        (i) =>
+          !folders.some((f) =>
+            i.path.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
+          ),
+      );
       api.moveItems(newItems, path);
     } else if (e.dataTransfer) createFiles(e.dataTransfer.files, path);
   };

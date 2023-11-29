@@ -38,7 +38,7 @@ const handleLeftMouseUp = (e: MouseEvent) => {
 const handleKeydown = (e: KeyboardEvent) => {
   const store = searchStore.isFocused ? searchItemsStore : itemsStore;
   if (e.key == "Escape") {
-    if (searchStore.isOpen) searchStore.close();
+    if (searchStore.isOpen) searchStore.hide();
     else if (store.selectedItems.length) store.deselectAll();
   } else if (e.key == "Delete" && store.selectedItems.length) {
     store.deleteItems();
@@ -72,7 +72,7 @@ const handleClickLeft = (e: MouseEvent) => {
     return;
   }
   if (!searchItemsStore.items.length && !searchStore.isFocused)
-    searchStore.close();
+    searchStore.hide();
   if (e.ctrlKey || e.shiftKey) return;
   store.deselectAll();
 };
@@ -81,8 +81,7 @@ const handleMouseDown = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   contextMenuStore.hide();
   searchStore.isFocused = !!target.closest("#search-results");
-  if (!target.closest("#rename-container"))
-    store.stopRenaming();
+  if (!target.closest("#rename-container")) store.stopRenaming();
 };
 </script>
 

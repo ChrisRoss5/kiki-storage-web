@@ -84,6 +84,7 @@ const handlePathSubmit = () => {
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,
+            'is-current-path': i == pathStore.folderPaths.length - 1,
           }"
           @drop.stop.prevent="itemsStore.handleDrop($event, path)"
           @dragover.stop.prevent="setDragOverStyle"

@@ -45,7 +45,7 @@ const themes = [
 
 <template>
   <div
-    class="rounded-box grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+    class="grid grid-cols-2 gap-4 rounded-box sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
     :class="{ '!grid-cols-1': onlyActiveTheme }"
   >
     <div
@@ -73,12 +73,24 @@ const themes = [
             <div class="font-bold">{{ theme }}</div>
             <div class="flex flex-wrap gap-1">
               <div
-                v-for="color in ['primary', 'secondary', 'accent', 'neutral']"
-                :class="`bg-${color} flex aspect-square w-5 items-center justify-center rounded lg:w-6`"
-                :key="color"
+                class="flex aspect-square w-5 items-center justify-center rounded bg-primary lg:w-6"
               >
-                <!-- todo fix colors? -->
-                <div :class="`text-${color}-content text-sm font-bold`">A</div>
+                <div class="text-sm font-bold text-primary-content">A</div>
+              </div>
+              <div
+                class="flex aspect-square w-5 items-center justify-center rounded bg-secondary lg:w-6"
+              >
+                <div class="text-sm font-bold text-secondary-content">A</div>
+              </div>
+              <div
+                class="flex aspect-square w-5 items-center justify-center rounded bg-accent lg:w-6"
+              >
+                <div class="text-sm font-bold text-accent-content">A</div>
+              </div>
+              <div
+                class="flex aspect-square w-5 items-center justify-center rounded bg-neutral lg:w-6"
+              >
+                <div class="text-sm font-bold text-neutral-content">A</div>
               </div>
             </div>
           </div>
