@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useItemsStorage } from "@/stores/items/storage";
+import { useItemsStorageStore } from "@/stores/items/storage";
 import { formatSize } from "@/utils/format";
 import { computed } from "vue";
 
-const itemsStorage = useItemsStorage();
+const itemsStorage = useItemsStorageStore();
 const items = computed(() => itemsStorage.itemsUploading);
 const totalSize = computed(() =>
   items.value.reduce((acc, item) => acc + item.size!, 0),
@@ -113,7 +113,7 @@ const totalUploaded = computed(() =>
           :class="{ 'opacity-0': allItemsPaused }"
         ></div>
         <div class="flex-1">
-          Uploading {{ items.length }} files
+          Uploading {{ items.length }} {{ items.length > 1 ? "files" : "file" }}
           <strong>
             ({{ formatSize(totalUploaded) }} / {{ formatSize(totalSize) }})
           </strong>

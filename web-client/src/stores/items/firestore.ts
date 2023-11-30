@@ -1,5 +1,7 @@
 import { roots } from "@/stores/settings/default";
 import {
+  DocumentData,
+  DocumentReference,
   FirestoreDataConverter,
   QueryConstraint,
   Timestamp,
@@ -9,6 +11,7 @@ import {
   doc,
   limit,
   query,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -19,6 +22,7 @@ import {
   useCurrentUser,
   useFirestore,
 } from "vuefire";
+import { useItemsStorageStore } from "./storage";
 
 export interface DbItem {
   id?: string;
@@ -36,6 +40,7 @@ export interface DbItem {
 export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const user = useCurrentUser();
   const db = useFirestore();
+  const { api: storageApi } = useItemsStorageStore();
   const dbPath = `app/drive/${user.value?.uid}`;
 
   const api = {
@@ -100,17 +105,16 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       ).promise.value;
       return items.at(0) ?? null;
     },
-    createItem(item: Item) {
-      addDoc(collection(db, dbPath).withConverter(itemConverter), item);
+    createItem(
+      item: Item,
+      itemDoc?: DocumentReference<DocumentData, DocumentData>,
+    ) {
+      if (itemDoc) setDoc(itemDoc, item);
+      else addDoc(collection(db, dbPath).withConverter(itemConverter), item);
       updateParentDateModified(item);
     },
     createItemDoc() {
-      return doc(collection(db, dbPath));
-    },
-    createItems(items: Item[]) {
-      for (const item of items)
-        addDoc(collection(db, dbPath).withConverter(itemConverter), item);
-      updateParentDateModified(...items);
+      return doc(collection(db, dbPath).withConverter(itemConverter));
     },
     moveItems(items: Item[], newPath: string) {
       for (const item of items) {
@@ -134,21 +138,25 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
     },
     deleteItems(items: Item[]) {
       for (const item of items) {
-        deleteDoc(doc(db, dbPath, item.id!));
+        this.deleteItem(item);
         if (item.isFolder)
           api
-            .getItems(item.path + item.name, true)
+            .getItems(item.path + item.name, true, { once: true })
             .promise.value.then((items) => {
-              for (const nestedItem of items)
-                deleteDoc(doc(db, dbPath, nestedItem.id!));
+              items.forEach(this.deleteItem);
             });
       }
       updateParentDateModified(...items);
     },
+    deleteItem(item: Item) {
+      if (!item.isFolder) storageApi.deleteFile(item);
+      deleteDoc(doc(db, dbPath, item.id!));
+    },
   };
 
   async function updatePaths(oldPath: string, newPath: string) {
-    const items = await api.getItems(oldPath, true).promise.value;
+    const items = await api.getItems(oldPath, true, { once: true }).promise
+      .value;
     for (const nestedItem of items) {
       const regexp = new RegExp(`^${oldPath}`);
       updateDoc(doc(db, dbPath, nestedItem.id!), {

@@ -93,10 +93,6 @@ watch(
         Path: {{ item.path }}
       </div>
     </div>
-    <div>
-      Uploading...
-      
-    </div>
   </template>
   <template v-else-if="columnName == 'size'">
     {{ item.isFolder ? "" : formatSize(item.size) }}

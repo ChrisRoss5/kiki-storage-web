@@ -6,13 +6,13 @@ import { computed, ref, watch } from "vue";
 import { _RefFirestore } from "vuefire";
 import { usePathStore } from "../path";
 import { useShortDialogStore } from "../short-dialog";
-import { useItemsStorage } from "./storage";
+import { useItemsStorageStore } from "./storage";
 
 function createItemsStore(this: { isSearch: boolean }) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
   const { api: firestoreApi } = useItemsFirestoreStore();
-  const { api: storageApi } = useItemsStorage();
+  const { api: storageApi } = useItemsStorageStore();
   const otherStore = useItemsStore(!this.isSearch);
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
@@ -39,7 +39,7 @@ function createItemsStore(this: { isSearch: boolean }) {
       ),
     );
     console.log("ITEMS: ", items.value);
-    
+
     /*       .map((i) => {
         if (i.isFolder) return i;
         const ref = storageRef(storage, storagePath + i.id);
@@ -106,7 +106,6 @@ function createItemsStore(this: { isSearch: boolean }) {
       return dialogStore.showError("No valid files were selected.");
     if (await areItemsInvalid(newItems, path)) return;
     storageApi.createFiles(newItems, files);
-    //firestoreApi.createItems(newItems);
   };
   const deleteItems = async () => {
     const _items = selectedItems.value;

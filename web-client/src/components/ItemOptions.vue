@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
 import { ItemsStore } from "@/stores/items";
+import { useItemsStorageStore } from "@/stores/items/storage";
 import { useSettingsStore } from "@/stores/settings";
+import { useShortDialogStore } from "@/stores/short-dialog";
 import { computed } from "vue";
 
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
+const itemsStorageStore = useItemsStorageStore();
+const dialogStore = useShortDialogStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 
@@ -23,12 +27,22 @@ const options = computed<Option[]>(() => [
   {
     icon: "download",
     label: "Download",
-    onClick: () => {},
+    onClick: () => {
+      if (props.itemsStore.selectedItems.some((i) => i.isFolder))
+        return dialogStore.showError(
+          "Downloading folders is not supported yet.",
+        );
+      props.itemsStore.selectedItems.forEach(
+        itemsStorageStore.api.downloadFile,
+      );
+    },
   },
   {
     icon: "share",
     label: "Share",
-    onClick: () => {},
+    onClick: () => {
+      dialogStore.showError("Sharing is not supported yet.");
+    },
   },
   ...(props.itemsStore.selectedItems.length == 1
     ? [

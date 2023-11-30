@@ -1,14 +1,17 @@
-import { ref as storageRef } from "firebase/storage";
+// https://firebase.google.com/docs/storage/web/download-files
+// gsutil cors set storage-cors-config.json gs://dropbox-clone-716f7.appspot.com
+
+import { deleteObject, getBlob, ref as storageRef } from "firebase/storage";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useCurrentUser, useFirebaseStorage, useStorageFile } from "vuefire";
 import { useShortDialogStore } from "../short-dialog";
 import { useItemsFirestoreStore } from "./firestore";
 
-export const useItemsStorage = defineStore("items-storage", () => {
+export const useItemsStorageStore = defineStore("items-storage", () => {
   const user = useCurrentUser();
   const storage = useFirebaseStorage();
-  const { api: firestoreApi } = useItemsFirestoreStore();
+  const itemsFirestoreStore = useItemsFirestoreStore();
   const dialogStore = useShortDialogStore();
   const storagePath = `user/${user.value?.uid}/`;
 
@@ -19,16 +22,16 @@ export const useItemsStorage = defineStore("items-storage", () => {
       for (let i = 0; i < files.length; i++) {
         const file = files.item(i)!;
         const item = items[i];
-        const firestoreDoc = firestoreApi.createItemDoc();
+        const firestoreDoc = itemsFirestoreStore.api.createItemDoc();
         const _storageRef = storageRef(storage, storagePath + firestoreDoc.id);
         const storageFile = useStorageFile(_storageRef);
+        console.log("CREATING FILE: ", item);
         item.id = firestoreDoc.id;
         item.storageFile = storageFile;
         itemsUploading.value.push(item);
-        console.log("CREATING FILE: ", file);
         storageFile.upload(file)?.then(() => {
-          console.log("UPLOADED FILE: ", file);
           itemsUploading.value.splice(itemsUploading.value.indexOf(item), 1);
+          itemsFirestoreStore.api.createItem(item, firestoreDoc);
         });
       }
     },
@@ -53,11 +56,21 @@ export const useItemsStorage = defineStore("items-storage", () => {
       if (await dialogStore.confirm(msg))
         itemsUploading.value.forEach(api.cancelUpload);
     },
+    deleteFile(item: Item) {
+      const _storageRef = storageRef(storage, storagePath + item.id!);
+      return deleteObject(_storageRef);
+    },
+    async downloadFile(item: Item) {
+      const _storageRef = storageRef(storage, storagePath + item.id!);
+      const blob = await getBlob(_storageRef);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${item.name}.${item.type}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
   };
-
-  /*   const getItemsUploading = (path: string) => {
-    return itemsUploading.value.filter((i) => i.path == path);
-  }; */
 
   return { itemsUploading, api };
 });
