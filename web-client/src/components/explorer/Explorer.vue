@@ -6,6 +6,7 @@ import { computed, provide } from "vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
 import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
+import Uploads from "../Uploads.vue";
 
 const itemsStore = useItemsStore();
 const settingsStore = useSettingsStore();
@@ -40,5 +41,6 @@ provide("isThemeLight", isThemeLight);
         Drop files or create a new folder
       </div>
     </div>
+    <Uploads />
   </div>
 </template>

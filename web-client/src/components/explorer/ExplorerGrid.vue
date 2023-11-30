@@ -157,13 +157,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
       @scroll="scrollTop = explBody?.scrollTop ?? 0"
     >
       <TransitionGroup
-        :name="
-          !preventTransition
-            ? view == 'list'
-              ? 'expl-rows'
-              : 'expl-items'
-            : ''
-        "
+        :name="!preventTransition ? 'rows' : ''"
         :css="!preventTransition"
       >
         <a
@@ -241,20 +235,5 @@ body[dragging-items] .expl-item,
     opacity: 0.25;
     transition: opacity 300ms;
   }
-}
-.expl-rows-enter-active,
-.expl-rows-leave-active,
-.expl-rows-enter-active ~ .expl-rows-move,
-.expl-rows-leave-active ~ .expl-rows-move {
-  transition:
-    opacity 300ms,
-    transform 300ms;
-}
-.expl-rows-enter-from {
-  opacity: 0;
-  transform: translateX(3rem);
-}
-.expl-rows-leave-active {
-  display: none;
 }
 </style>

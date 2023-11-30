@@ -13,11 +13,8 @@ interface Item extends ItemCore {
   searchEl?: HTMLElement;
   isSelected?: boolean;
   isRenaming?: boolean;
-  isDeleting?: boolean; // todo
-  isUploading?: boolean; // todo
-  isDownloading?: boolean; // todo
-  isSearched?: boolean;
   newName?: string;
+  storageFile?: any; // No type for ReturnType<typeof useStorageFile>
 }
 interface SearchFilters {
   query: string;

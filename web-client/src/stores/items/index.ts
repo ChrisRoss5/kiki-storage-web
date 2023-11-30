@@ -6,11 +6,13 @@ import { computed, ref, watch } from "vue";
 import { _RefFirestore } from "vuefire";
 import { usePathStore } from "../path";
 import { useShortDialogStore } from "../short-dialog";
+import { useItemsStorage } from "./storage";
 
 function createItemsStore(this: { isSearch: boolean }) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
-  const { api } = useItemsFirestoreStore();
+  const { api: firestoreApi } = useItemsFirestoreStore();
+  const { api: storageApi } = useItemsStorage();
   const otherStore = useItemsStore(!this.isSearch);
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
@@ -36,6 +38,8 @@ function createItemsStore(this: { isSearch: boolean }) {
         newDbItem,
       ),
     );
+    console.log("ITEMS: ", items.value);
+    
     /*       .map((i) => {
         if (i.isFolder) return i;
         const ref = storageRef(storage, storagePath + i.id);
@@ -55,7 +59,8 @@ function createItemsStore(this: { isSearch: boolean }) {
     const scopedItems =
       path == pathStore.currentPath
         ? items.value
-        : await api.getItems(path, false, { once: true }).promise.value;
+        : await firestoreApi.getItems(path, false, { once: true }).promise
+            .value;
     return newItems.some((i) => isItemInvalid(i, scopedItems));
   };
   const isItemInvalid = (item: Item, _items?: Item[]) => {
@@ -76,7 +81,7 @@ function createItemsStore(this: { isSearch: boolean }) {
     const msg = "You can't move a folder into its own subfolder.";
     if (
       folders.some((f) =>
-        path!.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
+        path.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
       )
     )
       return dialogStore.showError(msg);
@@ -86,13 +91,13 @@ function createItemsStore(this: { isSearch: boolean }) {
           i.path.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
         ),
     );
-    api.moveItems(items, path);
+    firestoreApi.moveItems(items, path);
   };
   const createFolder = async () => {
     const item = _createFolder(newFolderName.value, pathStore.currentPath);
     if (isItemInvalid(item)) return;
     newFolderName.value = "";
-    api.createItem(item);
+    firestoreApi.createItem(item);
   };
   const createFiles = async (files: FileList, path?: string) => {
     path ??= pathStore.currentPath;
@@ -100,22 +105,22 @@ function createItemsStore(this: { isSearch: boolean }) {
     if (!newItems.length)
       return dialogStore.showError("No valid files were selected.");
     if (await areItemsInvalid(newItems, path)) return;
-
-    api.createItems(newItems);
+    storageApi.createFiles(newItems, files);
+    //firestoreApi.createItems(newItems);
   };
   const deleteItems = async () => {
     const _items = selectedItems.value;
     const toDelete = _items.length > 1 ? `${_items.length} items` : "one item";
     const message = `Are you sure you want to delete ${toDelete}?`;
     if (!(await dialogStore.confirm(message))) return;
-    api.deleteItems(_items);
+    firestoreApi.deleteItems(_items);
   };
   const renameItem = async (item: Item) => {
     if (!item.newName) return;
     item.isRenaming = item.newName != item.name;
     if (!item.isRenaming || isItemInvalid({ ...item, name: item.newName }))
       return;
-    api.renameItem(item);
+    firestoreApi.renameItem(item);
     item.isRenaming = false;
   };
   const stopRenaming = () => {

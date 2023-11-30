@@ -104,6 +104,9 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       addDoc(collection(db, dbPath).withConverter(itemConverter), item);
       updateParentDateModified(item);
     },
+    createItemDoc() {
+      return doc(collection(db, dbPath));
+    },
     createItems(items: Item[]) {
       for (const item of items)
         addDoc(collection(db, dbPath).withConverter(itemConverter), item);

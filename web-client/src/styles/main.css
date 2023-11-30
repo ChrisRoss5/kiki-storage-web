@@ -61,7 +61,8 @@ html:not([data-theme="light"]) {
         transparent
       );
   }
-  & #search-results {
+  & #search-results,
+  & #uploads {
     @apply bg-base-100/75 backdrop-blur-xl;
   }
 }
@@ -75,4 +76,19 @@ html:not([data-theme="light"]) {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0 !important;
+}
+.rows-enter-active,
+.rows-leave-active,
+.rows-enter-active ~ .rows-move,
+.rows-leave-active ~ .rows-move {
+  transition:
+    opacity 300ms,
+    transform 300ms;
+}
+.rows-enter-from {
+  opacity: 0;
+  transform: translateY(-3rem);
+}
+.rows-leave-active {
+  display: none;
 }

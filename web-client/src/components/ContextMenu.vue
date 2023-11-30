@@ -51,14 +51,14 @@ const handleColumnChange = (key: keyof ItemCore) => {
 
 <template>
   <div
-    class="fixed z-10 select-none rounded-btn bg-base-200 shadow-md"
+    class="fixed z-10 select-none rounded-btn rounded-tl-none bg-base-200 shadow-md"
     ref="ctxmenu"
     @click.stop="null"
     @contextmenu.prevent="contextMenuStore.hide"
   >
     <ItemOptions
       v-if="contextMenuStore.activeContextMenu == 'item'"
-      class="overflow-hidden rounded-btn bg-base-200 shadow-lg"
+      class="rounded-btn bg-base-200 shadow-lg"
       :items-store="contextMenuStore.itemsStore!"
       :in-context-menu="true"
       @click="contextMenuStore.hide"

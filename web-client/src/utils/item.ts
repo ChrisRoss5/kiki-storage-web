@@ -9,8 +9,8 @@ export function _createFolder(name: string, path: string): ItemCore {
   };
 }
 
-export function convertFilesToItems(files: FileList, path: string): Item[] {
-  const newItems: Item[] = [];
+export function convertFilesToItems(files: FileList, path: string): ItemCore[] {
+  const newItems: ItemCore[] = [];
   for (const file of files) {
     if (!file.size) continue;
     const split = file.name.split(".");

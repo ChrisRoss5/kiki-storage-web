@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
 import { ItemsStore } from "@/stores/items";
+import { useSettingsStore } from "@/stores/settings";
 import { computed } from "vue";
 
 const contextMenuStore = useContextMenuStore();
+const settingsStore = useSettingsStore();
+
+const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 
 const props = defineProps<{
   itemsStore: ItemsStore;
@@ -56,7 +60,13 @@ const handleClick = (onClickHandler: () => void) => {
       <div
         v-for="{ icon, label, onClick } in options"
         :key="label"
-        class="dsy-tooltip cursor-pointer p-4 hover:bg-base-300"
+        class="dsy-tooltip cursor-pointer p-4"
+        :class="{
+          'hover:bg-base-100': isThemeLight,
+          'hover:bg-base-100/50': !isThemeLight && !inContextMenu,
+          'hover:bg-base-content/20': !isThemeLight && inContextMenu,
+          'rounded-btn': inContextMenu,
+        }"
         :data-tip="label"
         @click.stop="handleClick(onClick)"
         v-wave

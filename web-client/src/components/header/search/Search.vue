@@ -28,7 +28,7 @@ const searchItemsStore = useItemsStore(true);
       <div
         id="search-results"
         v-if="searchStore.isOpen"
-        class="absolute left-0 right-0 top-full z-10 mt-3 rounded-box bg-base-100 p-4 pt-0 shadow-lg transition-shadow duration-300"
+        class="absolute left-0 right-0 top-full z-20 mt-3 rounded-box bg-base-100 p-4 pt-0 shadow-lg transition-shadow duration-300"
         :class="{ 'shadow-base-content/50': searchStore.isFocused }"
       >
         <template v-if="searchItemsStore.items.length">
@@ -63,6 +63,6 @@ const searchItemsStore = useItemsStore(true);
 .slide-down-enter-from,
 .slide-down-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-0.5rem);
 }
 </style>

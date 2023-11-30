@@ -99,7 +99,7 @@ watch(
     </div>
   </template>
   <template v-else-if="columnName == 'size'">
-    {{ item.isFolder ? "" : formatSize(item.size!) }}
+    {{ item.isFolder ? "" : formatSize(item.size) }}
   </template>
   <template v-else-if="columnName == 'type'">
     {{ item.isFolder ? "Folder" : item.type.toUpperCase() }}
