@@ -19,7 +19,7 @@
     }
   ],
   "hosting": {
-    "public": "public",
+    "public": "web-client/dist",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -55,5 +55,9 @@
       "enabled": true
     },
     "singleProjectMode": true
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }

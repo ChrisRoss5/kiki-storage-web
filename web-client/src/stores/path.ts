@@ -76,7 +76,7 @@ export const usePathStore = defineStore("path", () => {
         dialogStore.showError(
           "Invalid path. The parent folder does not exist.",
         );
-        replace(prevPath);
+        replace(prevPath == currentPath.value ? _root : prevPath);
       });
     return true;
   };

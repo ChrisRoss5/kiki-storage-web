@@ -15,3 +15,4 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DROPBOX_CLONE_716F7 }}'
           projectId: dropbox-clone-716f7
+          entryPoint: ./web-client

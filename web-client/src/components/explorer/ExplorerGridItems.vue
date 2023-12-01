@@ -2,7 +2,6 @@
 import { ItemsStore } from "@/stores/items";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { formatDate, formatSize } from "@/utils/format";
-import icons from "file-icon-vectors/dist/icons/vivid/catalog.json";
 import { computed, nextTick, ref, watch } from "vue";
 
 const props = defineProps<{
@@ -11,6 +10,7 @@ const props = defineProps<{
   itemsStore: ItemsStore;
   columnName: keyof ItemCore;
   view: ExplorerView;
+  images: Record<string, string>;
 }>();
 
 const selectionRectStore = useSelectionRectStore();
@@ -24,10 +24,9 @@ const showFullText = computed(
 const imgSrc = computed(() => {
   let path = "/node_modules/file-icon-vectors/dist/icons/vivid/";
   if (props.item.isFolder) path += "folder.svg";
-  else if (!props.item.type || !icons.find((i) => i == props.item.type))
-    path += "blank.svg";
+  else if (!(path + `${props.item.type}.svg` in props.images)) path += "blank.svg";
   else path += `${props.item.type}.svg`;
-  return path;
+  return props.images[path];
 });
 
 watch(

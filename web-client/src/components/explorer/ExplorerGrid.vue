@@ -21,11 +21,14 @@ const searchStore = useSearchStore();
 const settingsStore = useSettingsStore();
 const contextMenuStore = useContextMenuStore();
 
+const images = import.meta.glob(
+  "/node_modules/file-icon-vectors/dist/icons/vivid/*.svg",
+  { eager: true, as: "url" },
+);
 const columnSettings = computed(
   () => settingsStore.settings[isSearch ? "searchColumns" : "columns"],
 );
 const view = computed(() => settingsStore.settings.view);
-
 const gridStyle = computed<CSSProperties>(() => ({
   gridTemplateColumns:
     view.value == "list"
@@ -209,6 +212,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               :items-store="itemsStore"
               :column-name="columnName"
               :view="view"
+              :images="images"
             />
           </div>
         </a>

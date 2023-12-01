@@ -1,6 +1,6 @@
-import { createRouter, createWebHashHistory, createWebHistory } from "vue-router";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
+import { createRouter, createWebHistory } from "vue-router";
 import { getCurrentUser } from "vuefire";
 
 const routes = [

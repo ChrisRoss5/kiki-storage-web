@@ -1,5 +1,3 @@
-import { computed } from "vue";
-
 export function isObject(item: any) {
   return item && typeof item === "object" && !Array.isArray(item);
 }
@@ -23,7 +21,7 @@ export function mergeDeep(target: any, ...sources: any) {
 }
 
 // Created because of slicksort's v-model
-type Getter<T> = () => T;
+/* type Getter<T> = () => T;
 type Setter<T> = (value: T) => Promise<void>;
 function asyncWritableComputed<T>(getter: Getter<T>, setter: Setter<T>) {
   let isSaving = false;
@@ -36,4 +34,4 @@ function asyncWritableComputed<T>(getter: Getter<T>, setter: Setter<T>) {
       isSaving = false;
     },
   });
-}
+} */
