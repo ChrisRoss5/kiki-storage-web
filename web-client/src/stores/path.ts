@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
 import { useSettingsStore } from "./settings";
-import { roots } from "./settings/default";
+import { defaultRoot, roots } from "./settings/default";
 import { useShortDialogStore } from "./short-dialog";
 import { useTabsStore } from "./tabs";
 
@@ -68,6 +68,7 @@ export const usePathStore = defineStore("path", () => {
     const _root = path.slice(0, idx > 0 ? idx : undefined);
     if (!(_root in roots)) {
       dialogStore.showError("Invalid root folder path.");
+      replace(defaultRoot);
       return false;
     }
     if (path != _root)

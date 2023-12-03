@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
+import LoaderIcon from "@/components/explorer/LoaderIcon.vue";
 import { useItemsStore } from "@/stores/items";
 import { useSearchStore } from "@/stores/search";
 import { provide } from "vue";
@@ -28,22 +29,23 @@ const searchItemsStore = useItemsStore(true);
       <div
         id="search-results"
         v-if="searchStore.isOpen"
-        class="absolute left-0 right-0 top-full z-20 mt-3 rounded-box bg-base-100 p-4 pt-0 shadow-lg transition-shadow duration-300"
+        class="absolute left-0 right-0 top-full z-20 mt-1 rounded-box bg-base-100 p-4 pt-0 shadow-lg transition-shadow duration-300"
         :class="{ 'shadow-base-content/50': searchStore.isFocused }"
       >
+        <LoaderIcon :loading="searchItemsStore.itemsPending" />
         <template v-if="searchItemsStore.items.length">
           <div
             @click.stop="searchStore.hide"
-            class="z-10 cursor-pointer text-base-content/50 text-center pb-3"
+            class="z-10 cursor-pointer py-2 text-center text-base-content/50"
           >
-          <span class="material-symbols-outlined"> expand_less </span>
-            Press esc to hide or click here
+            <span class="material-symbols-outlined"> expand_less </span>
+            Press esc or click here to hide
             <span class="material-symbols-outlined"> expand_less </span>
           </div>
           <ExplorerGrid class="in-search max-h-[70vh]" />
           <ExplorerFooter class="mt-3" />
         </template>
-        <div v-else class="flex-center flex-col gap-3">
+        <div v-else class="flex-center flex-col gap-3 pt-3">
           <span class="material-symbols-outlined"> search </span>
           <div>No results found</div>
         </div>

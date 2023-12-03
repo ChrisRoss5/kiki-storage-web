@@ -2,6 +2,7 @@ import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { getCurrentUser } from "vuefire";
+import { defaultRoot } from "../stores/settings/default";
 
 const routes = [
   {
@@ -11,7 +12,7 @@ const routes = [
   },
   {
     path: "/",
-    redirect: "/drive",
+    redirect: `/${defaultRoot}`,
     meta: { transition: "scale-in", requiresAuth: true },
   },
   {

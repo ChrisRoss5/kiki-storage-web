@@ -25,7 +25,6 @@ export const useItemsStorageStore = defineStore("items-storage", () => {
         const firestoreDoc = itemsFirestoreStore.api.createItemDoc();
         const _storageRef = storageRef(storage, storagePath + firestoreDoc.id);
         const storageFile = useStorageFile(_storageRef);
-        console.log("CREATING FILE: ", item);
         item.id = firestoreDoc.id;
         item.storageFile = storageFile;
         itemsUploading.value.push(item);

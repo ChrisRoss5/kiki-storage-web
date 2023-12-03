@@ -1,4 +1,6 @@
-let isThrottled = false;
+let isThrottled = false; // To prevent lag
+let isDragoverOverExplBody = false; // To prevent flicker between items
+
 export function setDragOverStyle(e: DragEvent) {
   if (isThrottled) return;
   isThrottled = true;
@@ -10,10 +12,14 @@ export function setDragOverStyle(e: DragEvent) {
   if (willNeedRect && !target.classList.contains("folder"))
     target = target.closest(".expl-body")!;
   if (
-    document.body.hasAttribute("dragging-items") &&
-    (target.classList.contains("expl-body") ||
-      target.classList.contains("is-current-path") ||
-      target.classList.contains("is-selected"))
+    (document.body.hasAttribute("dragging-items") &&
+      ((target.classList.contains("expl-body") &&
+        target.getAttribute("path") ==
+          document.body.getAttribute("dragging-items")) ||
+        target.classList.contains("is-current-path") ||
+        target.classList.contains("is-selected"))) ||
+    (target.classList.contains("expl-body") &&
+      target.closest("#search-results"))
   )
     return;
   let { offsetX: x, offsetY: y } = e;
@@ -23,20 +29,36 @@ export function setDragOverStyle(e: DragEvent) {
     y = e.clientY - rect.top;
   }
   target.classList.add("dragover");
-  target.style.background = `radial-gradient(
+  if (target.classList.contains("expl-body")) {
+    isDragoverOverExplBody = true;
+    target.style.background = `radial-gradient(
+    circle at ${x}px ${y}px,
+    oklch(var(--a) / 100%) 5%,
+    oklch(var(--a) / 50%) 10%,
+    transparent 20%
+  ) no-repeat`;
+  } else {
+    target.style.background = `radial-gradient(
     circle at ${x}px ${y}px,
     oklch(var(--a) / 100%),
     oklch(var(--a) / 50%) 50%,
-    oklch(var(--b1)) 70%
-  ) no-repeat`;
+    transparent 70%
+  )`;
+  }
 }
 
 export function clearDragOverStyle(e: DragEvent) {
   let target = e.target as HTMLElement;
-  if (target.nodeType != 1) return;
-  if (typeof target == "string") return;
-  if (target.closest(".expl-row:not(.folder)")) return;
   target = target.closest(".folder") ?? target.closest(".expl-body") ?? target;
-  target.classList.remove("dragover");
-  target.style.background = "";
+  if (target.classList.contains("expl-body")) {
+    isDragoverOverExplBody = false;
+    setTimeout(() => {
+      if (isDragoverOverExplBody) return;
+      target.classList.remove("dragover");
+      target.style.background = "";
+    }, 100);
+  } else {
+    target.classList.remove("dragover");
+    target.style.background = "";
+  }
 }

@@ -17,6 +17,7 @@ function createItemsStore(this: { isSearch: boolean }) {
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
+  const itemsPending = computed(() => !!dbItems.value?.pending);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
   const newFolderName = ref("");
 
@@ -26,11 +27,11 @@ function createItemsStore(this: { isSearch: boolean }) {
   };
   const setItems = () => {
     const newDbItems = dbItems.value?.value;
-    if (!newDbItems || dbItems.value?.pending) return;
-    console.log(
+    if (!newDbItems || itemsPending.value) return;
+    /* console.log(
       `UPDATING ${this.isSearch ? "SEARCH " : ""}ITEMS: `,
       newDbItems.length,
-    );
+    ); */
     items.value = newDbItems.map((newDbItem) =>
       Object.assign(
         otherStore.items.find((i) => i.id == newDbItem.id) ??
@@ -38,21 +39,11 @@ function createItemsStore(this: { isSearch: boolean }) {
         newDbItem,
       ),
     );
-    console.log("ITEMS: ", items.value);
-
-    /*       .map((i) => {
-        if (i.isFolder) return i;
-        const ref = storageRef(storage, storagePath + i.id);
-        console.log(ref);
-        i.storageFile = useStorageFile(storageRef(storage, storagePath + i.id));
-        console.log(i.storageFile);
-        return i;
-      }); */
     // ItemCore will overwrite Item's previous Core values while keeping state
   };
 
   // VUEFIRE BUG: pending is false when it should be true!
-  watch(() => dbItems.value?.pending, setItems); // BUGFIX!
+  watch(itemsPending, setItems); // BUGFIX!
   watch(() => dbItems.value?.data, setItems, { deep: true });
 
   const areItemsInvalid = async (newItems: Item[], path: string) => {
@@ -134,6 +125,7 @@ function createItemsStore(this: { isSearch: boolean }) {
     setDbItems,
     stopDbItems,
     items,
+    itemsPending,
     selectedItems,
     newFolderName,
     handleDrop,

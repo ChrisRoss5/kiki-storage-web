@@ -35,7 +35,7 @@ const gridStyle = computed<CSSProperties>(() => ({
       ? columnSettings.value.order
           .map((c) => (c == "name" ? "minmax(10rem, auto)" : "min-content"))
           .join(" ")
-      : "repeat(auto-fill, minmax(10rem, 1fr))",
+      : "repeat(auto-fill, minmax(5rem, 1fr))",
 }));
 
 const explBody = ref<HTMLElement | null>(null);
@@ -111,13 +111,16 @@ const handleDragStart = (item: Item, e: DragEvent) => {
     return e.preventDefault();
   else selectionRectStore.isLeftMouseDown = false;
   e.dataTransfer?.setData("items", JSON.stringify(itemsStore.selectedItems));
-  document.body.setAttribute("dragging-items", "true");
+  document.body.setAttribute("dragging-items", pathStore.currentPath);
 };
 const handleDragStop = () => {
   document.body.removeAttribute("dragging-items");
 };
 const handleDropOnItem = (item: Item, e: DragEvent) => {
-  if (item.isFolder && !item.isSelected)
+  if (
+    document.body.getAttribute("dragging-items") != pathStore.currentPath ||
+    (item.isFolder && !item.isSelected)
+  )
     itemsStore.handleDrop(e, `${item.path ? `${item.path}/` : ""}${item.name}`);
 };
 const handleItemRef = (item: Item, el: HTMLElement) => {
@@ -144,6 +147,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
       ref="explBody"
       class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll rounded-box"
       :class="{ 'items-start gap-x-4 gap-y-1': view == 'grid' }"
+      :path="pathStore.currentPath"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
@@ -198,7 +202,6 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               ? columnSettings.order
               : (['name'] as (keyof ItemCore)[])"
             :key="columnName"
-            class="items-center"
             :class="{
               'is-renaming': item.isRenaming && columnName == 'name',
               'text-right': columnName == 'size',

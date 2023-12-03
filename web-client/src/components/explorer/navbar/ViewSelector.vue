@@ -39,7 +39,7 @@ const buttons: Button[] = [
       <button
         class="dsy-btn"
         :class="{
-          'dsy-btn-secondary pointer-events-none': view == dbView,
+          'dsy-btn-primary pointer-events-none': view == dbView,
           'border-none bg-base-100/25 hover:bg-base-100/50':
             view != dbView && !isThemeLight,
         }"

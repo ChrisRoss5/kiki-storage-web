@@ -62,7 +62,7 @@ watch(
         v-model.trim="item.newName"
         type="text"
         :placeholder="`Enter a new ${item.isFolder ? 'folder' : 'file'} name`"
-        class="dsy-input dsy-join-item dsy-input-secondary outline-none"
+        class="dsy-input dsy-join-item dsy-input-primary outline-none"
         :class="{ 'max-w-full text-center': view == 'grid' }"
         @keyup.enter.stop="itemsStore.renameItem(item)"
         @keydown.esc.stop="item.isRenaming = false"
@@ -70,7 +70,7 @@ watch(
         autocomplete="off"
       />
       <button
-        class="dsy-btn dsy-btn-secondary dsy-join-item"
+        class="dsy-btn dsy-btn-primary dsy-join-item"
         :class="{ 'dsy-btn-disabled': !item.newName }"
         @click="itemsStore.renameItem(item)"
         v-wave

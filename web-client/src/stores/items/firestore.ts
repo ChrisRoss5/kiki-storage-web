@@ -141,7 +141,9 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         this.deleteItem(item);
         if (item.isFolder)
           api
-            .getItems(item.path + item.name, true, { once: true })
+            .getItems(`${item.path ? `${item.path}/` : ""}${item.name}`, true, {
+              once: true,
+            })
             .promise.value.then((items) => {
               items.forEach(this.deleteItem);
             });

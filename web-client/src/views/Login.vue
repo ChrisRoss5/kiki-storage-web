@@ -3,10 +3,8 @@ import Logo from "@/components/Logo.vue";
 import { useFirebaseUI } from "@/firebase";
 import "firebaseui/dist/firebaseui.css";
 import { onMounted } from "vue";
-import { useRouter } from "vue-router";
 
 const ui = useFirebaseUI();
-const router = useRouter();
 
 onMounted(() => {
   ui.reset();
@@ -24,7 +22,6 @@ onMounted(() => {
     signInFlow: "popup",
     callbacks: {
       signInSuccessWithAuthResult: () => {
-        router.push("/");
         return false;
       },
     },
@@ -33,15 +30,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="login-grid" class="flex flex-col justify-center h-screen">
+  <div id="login-grid" class="flex h-screen flex-col justify-center">
     <Logo class="mb-5 flex-col gap-3 text-black" />
-    <div id="firebaseui-auth-container"></div>
+    <div id="firebaseui-auth-container" class="overflow-auto"></div>
   </div>
 </template>
 
 <style>
 #login-grid {
-  background: radial-gradient(#fff 20%, transparent),
+  background:
+    radial-gradient(#fff 20%, transparent),
     conic-gradient(
         #fff,
         #8f9cac,

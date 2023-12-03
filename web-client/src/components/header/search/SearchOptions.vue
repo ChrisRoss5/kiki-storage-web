@@ -15,7 +15,8 @@ const showTypeDialog = ref(false);
     <div
       class="cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 hover:bg-base-300"
       :class="{
-        '!bg-secondary text-secondary-content border-secondary': searchStore.sizeFilter.min || searchStore.sizeFilter.max,
+        'border-primary !bg-primary text-primary-content':
+          searchStore.sizeFilter.min || searchStore.sizeFilter.max,
       }"
       @click="showSizeDialog = true"
     >
@@ -30,22 +31,24 @@ const showTypeDialog = ref(false);
         <template v-else>∞</template>
       </template>
       <template v-else> Size </template>
-      <SizeDialog :show="showSizeDialog" @close="showSizeDialog = false" />
     </div>
     <div
       class="cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 hover:bg-base-300"
-      :class="{ '!bg-primary': searchStore.type }"
+      :class="{
+        'border-primary !bg-primary text-primary-content': searchStore.type,
+      }"
       @click="showTypeDialog = true"
     >
       {{ searchStore.type || "Type" }}
-      <TypeDialog :show="showTypeDialog" @close="showTypeDialog = false" />
     </div>
     <div
       class="material-symbols-outlined cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 transition-opacity duration-300 hover:bg-base-300"
-      :class="[searchStore.areFiltersActive ? '' : ['pointer-events-none', 'opacity-30']]"
+      :class="{ 'pointer-events-none opacity-30': !searchStore.areFiltersActive }"
       @click="searchStore.reset"
     >
       close
     </div>
+    <SizeDialog :show="showSizeDialog" @close="showSizeDialog = false" />
+    <TypeDialog :show="showTypeDialog" @close="showTypeDialog = false" />
   </div>
 </template>
