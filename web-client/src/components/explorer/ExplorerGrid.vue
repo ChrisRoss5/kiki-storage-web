@@ -145,8 +145,8 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     />
     <div
       ref="explBody"
-      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll rounded-box"
-      :class="{ 'items-start gap-x-4 gap-y-1': view == 'grid' }"
+      class="expl-body rounded-box relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll"
+      :class="{ 'items-start gap-x-2': view == 'grid' }"
       :path="pathStore.currentPath"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
@@ -176,11 +176,11 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
               ? `${item.path ? `/${item.path}` : ''}/${item.name}`
               : undefined
           "
-          class="expl-item cursor-pointer whitespace-nowrap rounded-box"
+          class="expl-item"
           :class="{
             folder: item.isFolder,
             'is-selected': item.isSelected,
-            'col-span-full grid grid-cols-[subgrid]': view == 'list',
+            'is-list col-span-full grid grid-cols-[subgrid]': view == 'list',
             'hover:bg-base-200': isThemeLight,
             'hover:bg-base-100/25': !isThemeLight,
             '!bg-base-300': isThemeLight && item.isSelected,
@@ -229,11 +229,16 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 </template>
 
 <style>
-.expl-item > * {
-  padding: 15px;
-  align-self: center;
-  &:not(.is-renaming) {
-    pointer-events: none;
+.expl-item {
+  @apply rounded-box cursor-pointer whitespace-nowrap;
+  & > * {
+    @apply p-3;
+    &:not(.is-renaming) {
+      pointer-events: none;
+    }
+  }
+  &.is-list > * {
+    @apply p-3;
   }
 }
 body[dragging-items] .expl-item,

@@ -24,7 +24,8 @@ const showFullText = computed(
 const imgSrc = computed(() => {
   let path = "/node_modules/file-icon-vectors/dist/icons/vivid/";
   if (props.item.isFolder) path += "folder.svg";
-  else if (!(path + `${props.item.type}.svg` in props.images)) path += "blank.svg";
+  else if (!(path + `${props.item.type}.svg` in props.images))
+    path += "blank.svg";
   else path += `${props.item.type}.svg`;
   return props.images[path];
 });
@@ -47,13 +48,16 @@ watch(
       :src="imgSrc"
       class="fiv-viv flex-shrink-0 text-xl"
       :class="{ 'w-full': view == 'grid' }"
-      alt=""
+      alt="Icon"
     />
     <div
       v-if="item.isRenaming"
       id="rename-container"
-      class="ml-2 inline-flex max-w-full flex-wrap"
-      :class="{ 'justify-center text-center': view == 'grid' }"
+      class="inline-flex items-center flex-wrap z-[1]"
+      :class="{
+        'justify-center text-center': view == 'grid',
+        'ml-2': view == 'list',
+      }"
       @mousedown.stop="null"
       @click.stop.prevent="null"
     >
@@ -63,7 +67,7 @@ watch(
         type="text"
         :placeholder="`Enter a new ${item.isFolder ? 'folder' : 'file'} name`"
         class="dsy-input dsy-join-item dsy-input-primary outline-none"
-        :class="{ 'max-w-full text-center': view == 'grid' }"
+        :class="{ 'max-w-[calc(100%+2rem)] !p-0 text-center': view == 'grid' }"
         @keyup.enter.stop="itemsStore.renameItem(item)"
         @keydown.esc.stop="item.isRenaming = false"
         spellcheck="false"
@@ -80,7 +84,7 @@ watch(
     </div>
     <div class="w-full overflow-hidden" v-else>
       <div
-        class="overflow-hidden text-ellipsis whitespace-pre"
+        class="overflow-hidden text-ellipsis whitespace-pre break-words"
         :class="{
           'whitespace-pre-wrap': view == 'grid' || showFullText,
           'line-clamp-3': view == 'grid' && !showFullText,
@@ -88,7 +92,10 @@ watch(
       >
         {{ item.name + (item.type ? `.${item.type}` : "") }}
       </div>
-      <div class="overflow-hidden text-ellipsis font-bold" v-if="isSearch">
+      <div
+        class="overflow-hidden text-ellipsis font-bold"
+        v-if="isSearch && view == 'list'"
+      >
         Path: {{ item.path }}
       </div>
     </div>

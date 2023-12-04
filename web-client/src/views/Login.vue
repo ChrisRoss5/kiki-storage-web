@@ -20,11 +20,6 @@ onMounted(() => {
       "phone",
     ],
     signInFlow: "popup",
-    callbacks: {
-      signInSuccessWithAuthResult: () => {
-        return false;
-      },
-    },
   });
 });
 </script>

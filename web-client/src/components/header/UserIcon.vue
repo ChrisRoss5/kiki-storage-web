@@ -14,7 +14,7 @@ const showSettingsDialog = ref(false);
   <div class="dsy-dropdown">
     <label tabindex="0" class="cursor-pointer">
       <img
-        alt=""
+        alt="Profile picture"
         class="h-16 rounded-full"
         :src="user?.photoURL || defaultPfp"
         @error="($event.target as HTMLImageElement).src = defaultPfp"
