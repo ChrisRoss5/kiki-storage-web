@@ -87,7 +87,7 @@ const handleMouseDown = (e: MouseEvent) => {
 
 <template>
   <div
-    v-if="settingsStore.dbSettings?.id"
+    v-if="settingsStore.dbSettings"
     class="flex flex-col"
     @click.left="handleClickLeft"
     @mousedown="handleMouseDown"

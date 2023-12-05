@@ -146,7 +146,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     <div
       ref="explBody"
       class="expl-body rounded-box relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll"
-      :class="{ 'items-start gap-x-2': view == 'grid' }"
+      :class="{ 'items-start gap-x-2 gap-y-1': view == 'grid' }"
       :path="pathStore.currentPath"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
