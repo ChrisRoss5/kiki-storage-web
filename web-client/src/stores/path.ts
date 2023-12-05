@@ -29,7 +29,7 @@ export const usePathStore = defineStore("path", () => {
   watch(
     () => tabsStore.activeTab,
     (activeTab) => {
-      if (!settingsStore.dbSettings || activeTab.path == currentPath.value)
+      if (!settingsStore.dbSettings?.id || activeTab.path == currentPath.value)
         return;
       if (isStartup) {
         isStartup = false;

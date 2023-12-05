@@ -12,8 +12,10 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
   let isSearch = false;
   let explElRect = null as DOMRect | null;
   let startCoords = { x: 0, y: 0 };
+  let left = 0; // left and width must be global because they are used in the interval
+  let width = 0;
   let startScrollTop = 0;
-  let startMaxScrollTop = 0;
+  let startMaxScrollTop = 0; // to prevent auto-scrolling down to infinity in the interval
   let isCtrlOrShiftDown = false;
   let lastScrollDirection = null as "up" | "down" | null;
   let isThrottled = false;
@@ -32,9 +34,13 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     isActive.value = false;
     document.body.style.userSelect = "";
     lastScrollDirection = null;
-    rectEl.value.style.transition = "opacity 0.2s";
+    rectEl.value.style.transition = "opacity 300ms";
     rectEl.value.style.opacity = "0";
     rectEl.value.style.pointerEvents = "none";
+    setTimeout(() => {
+      if (!isActive.value)
+        rectEl.value!.style.width = rectEl.value!.style.height = "0";
+    }, 300);
     clearInterval(interval);
   };
   const handleLeftMouseDown = (
@@ -68,13 +74,13 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     };
     const x = newCoords.x - startCoords.x;
     const y = newCoords.y - startCoords.y;
-    const width = Math.abs(x);
+    width = Math.abs(x);
     let height = Math.abs(y);
     if (!isActive.value) {
       if (width < 5 || height < 5) return;
       activate();
     }
-    const left = x < 0 ? startCoords.x - width : startCoords.x;
+    left = x < 0 ? startCoords.x - width : startCoords.x;
     let top = y < 0 ? startCoords.y - height : startCoords.y;
     rectEl.value!.style.top = `${top}px`;
     rectEl.value!.style.left = `${left}px`;

@@ -205,7 +205,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
             :class="{
               'is-renaming': item.isRenaming && columnName == 'name',
               'text-right': columnName == 'size',
-              'flex min-w-0 gap-3': columnName == 'name',
+              'flex items-center min-w-0 gap-3': columnName == 'name',
               'flex-col text-center': view == 'grid',
             }"
           >
@@ -230,7 +230,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 
 <style>
 .expl-item {
-  @apply rounded-box cursor-pointer whitespace-nowrap;
+  @apply rounded-box cursor-pointer whitespace-nowrap items-center;
   & > * {
     @apply p-3;
     &:not(.is-renaming) {
@@ -238,7 +238,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     }
   }
   &.is-list > * {
-    @apply p-3;
+    @apply px-3;
   }
 }
 body[dragging-items] .expl-item,

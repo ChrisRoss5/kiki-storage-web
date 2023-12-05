@@ -86,17 +86,15 @@ const handleMouseDown = (e: MouseEvent) => {
 </script>
 
 <template>
-  <Transition name="fade">
-    <div
-      v-if="settingsStore.dbSettings"
-      class="flex flex-col"
-      @click.left="handleClickLeft"
-      @mousedown="handleMouseDown"
-      @contextmenu="contextMenuStore.hide()"
-    >
-      <Header />
-      <ExplorerTabs />
-      <Explorer />
-    </div>
-  </Transition>
+  <div
+    v-if="settingsStore.dbSettings?.id"
+    class="flex flex-col"
+    @click.left="handleClickLeft"
+    @mousedown="handleMouseDown"
+    @contextmenu="contextMenuStore.hide()"
+  >
+    <Header />
+    <ExplorerTabs />
+    <Explorer />
+  </div>
 </template>
