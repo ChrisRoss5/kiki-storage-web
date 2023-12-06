@@ -23,15 +23,17 @@ function createItemsStore(this: { isSearch: boolean }) {
 
   const stopDbItems = () => dbItems.value?.stop();
   const setDbItems = (newItems: _RefFirestore<ItemCore[]>) => {
+    // All paths are being watched, but in the future it may be necessary to stop watchers
+    // depending on the usage (dbItems.value?.stop();)
+    // But I highly doubt it will be necessary, not until the app has thousands of users
+    // or the Firestore pricing model changes to include a limit on concurrent watchers
+    // https://cloud.google.com/firestore/pricing
+    // https://firebase.google.com/docs/firestore/quotas#writes_and_transactions
     dbItems.value = newItems;
   };
   const setItems = () => {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
-    /* console.log(
-      `UPDATING ${this.isSearch ? "SEARCH " : ""}ITEMS: `,
-      newDbItems.length,
-    ); */
     items.value = newDbItems.map((newDbItem) =>
       Object.assign(
         otherStore.items.find((i) => i.id == newDbItem.id) ??

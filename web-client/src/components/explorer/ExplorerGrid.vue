@@ -117,11 +117,12 @@ const handleDragStop = () => {
   document.body.removeAttribute("dragging-items");
 };
 const handleDropOnItem = (item: Item, e: DragEvent) => {
-  if (
-    document.body.getAttribute("dragging-items") != pathStore.currentPath ||
-    (item.isFolder && !item.isSelected)
-  )
+  if (item.isFolder && !item.isSelected)
     itemsStore.handleDrop(e, `${item.path ? `${item.path}/` : ""}${item.name}`);
+  else if (
+    document.body.getAttribute("dragging-items") != pathStore.currentPath
+  )
+    itemsStore.handleDrop(e);
 };
 const handleItemRef = (item: Item, el: HTMLElement) => {
   if (isSearch) item.searchEl = el;
@@ -145,7 +146,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
     />
     <div
       ref="explBody"
-      class="expl-body rounded-box relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll"
+      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll rounded-box"
       :class="{ 'items-start gap-x-2 gap-y-1': view == 'grid' }"
       :path="pathStore.currentPath"
       @drop.stop.prevent="itemsStore.handleDrop"
@@ -205,7 +206,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
             :class="{
               'is-renaming': item.isRenaming && columnName == 'name',
               'text-right': columnName == 'size',
-              'flex items-center min-w-0 gap-3': columnName == 'name',
+              'flex min-w-0 items-center gap-3': columnName == 'name',
               'flex-col text-center': view == 'grid',
             }"
           >
@@ -230,7 +231,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
 
 <style>
 .expl-item {
-  @apply rounded-box cursor-pointer whitespace-nowrap items-center;
+  @apply cursor-pointer items-center whitespace-nowrap rounded-box;
   & > * {
     @apply p-3;
     &:not(.is-renaming) {
