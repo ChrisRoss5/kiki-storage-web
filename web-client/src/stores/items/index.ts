@@ -6,6 +6,7 @@ import { computed, ref, watch } from "vue";
 import { _RefFirestore } from "vuefire";
 import { usePathStore } from "../path";
 import { useSearchStore } from "../search";
+import { RootKey } from "../settings/default";
 import { useShortDialogStore } from "../short-dialog";
 import { useItemsStorageStore } from "./storage";
 
@@ -81,7 +82,8 @@ function createItemsStore(this: { isSearch: boolean }) {
     else if (e.dataTransfer) createFiles(e.dataTransfer.files, path);
   };
   const handleMove = async (items: Item[], path: string) => {
-    if (await areItemsInvalid(items, path)) return;
+    if ((path as RootKey) != "bin" && (await areItemsInvalid(items, path)))
+      return;
     const folders = items.filter((i) => i.isFolder);
     const msg = "You can't move a folder into its own subfolder.";
     if (
@@ -113,11 +115,15 @@ function createItemsStore(this: { isSearch: boolean }) {
     storageApi.createFiles(newItems, files);
   };
   const deleteItems = async () => {
+    const permanent = pathStore.currentRoot == "bin";
     const _items = selectedItems.value;
     const toDelete = _items.length > 1 ? `${_items.length} items` : "one item";
-    const message = `Are you sure you want to delete ${toDelete}?`;
+    const message = `Are you sure you want to delete ${toDelete}${
+      permanent ? " permanently" : ""
+    }?`;
     if (!(await dialogStore.confirm(message))) return;
-    firestoreApi.deleteItemsPermanently(_items);
+    if (!permanent) handleMove(_items, "bin" satisfies RootKey);
+    else firestoreApi.deleteItemsPermanently(_items);
   };
   const renameItem = async (item: Item) => {
     if (!item.newName) return;

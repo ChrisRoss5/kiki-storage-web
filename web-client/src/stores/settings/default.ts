@@ -4,7 +4,9 @@ export const roots = {
   bin: { name: "Bin", icon: "delete" },
 };
 
-export const defaultRoot = "drive" satisfies keyof typeof roots;
+export type RootKey = keyof typeof roots;
+
+export const defaultRoot = "drive" satisfies RootKey;
 
 const defaultActiveTab = { path: defaultRoot, id: crypto.randomUUID() };
 

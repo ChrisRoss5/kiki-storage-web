@@ -4,12 +4,12 @@ import { useRoute, useRouter } from "vue-router";
 import { useItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
 import { useSettingsStore } from "./settings";
-import { defaultRoot, roots } from "./settings/default";
+import { RootKey, defaultRoot, roots } from "./settings/default";
 import { useShortDialogStore } from "./short-dialog";
 import { useTabsStore } from "./tabs";
 
 export const getPathName = (path: string) => {
-  if (path in roots) return roots[path as keyof typeof roots].name;
+  if (path in roots) return roots[path as RootKey].name;
   return path.slice(path.lastIndexOf("/") + 1);
 };
 
@@ -24,7 +24,7 @@ export const usePathStore = defineStore("path", () => {
 
   const folderPaths = ref<string[]>([]);
   const currentPath = ref("");
-  const currentRoot = computed(() => currentPath.value.split("/")[0]);
+  const currentRoot = computed(() => currentPath.value.split("/")[0] as RootKey);
   let isStartup = true;
 
   watch(

@@ -2,6 +2,7 @@
 import { useContextMenuStore } from "@/stores/context-menu";
 import { ItemsStore } from "@/stores/items";
 import { useItemsStorageStore } from "@/stores/items/storage";
+import { usePathStore } from "@/stores/path";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { computed } from "vue";
@@ -10,6 +11,7 @@ const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
 const itemsStorageStore = useItemsStorageStore();
 const dialogStore = useShortDialogStore();
+const pathStore = usePathStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 
@@ -56,8 +58,8 @@ const options = computed<Option[]>(() => [
       ]
     : []),
   {
-    icon: "delete",
-    label: "Delete",
+    icon: pathStore.currentRoot == "bin" ? "delete_forever" : "delete",
+    label: pathStore.currentRoot == "bin" ? "Delete permanently" : "Delete",
     onClick: props.itemsStore.deleteItems,
   },
 ]);
@@ -79,7 +81,7 @@ const handleClick = (onClickHandler: () => void) => {
           'hover:bg-base-100': isThemeLight,
           'hover:bg-base-100/50': !isThemeLight && !inContextMenu,
           'hover:bg-base-content/20': !isThemeLight && inContextMenu,
-          'rounded-btn': inContextMenu,
+          'rounded-box': inContextMenu,
         }"
         :data-tip="label"
         @click.stop="handleClick(onClick)"

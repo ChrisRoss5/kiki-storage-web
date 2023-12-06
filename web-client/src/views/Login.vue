@@ -17,7 +17,7 @@ onMounted(() => {
     signInOptions: [
       "google.com",
       "twitter.com",
-      "facebook.com",
+      // "facebook.com",
       "github.com",
       "microsoft.com",
       "yahoo.com",

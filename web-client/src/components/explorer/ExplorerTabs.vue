@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getPathName } from "@/stores/path";
 import { useSettingsStore } from "@/stores/settings";
-import { roots } from "@/stores/settings/default";
+import { RootKey, roots } from "@/stores/settings/default";
 import { useTabsStore } from "@/stores/tabs";
 import { computed } from "vue";
 import { SlickItem, SlickList } from "vue-slicksort";
@@ -46,7 +46,7 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
             v-if="tab.path in roots"
             class="material-symbols-outlined !text-xl"
           >
-            {{ roots[tab.path as keyof typeof roots]?.icon }}
+            {{ roots[tab.path as RootKey]?.icon }}
           </div>
           <div
             v-else

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useItemsStore } from "@/stores/items";
 import { getPathName, usePathStore } from "@/stores/path";
-import { roots } from "@/stores/settings/default";
+import { RootKey, roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { inject, nextTick, ref, watch } from "vue";
 import CreateOrUpload from "./CreateOrUpload.vue";
@@ -34,7 +34,7 @@ const handlePathSubmit = () => {
 </script>
 
 <template>
-  <div class="z-[2] flex gap-3 flex-wrap" @click.stop="null">
+  <div class="z-[2] flex flex-wrap gap-3" @click.stop="null">
     <div
       class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-btn text-xl"
       :class="{
@@ -75,12 +75,9 @@ const handlePathSubmit = () => {
         >
           chevron_right
         </span>
-        <span v-else class="material-symbols-outlined pointer-events-none pl-2">
-          {{ roots[path as keyof typeof roots]?.icon }}
-        </span>
         <a
           :href="`/${path}`"
-          class="whitespace-pre rounded-btn px-2 py-1"
+          class="whitespace-pre rounded-btn px-2 py-1 relative"
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,
@@ -94,11 +91,17 @@ const handlePathSubmit = () => {
           draggable="false"
           v-wave
         >
-          {{ getPathName(path) }}
+          <span
+            v-if="!i"
+            class="material-symbols-outlined pointer-events-none pr-2 !align-text-bottom"
+          >
+            {{ roots[path as RootKey]?.icon }} </span
+          >{{ getPathName(path) }}
+          
         </a>
       </template>
     </div>
-    <div class="flex gap-3 w-full lg:w-auto">
+    <div class="flex w-full gap-3 lg:w-auto">
       <ViewSelector />
       <CreateOrUpload class="ml-auto" />
     </div>

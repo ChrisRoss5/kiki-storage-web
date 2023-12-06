@@ -34,9 +34,9 @@ watchPostEffect(() => {
   el.offsetHeight; // nosonar: reflow
   el.style.top = `${y}px`;
   el.style.left = `${x}px`;
-  el.style.transition = "opacity 300ms, clip-path 300ms, transform 300ms";
+  el.style.transition = "opacity 400ms, clip-path 400ms, transform 400ms";
   el.style.opacity = "1";
-  el.style.clipPath = "circle(150% at 0 0)";
+  el.style.clipPath = "circle(170% at 0 0)";
   el.style.transform = "translateY(0)";
 });
 
@@ -51,14 +51,14 @@ const handleColumnChange = (key: keyof ItemCore) => {
 
 <template>
   <div
-    class="fixed z-20 select-none rounded-btn bg-base-200 shadow-md"
+    class="fixed z-20 select-none rounded-box bg-base-200 shadow-md"
     ref="ctxmenu"
     @click.stop="null"
     @contextmenu.prevent="contextMenuStore.hide"
   >
     <ItemOptions
       v-if="contextMenuStore.activeContextMenu == 'item'"
-      class="rounded-btn bg-base-200 shadow-lg"
+      class="rounded-box bg-base-200 shadow-lg"
       :items-store="contextMenuStore.itemsStore!"
       :in-context-menu="true"
       @click="contextMenuStore.hide"
@@ -67,7 +67,7 @@ const handleColumnChange = (key: keyof ItemCore) => {
       <label
         v-for="key in allColumnsOrder"
         :key="key"
-        class="flex cursor-pointer items-center rounded-btn px-3 py-2 hover:bg-base-300"
+        class="flex cursor-pointer items-center rounded-box px-3 py-2 hover:bg-base-300"
       >
         <input
           type="checkbox"
