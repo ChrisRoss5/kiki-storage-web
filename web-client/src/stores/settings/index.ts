@@ -12,10 +12,8 @@ export const useSettingsStore = defineStore("settings", () => {
   const dbPath = computed(() => `settings/${user.value?.uid}`);
   const dbSettings = computed(() =>
     user.value
-      ? useDatabaseObject<Settings>(dbRef(db, dbPath.value)).value ?? {
-          id: false,
-        } // could be null if no settings are set, but id is wanted
-      : null,
+      ? useDatabaseObject<Settings>(dbRef(db, dbPath.value)).value // could be null if no settings are set
+      : undefined,
   );
   const dialogStore = useShortDialogStore();
 

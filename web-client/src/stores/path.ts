@@ -34,6 +34,7 @@ export const usePathStore = defineStore("path", () => {
       if (isStartup) {
         isStartup = false;
         const startupPath = sanitizePath(route.path);
+        if (!isPathValid(startupPath)) return;
         if (activeTab.path != startupPath) {
           const startupTab = tabsStore.tabs.find((t) => t.path == startupPath);
           if (!startupTab) tabsStore.createTab(startupPath);
@@ -89,7 +90,7 @@ export const usePathStore = defineStore("path", () => {
   };
   const pushOnTab = (path: string) => {
     path = sanitizePath(path);
-    if (!isPathValid(path)) return;
+    if (!settingsStore.dbSettings?.id || !isPathValid(path)) return;
     tabsStore.updateTab(tabsStore.activeTab, path);
     push(path);
   };

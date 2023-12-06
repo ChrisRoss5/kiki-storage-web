@@ -76,7 +76,7 @@ const handlePathSubmit = () => {
           chevron_right
         </span>
         <span v-else class="material-symbols-outlined pointer-events-none pl-2">
-          {{ roots[path as keyof typeof roots].icon }}
+          {{ roots[path as keyof typeof roots]?.icon }}
         </span>
         <a
           :href="`/${path}`"

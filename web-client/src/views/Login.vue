@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import Logo from "@/components/Logo.vue";
 import { useFirebaseUI } from "@/firebase";
+import defaultSettings from "@/stores/settings/default";
+import { useTabsStore } from "@/stores/tabs";
 import "firebaseui/dist/firebaseui.css";
 import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 
 const ui = useFirebaseUI();
+const router = useRouter();
+const tabsStore = useTabsStore();
 
 onMounted(() => {
   ui.reset();
@@ -20,13 +25,23 @@ onMounted(() => {
       "phone",
     ],
     signInFlow: "popup",
+    callbacks: {
+      signInSuccessWithAuthResult: (authResult) => {
+        if (authResult.additionalUserInfo.isNewUser) {
+          localStorage.setItem("theme", defaultSettings.theme);
+          document.documentElement.dataset.theme = defaultSettings.theme;
+          tabsStore.initOnRegister().then(() => router.push("/"));
+        } else router.push("/");
+        return false;
+      },
+    },
   });
 });
 </script>
 
 <template>
   <div id="login-grid" class="flex h-screen flex-col justify-center">
-    <Logo class="mb-5 flex-col gap-3 text-black" />
+    <Logo :is-login="true" class="mb-5 flex-col gap-3 text-black" />
     <div id="firebaseui-auth-container" class="overflow-auto"></div>
   </div>
 </template>

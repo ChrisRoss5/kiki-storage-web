@@ -46,7 +46,7 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
             v-if="tab.path in roots"
             class="material-symbols-outlined !text-xl"
           >
-            {{ roots[tab.path as keyof typeof roots].icon }}
+            {{ roots[tab.path as keyof typeof roots]?.icon }}
           </div>
           <div
             v-else
@@ -129,6 +129,7 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
     width: var(--rounded-box);
     height: var(--rounded-box);
     bottom: 0;
+    pointer-events: none;
   }
   &::before {
     right: 100%;
