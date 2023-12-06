@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
@@ -24,6 +24,7 @@ export const usePathStore = defineStore("path", () => {
 
   const folderPaths = ref<string[]>([]);
   const currentPath = ref("");
+  const currentRoot = computed(() => currentPath.value.split("/")[0]);
   let isStartup = true;
 
   watch(
@@ -101,5 +102,5 @@ export const usePathStore = defineStore("path", () => {
     router.replace({ path: `/${path}` });
   };
 
-  return { folderPaths, currentPath, pushOnTab };
+  return { folderPaths, currentPath, currentRoot, pushOnTab };
 });

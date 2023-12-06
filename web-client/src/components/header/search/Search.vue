@@ -3,6 +3,7 @@ import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
 import LoaderIcon from "@/components/explorer/LoaderIcon.vue";
 import { useItemsStore } from "@/stores/items";
+import { usePathStore } from "@/stores/path";
 import { useSearchStore } from "@/stores/search";
 import { provide } from "vue";
 import SearchOptions from "./SearchOptions.vue";
@@ -12,13 +13,14 @@ provide("isThemeLight", true);
 
 const searchStore = useSearchStore();
 const searchItemsStore = useItemsStore(true);
+const pathStore = usePathStore();
 </script>
 
 <template>
   <div>
     <input
       type="text"
-      placeholder="Search"
+      :placeholder="`Search ${pathStore.currentRoot}`"
       class="dsy-input dsy-input-bordered dsy-input-primary w-full bg-base-100"
       v-model="searchStore.query"
       spellcheck="false"

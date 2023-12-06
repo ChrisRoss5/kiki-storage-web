@@ -46,12 +46,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const api = {
     searchItems(filters: SearchFilters) {
       const constraints: QueryConstraint[] = [];
-      if (filters.query) {
-        constraints.push(
-          where("name", ">=", filters.query),
-          where("name", "<=", `${filters.query}\uf8ff`),
-        );
-      }
+      // Cannot have inequality filters on multiple properties!
       if (filters.minSize)
         constraints.push(where("size", ">=", filters.minSize));
       if (filters.maxSize)
@@ -81,10 +76,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         query(
           collection(db, dbPath),
           ...(nestedOnly
-            ? [
-                where("path", ">=", `${path}`),
-                where("path", "<=", `${path}\uf8ff`),
-              ]
+            ? startsWithConstraints(path)
             : [where("path", "==", path)]),
         ).withConverter(itemConverter),
         { ...options },
@@ -136,25 +128,32 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         );
       updateParentDateModified(item);
     },
-    deleteItems(items: Item[]) {
+    deleteItemsPermanently(items: Item[]) {
       for (const item of items) {
-        this.deleteItem(item);
+        this.deleteItemPermanently(item);
         if (item.isFolder)
           api
             .getItems(`${item.path ? `${item.path}/` : ""}${item.name}`, true, {
               once: true,
             })
             .promise.value.then((items) => {
-              items.forEach(this.deleteItem);
+              items.forEach(this.deleteItemPermanently);
             });
       }
       updateParentDateModified(...items);
     },
-    deleteItem(item: Item) {
+    deleteItemPermanently(item: Item) {
       if (!item.isFolder) storageApi.deleteFile(item);
       deleteDoc(doc(db, dbPath, item.id!));
     },
   };
+
+  function startsWithConstraints(string: string) {
+    return [
+      where("path", ">=", `${string}`),
+      where("path", "<=", `${string}\uf8ff`),
+    ];
+  }
 
   async function updatePaths(oldPath: string, newPath: string) {
     const items = await api.getItems(oldPath, true, { once: true }).promise

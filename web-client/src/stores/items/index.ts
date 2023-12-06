@@ -5,6 +5,7 @@ import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { _RefFirestore } from "vuefire";
 import { usePathStore } from "../path";
+import { useSearchStore } from "../search";
 import { useShortDialogStore } from "../short-dialog";
 import { useItemsStorageStore } from "./storage";
 
@@ -14,6 +15,7 @@ function createItemsStore(this: { isSearch: boolean }) {
   const { api: firestoreApi } = useItemsFirestoreStore();
   const { api: storageApi } = useItemsStorageStore();
   const otherStore = useItemsStore(!this.isSearch);
+  const searchStore = useSearchStore();
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
@@ -34,14 +36,24 @@ function createItemsStore(this: { isSearch: boolean }) {
   const setItems = () => {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
-    items.value = newDbItems.map((newDbItem) =>
-      Object.assign(
-        otherStore.items.find((i) => i.id == newDbItem.id) ??
-          items.value.find((i) => i.id == newDbItem.id) ?? { ...newDbItem },
-        newDbItem,
-      ),
-    );
-    // ItemCore will overwrite Item's previous Core values while keeping state
+    items.value = newDbItems
+      // Unsupported firestore query filters
+      .filter((newDbItem) =>
+        this.isSearch && searchStore.filters.query
+          ? newDbItem.name
+              .toLowerCase()
+              .startsWith(searchStore.filters.query.toLowerCase()) &&
+            newDbItem.path.startsWith(pathStore.currentRoot)
+          : true,
+      )
+      // ItemCore will overwrite Item's previous Core values while keeping state
+      .map((newDbItem) =>
+        Object.assign(
+          otherStore.items.find((i) => i.id == newDbItem.id) ??
+            items.value.find((i) => i.id == newDbItem.id) ?? { ...newDbItem },
+          newDbItem,
+        ),
+      );
   };
 
   // VUEFIRE BUG: pending is false when it should be true!
@@ -105,7 +117,7 @@ function createItemsStore(this: { isSearch: boolean }) {
     const toDelete = _items.length > 1 ? `${_items.length} items` : "one item";
     const message = `Are you sure you want to delete ${toDelete}?`;
     if (!(await dialogStore.confirm(message))) return;
-    firestoreApi.deleteItems(_items);
+    firestoreApi.deleteItemsPermanently(_items);
   };
   const renameItem = async (item: Item) => {
     if (!item.newName) return;
