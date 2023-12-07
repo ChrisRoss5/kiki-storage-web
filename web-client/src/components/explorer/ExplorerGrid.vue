@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { useItemsStore } from "@/stores/items";
+import { ItemsStore, useItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
@@ -10,6 +10,10 @@ import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { CSSProperties, computed, inject, nextTick, ref, watch } from "vue";
 import ExplorerGridHead from "./ExplorerGridHead.vue";
 import ExplorerGridItems from "./ExplorerGridItems.vue";
+
+/* defineProps<{
+  itemsStore: ItemsStore;
+}>(); */
 
 const isSearch = inject<boolean>("isSearch")!;
 const isThemeLight = inject<boolean>("isThemeLight")!;

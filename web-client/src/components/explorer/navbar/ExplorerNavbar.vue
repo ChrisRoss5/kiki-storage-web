@@ -15,6 +15,7 @@ const pathStore = usePathStore();
 const pathInput = ref<HTMLInputElement | null>(null);
 const showPathInput = ref(false);
 const newPath = ref("");
+const showRootsDropdown = ref(false);
 
 watch(
   showPathInput,
@@ -77,7 +78,7 @@ const handlePathSubmit = () => {
         </span>
         <a
           :href="`/${path}`"
-          class="whitespace-pre rounded-btn px-2 py-1 relative"
+          class="relative whitespace-pre rounded-btn px-2 py-1"
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,
@@ -88,6 +89,8 @@ const handlePathSubmit = () => {
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"
           @click.stop.prevent="pathStore.pushOnTab(path)"
+          @mouseover="showRootsDropdown = !i"
+          @mouseleave="showRootsDropdown = false"
           draggable="false"
           v-wave
         >
@@ -95,9 +98,34 @@ const handlePathSubmit = () => {
             v-if="!i"
             class="material-symbols-outlined pointer-events-none pr-2 !align-text-bottom"
           >
-            {{ roots[path as RootKey]?.icon }} </span
-          >{{ getPathName(path) }}
-          
+            {{ roots[path as RootKey]?.icon }}
+          </span>
+            {{ getPathName(path) }}
+          <div
+            class="dsy-dropdown absolute left-0 top-full min-w-full"
+            :class="{ 'dsy-dropdown-open': !i && showRootsDropdown }"
+          >
+            <ul
+              tabindex="0"
+              class="dsy-menu dsy-dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow"
+            >
+              <a
+                v-for="root in Object.keys(roots)"
+                :key="root"
+                :href="`/${root}`"
+                class="rounded-btn px-1 py-3 text-xl"
+                :class="{
+                  'pointer-events-none bg-base-200 bg-none font-bold':
+                    root == pathStore.currentRoot,
+                }"
+                @click.stop.prevent="pathStore.pushOnTab(root)"
+              >
+                <span class="material-symbols-outlined pr-2 !align-text-bottom">
+                  {{ roots[root as RootKey]?.icon }} </span
+                >{{ getPathName(root) }}
+              </a>
+            </ul>
+          </div>
         </a>
       </template>
     </div>
