@@ -55,7 +55,7 @@ const handleArrowClick = (path: string) => {
         'bg-base-100/25 hover:bg-base-100/50': !isThemeLight,
         'bg-base-100/50': !isThemeLight && showPathInput,
       }"
-      @click="showPathInput = true"
+      @click.self="showPathInput = true"
     >
       <ExplorerNavbarInput v-model:show-path-input="showPathInput" />
       <template
@@ -73,7 +73,7 @@ const handleArrowClick = (path: string) => {
             'bg-base-300':
               !isThemeLight && explorerPath == pathStore.folderPaths[i - 1],
           }"
-          @click.stop.self="handleArrowClick(pathStore.folderPaths[i - 1])"
+          @click.self="handleArrowClick(pathStore.folderPaths[i - 1])"
         >
           <span class="material-symbols-outlined pointer-events-none">
             chevron_right
@@ -101,7 +101,7 @@ const handleArrowClick = (path: string) => {
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"
-          @click.stop.prevent="() => handlePathClick(path)"
+          @click.prevent="() => handlePathClick(path)"
           @mouseover="showRootsDropdown = !i"
           @mouseleave="showRootsDropdown = false"
           draggable="false"

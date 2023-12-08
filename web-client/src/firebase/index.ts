@@ -1,9 +1,8 @@
-import { initializeApp } from "firebase/app";
+import firebase from "firebase/compat/app";
 import { auth } from "firebaseui";
 //import { setLogLevel } from "firebase/firestore";
-import { useFirebaseAuth } from "vuefire";
 
-export const firebaseApp = initializeApp({
+export const firebaseApp = firebase.initializeApp({
   apiKey: "AIzaSyAHN2MNGn8iTJAuzmgkYszyrS7m9tDEGeU",
   authDomain: "dropbox-clone-716f7.firebaseapp.com",
   databaseURL:
@@ -19,6 +18,6 @@ export const firebaseApp = initializeApp({
 let ui: auth.AuthUI;
 
 export function useFirebaseUI() {
-  ui ??= new auth.AuthUI(useFirebaseAuth());
+  ui ??= new auth.AuthUI(firebase.auth());
   return ui;
 }
