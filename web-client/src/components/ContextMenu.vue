@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
 import { useSettingsStore } from "@/stores/settings";
-import defaultSettings, { columnNames } from "@/stores/settings/default";
+import getDefaultSettings, { columnNames } from "@/stores/settings/default";
 import { computed, ref, watchPostEffect } from "vue";
 import ItemOptions from "./ItemOptions.vue";
 
@@ -18,7 +18,7 @@ const activeColumnsOrder = computed(
     settingsStore.settings[isSearch.value ? "searchColumns" : "columns"].order,
 );
 const allColumnsOrder =
-  defaultSettings[isSearch.value ? "searchColumns" : "columns"].order;
+  getDefaultSettings()[isSearch.value ? "searchColumns" : "columns"].order;
 
 watchPostEffect(() => {
   const el = ctxmenu.value!;

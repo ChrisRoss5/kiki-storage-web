@@ -65,7 +65,8 @@ html:not([data-theme="light"]) {
       );
   }
   & #search-results,
-  & #uploads {
+  & #uploads,
+  & #navbar-explorer {
     @apply bg-base-100/75 backdrop-blur-xl;
   }
 }
@@ -94,4 +95,16 @@ html:not([data-theme="light"]) {
 }
 .rows-leave-active {
   display: none;
+}
+.slide-down-enter-active,
+.slide-down-leave-active {
+  pointer-events: none;
+  transition:
+    opacity 300ms,
+    transform 300ms;
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-0.5rem);
 }

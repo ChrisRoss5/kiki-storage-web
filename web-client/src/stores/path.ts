@@ -17,14 +17,16 @@ export const usePathStore = defineStore("path", () => {
   const route = useRoute();
   const router = useRouter();
   const itemsStore = useItemsStore();
-  const { api } = useItemsFirestoreStore();
+  const { api: firestoreApi } = useItemsFirestoreStore();
   const settingsStore = useSettingsStore();
   const tabsStore = useTabsStore();
   const dialogStore = useShortDialogStore();
 
   const folderPaths = ref<string[]>([]);
   const currentPath = ref("");
-  const currentRoot = computed(() => currentPath.value.split("/")[0] as RootKey);
+  const currentRoot = computed(
+    () => currentPath.value.split("/")[0] as RootKey,
+  );
   let isStartup = true;
 
   watch(
@@ -59,7 +61,7 @@ export const usePathStore = defineStore("path", () => {
       folderPaths.value = pathSplit.map((_, i) =>
         pathSplit.slice(0, i + 1).join("/"),
       );
-      itemsStore.setDbItems(api.getItems(newPath));
+      itemsStore.setDbItems(firestoreApi.getItems(newPath));
     },
     { immediate: true },
   );
@@ -74,7 +76,7 @@ export const usePathStore = defineStore("path", () => {
       return false;
     }
     if (path != _root)
-      api.getParentItem(path).then((parentItem) => {
+      firestoreApi.getParentItem(path).then((parentItem) => {
         if (parentItem) return;
         dialogStore.showError(
           "Invalid path. The parent folder does not exist.",

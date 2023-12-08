@@ -10,19 +10,21 @@ import { RootKey } from "../settings/default";
 import { useShortDialogStore } from "../short-dialog";
 import { useItemsStorageStore } from "./storage";
 
-function createItemsStore(this: { isSearch: boolean }) {
+function createItemsStore(this: { id: ItemsStoreId }) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
   const { api: firestoreApi } = useItemsFirestoreStore();
   const { api: storageApi } = useItemsStorageStore();
-  const otherStore = useItemsStore(!this.isSearch);
   const searchStore = useSearchStore();
+  const _stores = stores.map((s) => s());
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
   const itemsPending = computed(() => !!dbItems.value?.pending);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
   const newFolderName = ref("");
+  const isFocused = ref(false);
+  const isOpen = ref(false);
 
   const stopDbItems = () => dbItems.value?.stop();
   const setDbItems = (newItems: _RefFirestore<ItemCore[]>) => {
@@ -39,22 +41,24 @@ function createItemsStore(this: { isSearch: boolean }) {
     if (!newDbItems || itemsPending.value) return;
     items.value = newDbItems
       // Unsupported firestore query filters
-      .filter((newDbItem) =>
-        this.isSearch && searchStore.filters.query
-          ? newDbItem.name
-              .toLowerCase()
-              .startsWith(searchStore.filters.query.toLowerCase()) &&
-            newDbItem.path.startsWith(pathStore.currentRoot)
-          : true,
-      )
+      .filter((newDbItem) => {
+        if (this.id != "search-items") return true;
+        return (
+          newDbItem.name
+            .toLowerCase()
+            .startsWith(searchStore.filters.query.toLowerCase()) &&
+          newDbItem.path.startsWith(pathStore.currentRoot)
+        );
+      })
       // ItemCore will overwrite Item's previous Core values while keeping state
-      .map((newDbItem) =>
-        Object.assign(
-          otherStore.items.find((i) => i.id == newDbItem.id) ??
-            items.value.find((i) => i.id == newDbItem.id) ?? { ...newDbItem },
-          newDbItem,
-        ),
-      );
+      .map((newDbItem) => {
+        let prevItem: Item | undefined;
+        for (const store of _stores) {
+          prevItem = store.items.find((item) => item.id === newDbItem.id);
+          if (prevItem) break;
+        }
+        return Object.assign(prevItem ?? { ...newDbItem }, newDbItem);
+      });
   };
 
   // VUEFIRE BUG: pending is false when it should be true!
@@ -148,6 +152,8 @@ function createItemsStore(this: { isSearch: boolean }) {
     itemsPending,
     selectedItems,
     newFolderName,
+    isFocused,
+    isOpen,
     handleDrop,
     createFolder,
     createFiles,
@@ -159,16 +165,16 @@ function createItemsStore(this: { isSearch: boolean }) {
   };
 }
 
-export const itemsStore = defineStore(
-  "items",
-  createItemsStore.bind({ isSearch: false }),
-);
-export const searchItemsStore = defineStore(
-  "search-items",
-  createItemsStore.bind({ isSearch: true }),
-);
+const itemsStoreIds = ["items", "navbar-items", "search-items"] as const;
+type ItemsStoreId = (typeof itemsStoreIds)[number];
 
-export const useItemsStore = (isSearch = false) =>
-  isSearch ? searchItemsStore() : itemsStore();
+const _defineStore = (id: ItemsStoreId) =>
+  defineStore(id, createItemsStore.bind({ id }));
 
-export type ItemsStore = ReturnType<typeof useItemsStore>;
+const stores = itemsStoreIds.map(_defineStore);
+
+export const useItemsStore = stores[0];
+export const useNavbarItemsStore = stores[1];
+export const useSearchItemsStore = stores[2];
+
+export type ItemsStore = ReturnType<(typeof stores)[number]>;

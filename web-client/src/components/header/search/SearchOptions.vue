@@ -42,11 +42,14 @@ const showTypeDialog = ref(false);
       {{ searchStore.type || "Type" }}
     </div>
     <div
-      class="material-symbols-outlined cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 transition-opacity duration-300 hover:bg-base-300"
-      :class="{ 'pointer-events-none opacity-30': !searchStore.areFiltersActive }"
+      class="dsy-tooltip dsy-tooltip-bottom cursor-pointer rounded-badge border border-primary bg-base-200 transition-opacity duration-300 hover:bg-base-300"
+      :class="{
+        'pointer-events-none opacity-30': !searchStore.areFiltersActive,
+      }"
       @click="searchStore.reset"
+      data-tip="Reset search"
     >
-      close
+      <span class="material-symbols-outlined p-1 px-2"> close </span>
     </div>
     <SizeDialog :show="showSizeDialog" @close="showSizeDialog = false" />
     <TypeDialog :show="showTypeDialog" @close="showTypeDialog = false" />

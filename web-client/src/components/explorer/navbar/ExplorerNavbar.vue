@@ -1,43 +1,54 @@
 <script setup lang="ts">
-import { useItemsStore } from "@/stores/items";
+import { useItemsStore, useNavbarItemsStore } from "@/stores/items";
+import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { getPathName, usePathStore } from "@/stores/path";
 import { RootKey, roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
-import { inject, nextTick, ref, watch } from "vue";
+import { inject, ref, watch } from "vue";
 import CreateOrUpload from "./CreateOrUpload.vue";
+import ExplorerNavbarDropdown from "./ExplorerNavbarDropdown.vue";
+import ExplorerNavbarExplorer from "./ExplorerNavbarExplorer.vue";
+import ExplorerNavbarInput from "./ExplorerNavbarInput.vue";
 import ViewSelector from "./ViewSelector.vue";
 
 const isThemeLight = inject<boolean>("isThemeLight")!;
 
+const { api: firestoreApi } = useItemsFirestoreStore();
 const itemsStore = useItemsStore();
+const navbarItemsStore = useNavbarItemsStore();
 const pathStore = usePathStore();
 
-const pathInput = ref<HTMLInputElement | null>(null);
 const showPathInput = ref(false);
-const newPath = ref("");
 const showRootsDropdown = ref(false);
+const explorerPath = ref("");
 
 watch(
-  showPathInput,
-  async (showPathInput) => {
-    if (!showPathInput) return;
-    newPath.value = pathStore.currentPath;
-    await nextTick();
-    pathInput.value?.select();
+  () => navbarItemsStore.isOpen,
+  (isOpen) => {
+    if (!isOpen) explorerPath.value = "";
   },
-  { flush: "post" },
 );
 
-const handlePathSubmit = () => {
-  showPathInput.value = false;
-  pathStore.pushOnTab(newPath.value);
+const handlePathClick = (path: string) => {
+  showRootsDropdown.value = false;
+  pathStore.pushOnTab(path);
+};
+const handleArrowClick = (path: string) => {
+  if (explorerPath.value == path) {
+    navbarItemsStore.isOpen = false;
+    return;
+  }
+  explorerPath.value = path;
+  navbarItemsStore.isOpen = navbarItemsStore.isFocused = true;
+  if (!navbarItemsStore.isOpen) return;
+  navbarItemsStore.setDbItems(firestoreApi.getItems(path));
 };
 </script>
 
 <template>
-  <div class="z-[2] flex flex-wrap gap-3" @click.stop="null">
+  <div class="z-20 flex flex-wrap gap-3">
     <div
-      class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-btn text-xl"
+      class="relative flex h-12 flex-1 cursor-pointer flex-wrap items-center rounded-btn text-xl"
       :class="{
         'bg-base-200 hover:bg-base-300': isThemeLight,
         'bg-base-300': isThemeLight && showPathInput,
@@ -46,39 +57,41 @@ const handlePathSubmit = () => {
       }"
       @click="showPathInput = true"
     >
-      <template v-if="showPathInput">
-        <input
-          type="text"
-          ref="pathInput"
-          placeholder="Enter location"
-          class="dsy-input dsy-input-bordered dsy-input-primary w-full bg-transparent text-xl"
-          v-model="newPath"
-          @keydown.stop.escape="showPathInput = false"
-          @keyup.stop.enter="handlePathSubmit"
-          @blur="showPathInput = false"
-          spellcheck="false"
-          autocomplete="off"
-        />
-        <div class="absolute bottom-0 right-2 top-0 flex items-center gap-2">
-          <div
-            class="material-symbols-outlined cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 transition-opacity duration-300 hover:bg-base-300"
-            :class="{ 'pointer-events-none opacity-30': !newPath }"
-            @mousedown="handlePathSubmit"
-          >
-            arrow_right_alt
-          </div>
-        </div>
-      </template>
-      <template v-else v-for="(path, i) in pathStore.folderPaths">
-        <span
+      <ExplorerNavbarInput v-model:show-path-input="showPathInput" />
+      <template
+        v-if="!showPathInput"
+        v-for="(path, i) in pathStore.folderPaths"
+      >
+        <div
           v-if="i"
-          class="material-symbols-outlined flex w-3 justify-center"
+          class="relative flex h-full items-center rounded-btn"
+          :class="{
+            'hover:bg-base-100': isThemeLight,
+            'hover:bg-base-300': !isThemeLight,
+            'bg-base-100':
+              isThemeLight && explorerPath == pathStore.folderPaths[i - 1],
+            'bg-base-300':
+              !isThemeLight && explorerPath == pathStore.folderPaths[i - 1],
+          }"
+          @click.stop.self="handleArrowClick(pathStore.folderPaths[i - 1])"
         >
-          chevron_right
-        </span>
+          <span class="material-symbols-outlined pointer-events-none">
+            chevron_right
+          </span>
+          <Transition name="slide-down">
+            <ExplorerNavbarExplorer
+              v-if="
+                navbarItemsStore.isOpen &&
+                explorerPath == pathStore.folderPaths[i - 1]
+              "
+              :current-path="explorerPath"
+              :items-store="navbarItemsStore"
+            />
+          </Transition>
+        </div>
         <a
           :href="`/${path}`"
-          class="relative whitespace-pre rounded-btn px-2 py-1"
+          class="nav-path relative flex h-full items-center whitespace-pre rounded-btn"
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,
@@ -88,7 +101,7 @@ const handlePathSubmit = () => {
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"
-          @click.stop.prevent="pathStore.pushOnTab(path)"
+          @click.stop.prevent="() => handlePathClick(path)"
           @mouseover="showRootsDropdown = !i"
           @mouseleave="showRootsDropdown = false"
           draggable="false"
@@ -96,36 +109,14 @@ const handlePathSubmit = () => {
         >
           <span
             v-if="!i"
-            class="material-symbols-outlined pointer-events-none pr-2 !align-text-bottom"
+            class="material-symbols-outlined pointer-events-none pl-2 !align-text-bottom"
           >
             {{ roots[path as RootKey]?.icon }}
           </span>
-            {{ getPathName(path) }}
-          <div
-            class="dsy-dropdown absolute left-0 top-full min-w-full"
-            :class="{ 'dsy-dropdown-open': !i && showRootsDropdown }"
-          >
-            <ul
-              tabindex="0"
-              class="dsy-menu dsy-dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow"
-            >
-              <a
-                v-for="root in Object.keys(roots)"
-                :key="root"
-                :href="`/${root}`"
-                class="rounded-btn px-1 py-3 text-xl"
-                :class="{
-                  'pointer-events-none bg-base-200 bg-none font-bold':
-                    root == pathStore.currentRoot,
-                }"
-                @click.stop.prevent="pathStore.pushOnTab(root)"
-              >
-                <span class="material-symbols-outlined pr-2 !align-text-bottom">
-                  {{ roots[root as RootKey]?.icon }} </span
-                >{{ getPathName(root) }}
-              </a>
-            </ul>
-          </div>
+          {{ getPathName(path) }}
+          <ExplorerNavbarDropdown
+            :show-roots-dropdown="!i && showRootsDropdown"
+          />
         </a>
       </template>
     </div>
@@ -137,7 +128,7 @@ const handlePathSubmit = () => {
 </template>
 
 <style scoped>
-a {
+a.nav-path {
   transition:
     transform 300ms,
     border 300ms;
@@ -151,5 +142,9 @@ a {
       visibility: hidden;
     }
   }
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+  transform: translateY(-0.5rem) scale(0.75);
 }
 </style>

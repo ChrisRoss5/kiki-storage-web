@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Logo from "@/components/Logo.vue";
 import { useFirebaseUI } from "@/firebase";
-import defaultSettings from "@/stores/settings/default";
+import getDefaultSettings from "@/stores/settings/default";
 import { useTabsStore } from "@/stores/tabs";
 import "firebaseui/dist/firebaseui.css";
 import { onMounted } from "vue";
@@ -14,22 +14,26 @@ const tabsStore = useTabsStore();
 onMounted(() => {
   ui.reset();
   ui.start("#firebaseui-auth-container", {
+    // As of 2023, Facebook auth is no longer supported without a verified business account
     signInOptions: [
       "google.com",
       "twitter.com",
-      // "facebook.com",
       "github.com",
       "microsoft.com",
       "yahoo.com",
       "password",
-      "phone",
+      {
+        provider: "phone",
+        defaultCountry: "HR",
+      },
     ],
     signInFlow: "popup",
     callbacks: {
       signInSuccessWithAuthResult: (authResult) => {
         if (authResult.additionalUserInfo.isNewUser) {
-          localStorage.setItem("theme", defaultSettings.theme);
-          document.documentElement.dataset.theme = defaultSettings.theme;
+          const { theme } = getDefaultSettings();
+          localStorage.setItem("theme", theme);
+          document.documentElement.dataset.theme = theme;
           tabsStore.initOnRegister().then(() => router.push("/"));
         } else router.push("/");
         return false;
@@ -40,14 +44,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="login-grid" class="flex h-screen flex-col justify-center">
+  <div id="login" class="flex h-screen flex-col justify-center">
     <Logo :is-login="true" class="mb-5 flex-col gap-3 text-black" />
     <div id="firebaseui-auth-container" class="overflow-auto"></div>
   </div>
 </template>
 
 <style>
-#login-grid {
+#login {
   background:
     radial-gradient(#fff 20%, transparent),
     conic-gradient(

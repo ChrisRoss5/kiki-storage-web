@@ -22,24 +22,16 @@ const showSettingsDialog = ref(false);
     </label>
     <ul
       tabindex="0"
-      class="dsy-dropdown-content rounded-box right-0 z-10 w-max bg-base-100 p-2 text-right shadow-md"
+      class="dsy-menu dsy-dropdown-content right-0 z-10 w-max rounded-box bg-base-100 p-2 text-right shadow-md"
     >
       <li>
-        <div
-          @click="showSettingsDialog = true"
-          class="dsy-btn dsy-btn-ghost"
-          v-wave
-        >
+        <div @click="showSettingsDialog = true" v-wave>
           Settings
           <span class="material-symbols-outlined"> settings </span>
         </div>
       </li>
       <li>
-        <div
-          @click="auth?.signOut"
-          class="dsy-btn dsy-btn-ghost text-right"
-          v-wave
-        >
+        <div @click="auth?.signOut" v-wave>
           Sign out
           <span class="material-symbols-outlined"> logout </span>
         </div>

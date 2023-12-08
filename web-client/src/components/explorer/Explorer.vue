@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { useItemsStore } from "@/stores/items";
+import { usePathStore } from "@/stores/path";
 import { useSettingsStore } from "@/stores/settings";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { computed, provide } from "vue";
 import Uploads from "../Uploads.vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
-import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
 import LoaderIcon from "./LoaderIcon.vue";
+import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
 
 const itemsStore = useItemsStore();
 const settingsStore = useSettingsStore();
+const pathStore = usePathStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 
@@ -21,18 +23,22 @@ provide("isThemeLight", isThemeLight);
 <template>
   <div
     id="explorer"
-    class="flex min-h-0 flex-1 flex-col gap-3 px-5 relative"
+    class="relative flex min-h-0 flex-1 flex-col gap-3 px-5"
     :class="{ 'pt-3': !isThemeLight }"
   >
     <ExplorerNavbar />
     <LoaderIcon :loading="itemsStore.itemsPending" />
     <template v-if="itemsStore.items.length">
-      <ExplorerGrid class="flex-1" />
-      <ExplorerFooter />
+      <ExplorerGrid
+        class="flex-1"
+        :items-store="itemsStore"
+        :current-path="pathStore.currentPath"
+      />
+      <ExplorerFooter :items-store="itemsStore" />
     </template>
     <div
       v-else-if="!itemsStore.itemsPending"
-      class="flex-center mb-3 flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content"
+      class="flex-center expl-body mb-3 flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"

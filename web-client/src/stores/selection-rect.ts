@@ -8,12 +8,12 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
   const isActive = ref<boolean>(false);
   const wasActive = ref<boolean>(false);
 
-  let items = [] as Item[];
-  let isSearch = false;
+  let items: { item: Item; el: HTMLAnchorElement }[] = [];
   let explElRect = null as DOMRect | null;
   let startCoords = { x: 0, y: 0 };
   let left = 0; // left and width must be global because they are used in the interval
   let width = 0;
+  let scale = 0; // scale is needed in case the explEl is transformed with scale
   let startScrollTop = 0;
   let startMaxScrollTop = 0; // to prevent auto-scrolling down to infinity in the interval
   let isCtrlOrShiftDown = false;
@@ -47,21 +47,27 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     _explEl: HTMLElement | null,
     _rectEl: HTMLElement | null,
     _items: Item[],
-    _isSearch: boolean,
     e: MouseEvent,
   ) => {
     if (!_explEl || !_rectEl) return;
     isCtrlOrShiftDown = e.ctrlKey || e.shiftKey;
-    items = _items.filter((i) => !(isCtrlOrShiftDown && i.isSelected));
+    items = _items
+      .filter((i) => !(isCtrlOrShiftDown && i.isSelected))
+      .map((i) => ({
+        item: i,
+        el: [..._explEl.children].find(
+          (_i) => _i.id == i.id,
+        ) as HTMLAnchorElement,
+      }));
     explEl.value = _explEl;
     rectEl.value = _rectEl;
-    isSearch = _isSearch;
     explElRect = _explEl.getBoundingClientRect();
+    scale = explElRect.width / _explEl.offsetWidth;
     startScrollTop = _explEl.scrollTop;
     startMaxScrollTop = _explEl.scrollHeight - _explEl.offsetHeight;
     startCoords = {
-      x: e.clientX - explElRect.left,
-      y: e.clientY - explElRect.top + startScrollTop,
+      x: (e.clientX - explElRect.left) / scale,
+      y: (e.clientY - explElRect.top) / scale + startScrollTop,
     };
     isLeftMouseDown.value = true;
   };
@@ -69,15 +75,15 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     if (!isLeftMouseDown.value) return;
     const scrolledDown = explEl.value!.scrollTop - startScrollTop;
     const newCoords = {
-      x: e.clientX - explElRect!.left,
-      y: e.clientY - explElRect!.top + startScrollTop + scrolledDown,
+      x: (e.clientX - explElRect!.left) / scale,
+      y: (e.clientY - explElRect!.top) / scale + startScrollTop + scrolledDown,
     };
     const x = newCoords.x - startCoords.x;
     const y = newCoords.y - startCoords.y;
     width = Math.abs(x);
     let height = Math.abs(y);
     if (!isActive.value) {
-      if (width < 5 || height < 5) return;
+      if (width < 5 && height < 5) return;
       activate();
     }
     left = x < 0 ? startCoords.x - width : startCoords.x;
@@ -87,16 +93,13 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     rectEl.value!.style.width = `${width}px`;
     rectEl.value!.style.height = `${height}px`;
     const checkOverlap = () => {
-      for (const item of items) {
-        const el = isSearch ? item.searchEl : item.el;
-        if (!el) continue;
+      for (const { item, el } of items)
         item.isSelected = !(
           el.offsetLeft + el.offsetWidth <= left ||
           el.offsetLeft >= left + width ||
           el.offsetTop + el.offsetHeight <= top ||
           el.offsetTop >= top + height
         );
-      }
     };
     let scrollDirection = null as "up" | "down" | null;
     if (e.clientY < explElRect!.top) {

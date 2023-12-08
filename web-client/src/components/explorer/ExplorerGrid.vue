@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemsStore, useItemsStore } from "@/stores/items";
+import { ItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
-import { useSearchStore } from "@/stores/search";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
@@ -11,17 +10,16 @@ import { CSSProperties, computed, inject, nextTick, ref, watch } from "vue";
 import ExplorerGridHead from "./ExplorerGridHead.vue";
 import ExplorerGridItems from "./ExplorerGridItems.vue";
 
-/* defineProps<{
+const props = defineProps<{
   itemsStore: ItemsStore;
-}>(); */
+  currentPath: string;
+}>();
 
 const isSearch = inject<boolean>("isSearch")!;
 const isThemeLight = inject<boolean>("isThemeLight")!;
-const itemsStore = useItemsStore(isSearch);
 const pathStore = usePathStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
-const searchStore = useSearchStore();
 const settingsStore = useSettingsStore();
 const contextMenuStore = useContextMenuStore();
 
@@ -52,11 +50,11 @@ watch(
   [
     () => columnSettings.value.orderBy,
     () => columnSettings.value.orderDesc,
-    () => itemsStore.items,
+    () => props.itemsStore.items,
   ],
   () => {
     const { orderBy, orderDesc } = columnSettings.value;
-    itemsStore.items.sort((a, b) => {
+    props.itemsStore.items.sort((a, b) => {
       const desc = orderDesc ? -1 : 1;
       if (a.isFolder && !b.isFolder) return -desc;
       if (!a.isFolder && b.isFolder) return desc;
@@ -73,7 +71,7 @@ watch(
   { immediate: true },
 );
 watch(
-  () => pathStore.currentPath,
+  () => props.currentPath,
   () => {
     lastSelectedItemIdx = 0;
     preventTransition.value = true;
@@ -83,54 +81,59 @@ watch(
 
 const handleItemContextMenu = (item: Item, e: MouseEvent) => {
   if (!item.isSelected) handleItemSelect(item, e);
-  contextMenuStore.show("item", itemsStore, e);
+  contextMenuStore.show("item", props.itemsStore, e);
 };
 const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
+  const idx = props.itemsStore.items.indexOf(item);
   if (e.ctrlKey) {
     if (item.isSelected) item.isSelected = false;
     else {
       item.isSelected = true;
-      lastSelectedItemIdx = itemsStore.items.indexOf(item);
+      lastSelectedItemIdx = idx;
     }
   } else if (e.shiftKey) {
-    itemsStore.deselectAll();
-    const start = Math.min(lastSelectedItemIdx, itemsStore.items.indexOf(item));
-    const end = Math.max(lastSelectedItemIdx, itemsStore.items.indexOf(item));
-    for (let i = start; i <= Math.min(end, itemsStore.items.length - 1); i++)
-      itemsStore.items[i].isSelected = true;
+    props.itemsStore.deselectAll();
+    const start = Math.min(lastSelectedItemIdx, idx);
+    const end = Math.max(lastSelectedItemIdx, idx);
+    for (
+      let i = start;
+      i <= Math.min(end, props.itemsStore.items.length - 1);
+      i++
+    )
+      props.itemsStore.items[i].isSelected = true;
   } else {
-    itemsStore.deselectAll();
+    props.itemsStore.deselectAll();
     item.isSelected = true;
-    lastSelectedItemIdx = itemsStore.items.indexOf(item);
+    lastSelectedItemIdx = idx;
   }
 };
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
     pathStore.pushOnTab(`${item.path}/${item.name}`);
-    if (isSearch) searchStore.hide();
+    if (props.itemsStore.$id != "items") props.itemsStore.isOpen = false;
   } else dialogStore.showError("This item cannot be previewed."); // todo: add previews
 };
 const handleDragStart = (item: Item, e: DragEvent) => {
   if (selectionRectStore.isActive || item.isRenaming || !item.isSelected)
     return e.preventDefault();
   else selectionRectStore.isLeftMouseDown = false;
-  e.dataTransfer?.setData("items", JSON.stringify(itemsStore.selectedItems));
-  document.body.setAttribute("dragging-items", pathStore.currentPath);
+  e.dataTransfer?.setData(
+    "items",
+    JSON.stringify(props.itemsStore.selectedItems),
+  );
+  document.body.setAttribute("dragging-items", props.currentPath);
 };
 const handleDragStop = () => {
   document.body.removeAttribute("dragging-items");
 };
 const handleDropOnItem = (item: Item, e: DragEvent) => {
   if (item.isFolder && !item.isSelected)
-    itemsStore.handleDrop(e, `${item.path ? `${item.path}/` : ""}${item.name}`);
-  else if (
-    document.body.getAttribute("dragging-items") != pathStore.currentPath
-  )
-    itemsStore.handleDrop(e);
-};
-const handleItemRef = (item: Item, el: HTMLElement) => {
-  if (isSearch) item.searchEl = el;
-  else item.el = el;
+    props.itemsStore.handleDrop(
+      e,
+      `${item.path ? `${item.path}/` : ""}${item.name}`,
+    );
+  else if (document.body.getAttribute("dragging-items") != props.currentPath)
+    props.itemsStore.handleDrop(e, props.currentPath);
 };
 </script>
 
@@ -152,7 +155,7 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
       ref="explBody"
       class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll rounded-box"
       :class="{ 'items-start gap-x-2 gap-y-1': view == 'grid' }"
-      :path="pathStore.currentPath"
+      :path="props.currentPath"
       @drop.stop.prevent="itemsStore.handleDrop"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
@@ -162,7 +165,6 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
           explBody,
           rectEl,
           itemsStore.items,
-          isSearch,
           $event,
         )
       "
@@ -174,8 +176,8 @@ const handleItemRef = (item: Item, el: HTMLElement) => {
       >
         <a
           v-for="item in itemsStore.items"
-          :key="item.id + isSearch.toString()"
-          :ref="(el) => handleItemRef(item, el as HTMLElement)"
+          :key="item.id"
+          :id="item.id"
           :href="
             item.isFolder
               ? `${item.path ? `/${item.path}` : ''}/${item.name}`

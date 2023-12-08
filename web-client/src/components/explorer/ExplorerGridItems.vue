@@ -90,7 +90,7 @@ watch(
           'line-clamp-3': view == 'grid' && !showFullText,
         }"
       >
-        {{ item.name + (item.type ? `.${item.type}` : "") }}
+        {{ `${item.name}${item.type ? `.${item.type}` : ""}` }}
       </div>
       <div
         class="overflow-hidden text-ellipsis font-bold"

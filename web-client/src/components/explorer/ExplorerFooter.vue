@@ -1,28 +1,29 @@
 <script setup lang="ts">
-import { useItemsStore } from "@/stores/items";
+import { ItemsStore } from "@/stores/items";
 import { formatSize } from "@/utils/format";
 import { computed, inject } from "vue";
 import ItemOptions from "../ItemOptions.vue";
 
-const isSearch = inject<boolean>("isSearch")!;
+const props = defineProps<{
+  itemsStore: ItemsStore;
+}>();
+
 const isThemeLight = inject<boolean>("isThemeLight")!;
-const itemsStore = useItemsStore(isSearch);
 
 const selectedItemsSize = computed(() => {
   const showSize =
-    itemsStore.selectedItems.length &&
-    !itemsStore.selectedItems.some((i) => i.isFolder);
+    props.itemsStore.selectedItems.length &&
+    !props.itemsStore.selectedItems.some((i) => i.isFolder);
   if (showSize)
-    return itemsStore.selectedItems.reduce((acc, i) => acc + i.size!, 0);
+    return props.itemsStore.selectedItems.reduce((acc, i) => acc + i.size!, 0);
   return "";
 });
 </script>
 
 <template>
   <div
-    class="flex items-center rounded-box px-6"
+    class="flex items-center rounded-box rounded-b-none px-6"
     :class="{
-      'rounded-b-none': !isSearch,
       'bg-base-100/50 shadow-[0_0_50px_0_oklch(var(--p)/30%)]': !isThemeLight,
       'bg-base-300': isThemeLight,
     }"

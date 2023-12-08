@@ -1,9 +1,9 @@
 import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
-import { _RefFirestore } from "vuefire";
-import { useItemsStore } from "./items";
+import { useSearchItemsStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firestore";
+import { usePathStore } from "./path";
 
 export interface SizeFilter {
   min: number;
@@ -20,11 +20,10 @@ const initialSizeFilter: SizeFilter = {
 };
 
 export const useSearchStore = defineStore("search", () => {
-  const searchItemsStore = useItemsStore(true);
-  const { api } = useItemsFirestoreStore();
+  const searchItemsStore = useSearchItemsStore();
+  const { api: firestoreApi } = useItemsFirestoreStore();
+  const pathStore = usePathStore();
 
-  const isOpen = ref(false);
-  const isFocused = ref(false);
   const query = ref("");
   const sizeFilter = ref<SizeFilter>({ ...initialSizeFilter });
   const type = ref<string>("");
@@ -39,20 +38,13 @@ export const useSearchStore = defineStore("search", () => {
   );
 
   watch(filters, queryItems);
+  watch(() => pathStore.currentRoot, queryItems);
 
   async function queryItems() {
-    isOpen.value = isFocused.value = areFiltersActive.value;
-    if (!isOpen.value) return searchItemsStore.stopDbItems();
-    searchItemsStore.setDbItems(api.searchItems(filters.value));
+    searchItemsStore.isOpen = areFiltersActive.value;
+    if (!searchItemsStore.isOpen) return;
+    searchItemsStore.setDbItems(firestoreApi.searchItems(filters.value));
   }
-  const show = () => {
-    if (!isOpen.value) return queryItems();
-    isOpen.value = isFocused.value = true;
-  };
-  const hide = () => {
-    searchItemsStore.stopDbItems();
-    isOpen.value = isFocused.value = false;
-  };
   const resetSizeFilter = () => {
     sizeFilter.value = { ...initialSizeFilter };
   };
@@ -64,14 +56,10 @@ export const useSearchStore = defineStore("search", () => {
 
   return {
     query,
-    isOpen,
-    isFocused,
     sizeFilter,
     type,
     filters,
     areFiltersActive,
-    show,
-    hide,
     resetSizeFilter,
     reset,
   };

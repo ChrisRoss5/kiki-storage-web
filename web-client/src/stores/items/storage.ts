@@ -65,7 +65,7 @@ export const useItemsStorageStore = defineStore("items-storage", () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${item.name}.${item.type}`;
+      a.download = `${item.name}${item.type ? `.${item.type}` : ""}`;
       a.click();
       URL.revokeObjectURL(url);
     },

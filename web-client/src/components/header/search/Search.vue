@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import CloseExplorer from "@/components/explorer/CloseExplorer.vue";
 import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
 import LoaderIcon from "@/components/explorer/LoaderIcon.vue";
-import { useItemsStore } from "@/stores/items";
+import { useSearchItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { useSearchStore } from "@/stores/search";
 import { provide } from "vue";
@@ -12,12 +13,20 @@ provide("isSearch", true);
 provide("isThemeLight", true);
 
 const searchStore = useSearchStore();
-const searchItemsStore = useItemsStore(true);
+const searchItemsStore = useSearchItemsStore();
 const pathStore = usePathStore();
 </script>
 
 <template>
-  <div>
+  <div
+    id="search"
+    @mousedown="
+      {
+        searchItemsStore.isOpen = searchStore.areFiltersActive;
+        searchItemsStore.isFocused = true;
+      }
+    "
+  >
     <input
       type="text"
       :placeholder="`Search ${pathStore.currentRoot}`"
@@ -25,29 +34,25 @@ const pathStore = usePathStore();
       v-model="searchStore.query"
       spellcheck="false"
       autocomplete="off"
-      @focus="searchStore.show()"
     />
     <Transition name="slide-down">
       <div
         id="search-results"
-        v-if="searchStore.isOpen"
-        class="absolute left-0 right-0 top-full z-20 mt-1 rounded-box bg-base-100 p-4 pt-0 shadow-lg transition-shadow duration-300"
-        :class="{ 'shadow-base-content/50': searchStore.isFocused }"
+        v-if="searchItemsStore.isOpen"
+        class="absolute left-0 right-0 top-full mt-1 rounded-box bg-base-100 px-4 shadow-lg transition-shadow duration-300"
+        :class="{ 'shadow-base-content/50': searchItemsStore.isFocused }"
       >
         <LoaderIcon :loading="searchItemsStore.itemsPending" />
         <template v-if="searchItemsStore.items.length">
-          <div
-            @click.stop="searchStore.hide"
-            class="z-10 cursor-pointer py-2 text-center text-base-content/50"
-          >
-            <span class="material-symbols-outlined"> expand_less </span>
-            Press esc or click here to hide
-            <span class="material-symbols-outlined"> expand_less </span>
-          </div>
-          <ExplorerGrid class="in-search max-h-[70vh]" />
-          <ExplorerFooter class="mt-3" />
+          <CloseExplorer @click="searchItemsStore.isOpen = false" />
+          <ExplorerGrid
+            :items-store="searchItemsStore"
+            :current-path="pathStore.currentPath"
+            class="in-search max-h-[70vh]"
+          />
+          <ExplorerFooter :items-store="searchItemsStore" class="mt-3" />
         </template>
-        <div v-else class="flex-center flex-col gap-3 pt-3">
+        <div v-else class="flex-center flex-col gap-3 py-3">
           <span class="material-symbols-outlined"> search </span>
           <div>No results found</div>
         </div>
@@ -56,17 +61,3 @@ const pathStore = usePathStore();
     <SearchOptions />
   </div>
 </template>
-
-<style scoped>
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition:
-    opacity 300ms,
-    transform 300ms;
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-0.5rem);
-}
-</style>

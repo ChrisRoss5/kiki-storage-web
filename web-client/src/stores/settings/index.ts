@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 import { computed, watch } from "vue";
 import { useCurrentUser, useDatabase, useDatabaseObject } from "vuefire";
 import { useShortDialogStore } from "../short-dialog";
-import defaultSettings from "./default";
+import getDefaultSettings from "./default";
 
 export const useSettingsStore = defineStore("settings", () => {
   const user = useCurrentUser();
@@ -18,7 +18,7 @@ export const useSettingsStore = defineStore("settings", () => {
   const dialogStore = useShortDialogStore();
 
   const settings = computed<Settings>(() => {
-    return mergeDeep(defaultSettings, dbSettings.value);
+    return mergeDeep(getDefaultSettings(), dbSettings.value);
   });
 
   const updateSettings = (newSettings: Partial<Settings>) => {
@@ -44,8 +44,13 @@ export const useSettingsStore = defineStore("settings", () => {
   );
 
   const reset = async () => {
-    if (!(await dialogStore.confirm("Reset all settings to default?"))) return;
-    set(dbRef(db, dbPath.value), defaultSettings);
+    if (
+      !(await dialogStore.confirm(
+        "Reset all settings to default? This includes open tabs, views, column settings and other settings outside this window.",
+      ))
+    )
+      return;
+    set(dbRef(db, dbPath.value), getDefaultSettings());
   };
 
   return {

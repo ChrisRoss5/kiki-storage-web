@@ -33,7 +33,7 @@ export function checkItem(item: Item, items: Item[]) {
     : items
         .filter((i) => !i.isFolder)
         .some((i) => i.name == item.name && i.type == item.type);
-  const fullName = `${item.name}.${item.type}`;
+  const fullName = `${item.name}${item.type ? `.${item.type}` : ""}`;
   const hasInvalidChars = /[\\/:*?"<>|]/.test(fullName);
   const type = item.isFolder ? "folder" : "file";
   const error =

@@ -3,20 +3,31 @@ import Explorer from "@/components/explorer/Explorer.vue";
 import ExplorerTabs from "@/components/explorer/ExplorerTabs.vue";
 import Header from "@/components/header/Header.vue";
 import { useContextMenuStore } from "@/stores/context-menu";
-import { useItemsStore } from "@/stores/items";
-import { useSearchStore } from "@/stores/search";
+import {
+  useItemsStore,
+  useNavbarItemsStore,
+  useSearchItemsStore,
+} from "@/stores/items";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
-import { onBeforeMount, onBeforeUnmount } from "vue";
+import { computed, onBeforeMount, onBeforeUnmount } from "vue";
 
-const itemsStore = useItemsStore(false);
-const searchItemsStore = useItemsStore(true);
+const itemsStore = useItemsStore();
+const searchItemsStore = useSearchItemsStore();
+const navbarItemsStore = useNavbarItemsStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
-const searchStore = useSearchStore();
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
+const focusedItemsStore = computed(
+  () =>
+    [searchItemsStore, navbarItemsStore].find((s) => s.isFocused) ?? itemsStore,
+);
+const openItemsStore = computed(
+  () =>
+    [searchItemsStore, navbarItemsStore].find((s) => s.isOpen) ?? itemsStore,
+);
 
 onBeforeMount(() => {
   document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
@@ -36,16 +47,21 @@ const handleLeftMouseUp = (e: MouseEvent) => {
   selectionRectStore.handleLeftMouseUp();
 };
 const handleKeydown = (e: KeyboardEvent) => {
-  const store = searchStore.isFocused ? searchItemsStore : itemsStore;
   if (e.key == "Escape") {
-    if (searchStore.isOpen) searchStore.hide();
-    else if (store.selectedItems.length) store.deselectAll();
-  } else if (e.key == "Delete" && store.selectedItems.length) {
-    store.deleteItems();
-  } else if (e.key == "F2" && store.selectedItems.length == 1) {
+    openItemsStore.value.isOpen = openItemsStore.value.isFocused = false;
+    focusedItemsStore.value.deselectAll();
+  } else if (
+    e.key == "Delete" &&
+    focusedItemsStore.value.selectedItems.length
+  ) {
+    focusedItemsStore.value.deleteItems();
+  } else if (
+    e.key == "F2" &&
+    focusedItemsStore.value.selectedItems.length == 1
+  ) {
     e.preventDefault();
-    store.selectedItems[0].isRenaming = true;
-  } else if (e.key == "a" && e.ctrlKey) {
+    focusedItemsStore.value.selectedItems[0].isRenaming = true;
+  } else if (e.ctrlKey && e.key == "a") {
     const inEditable =
       document.activeElement?.tagName == "INPUT" ||
       document.activeElement?.tagName == "TEXTAREA" ||
@@ -53,7 +69,7 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (inEditable) return;
     e.preventDefault();
     document.body.style.userSelect = "none";
-    store.selectAll();
+    focusedItemsStore.value.selectAll();
     document.body.style.userSelect = "";
   }
 };
@@ -65,23 +81,22 @@ const handleKeyUp = (e: KeyboardEvent) => {
   }
 };
 const handleClickLeft = (e: MouseEvent) => {
-  const store = searchStore.isFocused ? searchItemsStore : itemsStore;
   if (selectionRectStore.wasActive) {
     // Necessary because mouseup is triggered before click
     selectionRectStore.wasActive = false;
     return;
   }
-  if (!searchItemsStore.items.length && !searchStore.isFocused)
-    searchStore.hide();
   if (e.ctrlKey || e.shiftKey) return;
-  store.deselectAll();
+  focusedItemsStore.value.deselectAll();
 };
-const handleMouseDown = (e: MouseEvent) => {
-  const store = searchStore.isFocused ? searchItemsStore : itemsStore;
+const handleMouseDownCapture = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
+  if (!target.closest("#rename-container"))
+    focusedItemsStore.value.stopRenaming();
+  focusedItemsStore.value.isFocused = false;
+  if (!searchItemsStore.items.length && !target.closest("#search"))
+    searchItemsStore.isOpen = false;
   contextMenuStore.hide();
-  searchStore.isFocused = !!target.closest("#search-results");
-  if (!target.closest("#rename-container")) store.stopRenaming();
 };
 </script>
 
@@ -90,7 +105,7 @@ const handleMouseDown = (e: MouseEvent) => {
     v-if="settingsStore.dbSettings !== undefined"
     class="flex flex-col"
     @click.left="handleClickLeft"
-    @mousedown="handleMouseDown"
+    @mousedown.capture="handleMouseDownCapture"
     @contextmenu="contextMenuStore.hide()"
   >
     <Header />
