@@ -16,12 +16,6 @@ export const useTabsStore = defineStore("tabs", () => {
 
   let lastSelectedTabIdBeforeCreate: TabId | null = null;
 
-  const initOnRegister = () => {
-    return Promise.allSettled([
-      settingsStore.setSetting("tabs", tabs.value),
-      settingsStore.setSetting("activeTabId", activeTab.value.id),
-    ]);
-  };
   const createTab = (path?: string) => {
     lastSelectedTabIdBeforeCreate = activeTab.value.id;
     const newTab = { path: path ?? defaultRoot, id: crypto.randomUUID() };
@@ -59,7 +53,6 @@ export const useTabsStore = defineStore("tabs", () => {
 
   return {
     tabs,
-    initOnRegister,
     activeTab,
     createTab,
     deleteTab,

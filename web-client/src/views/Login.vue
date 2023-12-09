@@ -1,41 +1,42 @@
 <script setup lang="ts">
 import Logo from "@/components/Logo.vue";
 import { useFirebaseUI } from "@/firebase";
-import getDefaultSettings from "@/stores/settings/default";
-import { useTabsStore } from "@/stores/tabs";
+import firebase from "firebase/compat/app";
+import { auth } from "firebaseui";
 import "firebaseui/dist/firebaseui.css";
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 
-const ui = useFirebaseUI();
 const router = useRouter();
-const tabsStore = useTabsStore();
 
 onMounted(() => {
+  const ui = useFirebaseUI();
   ui.reset();
   ui.start("#firebaseui-auth-container", {
     // As of 2023, Facebook auth is no longer supported without a verified business account
+    // https://github.com/firebase/firebaseui-web#available-providers
     signInOptions: [
-      "google.com",
-      "twitter.com",
-      "github.com",
+      {
+        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        clientId:
+          "251749769626-c2ffkkp0mgatm0dptf4grpqtjr4mmioc.apps.googleusercontent.com",
+      },
+      firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+      firebase.auth.GithubAuthProvider.PROVIDER_ID,
       "microsoft.com",
       "yahoo.com",
-      "password",
+      firebase.auth.EmailAuthProvider.PROVIDER_ID,
       {
-        provider: "phone",
+        provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
         defaultCountry: "HR",
       },
     ],
+    // Required to enable one-tap sign-up credential helper.
+    credentialHelper: auth.CredentialHelper.GOOGLE_YOLO,
     signInFlow: "popup",
     callbacks: {
-      signInSuccessWithAuthResult: (authResult) => {
-        if (authResult.additionalUserInfo.isNewUser) {
-          const { theme } = getDefaultSettings();
-          localStorage.setItem("theme", theme);
-          document.documentElement.dataset.theme = theme;
-          tabsStore.initOnRegister().then(() => router.push("/"));
-        } else router.push("/");
+      signInSuccessWithAuthResult: () => {
+        router.push("/");
         return false;
       },
     },

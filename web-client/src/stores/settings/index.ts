@@ -1,5 +1,5 @@
 import { mergeDeep } from "@/utils";
-import { ref as dbRef, set, update } from "firebase/database";
+import { ref as dbRef, remove, set, update } from "firebase/database";
 import { defineStore } from "pinia";
 import { computed, watch } from "vue";
 import { useCurrentUser, useDatabase, useDatabaseObject } from "vuefire";
@@ -12,9 +12,10 @@ export const useSettingsStore = defineStore("settings", () => {
   const dbPath = computed(() => `settings/${user.value?.uid}`);
   const dbSettings = computed(() =>
     user.value
-      ? useDatabaseObject<Settings>(dbRef(db, dbPath.value)).value // could be null if no settings are set
+      ? useDatabaseObject<Settings>(dbRef(db, dbPath.value)).value // undefined while loading, null if empty!
       : undefined,
   );
+  const dbSettingsReady = computed(() => dbSettings.value !== undefined);
   const dialogStore = useShortDialogStore();
 
   const settings = computed<Settings>(() => {
@@ -35,26 +36,24 @@ export const useSettingsStore = defineStore("settings", () => {
   };
 
   watch(
-    () => settings.value?.theme,
+    () => settings.value.theme,
     (theme) => {
-      if (!theme) return;
       document.documentElement.dataset.theme = theme;
       localStorage.setItem("theme", theme);
     },
   );
 
   const reset = async () => {
-    if (
-      !(await dialogStore.confirm(
-        "Reset all settings to default? This includes open tabs, views, column settings and other settings outside this window.",
-      ))
-    )
-      return;
-    set(dbRef(db, dbPath.value), getDefaultSettings());
+    const msg =
+      "Reset all settings to default? " +
+      "This includes open tabs, views, column settings and other settings outside this window.";
+    if (!(await dialogStore.confirm(msg))) return;
+    remove(dbRef(db, dbPath.value));
   };
 
   return {
     dbSettings,
+    dbSettingsReady,
     settings,
     updateSettings,
     updateSetting,

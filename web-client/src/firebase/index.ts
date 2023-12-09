@@ -2,6 +2,8 @@ import firebase from "firebase/compat/app";
 import { auth } from "firebaseui";
 //import { setLogLevel } from "firebase/firestore";
 
+//setLogLevel("debug"); // todo
+
 export const firebaseApp = firebase.initializeApp({
   apiKey: "AIzaSyAHN2MNGn8iTJAuzmgkYszyrS7m9tDEGeU",
   authDomain: "dropbox-clone-716f7.firebaseapp.com",
@@ -12,8 +14,6 @@ export const firebaseApp = firebase.initializeApp({
   messagingSenderId: "251749769626",
   appId: "1:251749769626:web:01acdca36bf995f6b3da23",
 });
-
-//setLogLevel("debug"); // todo
 
 let ui: auth.AuthUI;
 

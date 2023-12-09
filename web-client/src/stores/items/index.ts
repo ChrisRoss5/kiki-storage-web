@@ -3,7 +3,7 @@ import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
-import { _RefFirestore } from "vuefire";
+import { _RefFirestore, useCurrentUser } from "vuefire";
 import { usePathStore } from "../path";
 import { useSearchStore } from "../search";
 import { RootKey } from "../settings/default";
@@ -11,6 +11,7 @@ import { useShortDialogStore } from "../short-dialog";
 import { useItemsStorageStore } from "./storage";
 
 function createItemsStore(this: { id: ItemsStoreId }) {
+  const user = useCurrentUser();
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
   const { api: firestoreApi } = useItemsFirestoreStore();
@@ -26,12 +27,16 @@ function createItemsStore(this: { id: ItemsStoreId }) {
   const isFocused = ref(false);
   const isOpen = ref(false);
 
+  watch(user, (user) => {
+    if (user) return;
+    items.value = [];
+    dbItems.value = undefined;
+  });
+
   const stopDbItems = () => dbItems.value?.stop();
   const setDbItems = (newItems: _RefFirestore<ItemCore[]>) => {
     // All paths are being watched, but in the future it may be necessary to stop watchers
     // depending on the usage (dbItems.value?.stop();)
-    // But I highly doubt it will be necessary, not until the app has thousands of users
-    // or the Firestore pricing model changes to include a limit on concurrent watchers
     // https://cloud.google.com/firestore/pricing
     // https://firebase.google.com/docs/firestore/quotas#writes_and_transactions
     dbItems.value = newItems;

@@ -32,8 +32,7 @@ export const usePathStore = defineStore("path", () => {
   watch(
     () => tabsStore.activeTab,
     (activeTab) => {
-      if (!settingsStore.dbSettings?.id || activeTab.path == currentPath.value)
-        return;
+      if (activeTab.path == currentPath.value) return;
       if (isStartup) {
         isStartup = false;
         const startupPath = sanitizePath(route.path);
@@ -48,20 +47,21 @@ export const usePathStore = defineStore("path", () => {
       push(activeTab.path);
     },
   );
-
   watch(
-    [() => route.path, () => settingsStore.dbSettings?.id],
-    async ([newPath, dbSettingsId]) => {
-      if (!dbSettingsId || !route.meta.requiresAuth) return;
+    [() => route.path, () => settingsStore.dbSettingsReady],
+    async ([newPath, dbSettingsReady]) => {
+      if (!dbSettingsReady || !route.meta.requiresAuth) return;
       newPath = sanitizePath(newPath);
       if (!isPathValid(newPath)) return;
       currentPath.value = newPath;
-      tabsStore.updateTab(tabsStore.activeTab, newPath);
       const pathSplit = newPath.split("/");
       folderPaths.value = pathSplit.map((_, i) =>
         pathSplit.slice(0, i + 1).join("/"),
       );
       itemsStore.setDbItems(firestoreApi.getItems(newPath));
+      tabsStore.updateTab(tabsStore.activeTab, newPath);
+      tabsStore.switchTab(tabsStore.activeTab);
+      isStartup = false;
     },
     { immediate: true },
   );
@@ -93,7 +93,7 @@ export const usePathStore = defineStore("path", () => {
   };
   const pushOnTab = (path: string) => {
     path = sanitizePath(path);
-    if (!settingsStore.dbSettings?.id || !isPathValid(path)) return;
+    if (!isPathValid(path)) return;
     tabsStore.updateTab(tabsStore.activeTab, path);
     push(path);
   };
