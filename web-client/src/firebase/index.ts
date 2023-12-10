@@ -15,6 +15,8 @@ export const firebaseApp = firebase.initializeApp({
   appId: "1:251749769626:web:01acdca36bf995f6b3da23",
 });
 
+export const firebaseAuth = firebase.auth();
+
 let ui: auth.AuthUI;
 
 export function useFirebaseUI() {

@@ -33,7 +33,7 @@ function createItemsStore(this: { id: ItemsStoreId }) {
     dbItems.value = undefined;
   });
 
-  const stopDbItems = () => dbItems.value?.stop();
+  const stopDbItems = () => dbItems.value?.stop(); // unused
   const setDbItems = (newItems: _RefFirestore<ItemCore[]>) => {
     // All paths are being watched, but in the future it may be necessary to stop watchers
     // depending on the usage (dbItems.value?.stop();)

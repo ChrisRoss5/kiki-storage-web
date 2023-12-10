@@ -12,7 +12,7 @@ export function formatSize(bytes?: number) {
   return `${+size.toFixed(decimals)} ${units[i]}`;
 }
 
-export function formatDate(date: Date, locales: string) {
+export function formatDate(date: Date, locales = "hr") {
   return date.toLocaleString(locales, {
     year: "numeric",
     month: "2-digit",

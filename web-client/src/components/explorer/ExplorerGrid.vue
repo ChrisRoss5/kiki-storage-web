@@ -185,9 +185,10 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
           "
           class="expl-item"
           :class="{
+            ['is-' + view]: true,
             folder: item.isFolder,
             'is-selected': item.isSelected,
-            'is-list col-span-full grid grid-cols-[subgrid]': view == 'list',
+            'col-span-full grid grid-cols-[subgrid]': view == 'list',
             'hover:bg-base-200': isThemeLight,
             'hover:bg-base-100/25': !isThemeLight,
             '!bg-base-300': isThemeLight && item.isSelected,
@@ -238,14 +239,14 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
 <style>
 .expl-item {
   @apply cursor-pointer items-center whitespace-nowrap rounded-box;
-  & > * {
-    @apply p-3;
-    &:not(.is-renaming) {
-      pointer-events: none;
-    }
+  & > *:not(.is-renaming) {
+    pointer-events: none;
   }
   &.is-list > * {
-    @apply px-3;
+    @apply p-3;
+  }
+  &.is-grid > * {
+    @apply px-0 py-2;
   }
 }
 body[dragging-items] .expl-item,

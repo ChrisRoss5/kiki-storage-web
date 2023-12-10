@@ -47,7 +47,7 @@ watch(
     <img
       :src="imgSrc"
       class="fiv-viv flex-shrink-0 text-xl"
-      :class="{ 'w-full': view == 'grid' }"
+      :class="{ 'w-full px-3': view == 'grid' }"
       alt="Icon"
     />
     <div
@@ -107,9 +107,9 @@ watch(
     {{ item.isFolder ? "Folder" : item.type.toUpperCase() }}
   </template>
   <template v-else-if="columnName == 'dateAdded'">
-    {{ formatDate(item.dateAdded, "hr") }}
+    {{ formatDate(item.dateAdded) }}
   </template>
   <template v-else-if="columnName == 'dateModified'">
-    {{ formatDate(item.dateModified, "hr") }}
+    {{ formatDate(item.dateModified) }}
   </template>
 </template>

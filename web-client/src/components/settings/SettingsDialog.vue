@@ -43,16 +43,10 @@ const showThemes = ref(false);
       </div>
     </template>
     <template #actions>
-      <form method="dialog">
-        <i> Changes save automatically </i>
-        <button
-          class="dsy-btn ml-3"
-          @click.prevent="settingsStore.reset"
-          v-wave
-        >
-          Reset to default
-        </button>
-      </form>
+      <i> Changes save automatically </i>
+      <button class="dsy-btn ml-3" @click.prevent="settingsStore.reset" v-wave>
+        Reset to default
+      </button>
     </template>
   </Dialog>
 </template>

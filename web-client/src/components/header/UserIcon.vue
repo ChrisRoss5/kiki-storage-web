@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import defaultPfp from "@/assets/default-pfp.webp";
-import SettingsDialog from "@/components/settings/SettingsDialog.vue";
 import { ref } from "vue";
 import { useCurrentUser, useFirebaseAuth } from "vuefire";
+import SettingsDialog from "../settings/SettingsDialog.vue";
+import AccountDialog from "./AccountDialog.vue";
 
 const auth = useFirebaseAuth();
 const user = useCurrentUser();
 
+const showAccountDialog = ref(false);
 const showSettingsDialog = ref(false);
 </script>
 
@@ -25,6 +27,12 @@ const showSettingsDialog = ref(false);
       class="dsy-menu dsy-dropdown-content right-0 z-10 w-max rounded-box bg-base-100 p-2 text-right shadow-md"
     >
       <li>
+        <div @click="showAccountDialog = true" v-wave>
+          Account
+          <span class="material-symbols-outlined"> Person </span>
+        </div>
+      </li>
+      <li>
         <div @click="showSettingsDialog = true" v-wave>
           Settings
           <span class="material-symbols-outlined"> settings </span>
@@ -37,6 +45,10 @@ const showSettingsDialog = ref(false);
         </div>
       </li>
     </ul>
+    <AccountDialog
+      :show="showAccountDialog"
+      @close="showAccountDialog = false"
+    />
     <SettingsDialog
       :show="showSettingsDialog"
       @close="showSettingsDialog = false"

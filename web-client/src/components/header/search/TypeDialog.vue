@@ -75,7 +75,6 @@ const handleClear = () => {
         <button class="dsy-btn dsy-btn-primary" @click="handleSearch">
           Search
         </button>
-        <button class="dsy-btn">Cancel</button>
         <button class="dsy-btn" @click="handleClear">Clear</button>
       </form>
     </template>
