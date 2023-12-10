@@ -139,7 +139,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
 
 <template>
   <div
-    class="grid min-h-0 w-full select-none overflow-x-auto"
+    class="grid select-none overflow-x-auto"
     :class="{
       'grid-rows-1': view == 'grid',
       'grid-rows-[auto_1fr]': view == 'list',
@@ -246,7 +246,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     @apply p-3;
   }
   &.is-grid > * {
-    @apply px-0 py-2;
+    @apply px-1 py-2;
   }
 }
 body[dragging-items] .expl-item,

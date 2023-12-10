@@ -48,7 +48,7 @@ const handleArrowClick = (path: string) => {
 <template>
   <div class="z-20 flex flex-wrap gap-3">
     <div
-      class="relative flex h-12 flex-1 cursor-pointer flex-wrap items-center rounded-btn text-xl"
+      class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-btn text-xl"
       :class="{
         'bg-base-200 hover:bg-base-300': isThemeLight,
         'bg-base-300': isThemeLight && showPathInput,
@@ -64,7 +64,7 @@ const handleArrowClick = (path: string) => {
       >
         <div
           v-if="i"
-          class="relative flex h-full items-center rounded-btn"
+          class="relative flex py-2 items-center rounded-btn"
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,
@@ -91,7 +91,7 @@ const handleArrowClick = (path: string) => {
         </div>
         <a
           :href="`/${path}`"
-          class="nav-path relative flex h-full items-center whitespace-pre rounded-btn"
+          class="nav-path relative flex py-2 items-center whitespace-pre rounded-btn"
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,

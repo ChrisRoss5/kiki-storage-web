@@ -29,7 +29,7 @@ const buttons: Button[] = [
 </script>
 
 <template>
-  <div>
+  <div class="shrink-0">
     <div
       v-for="{ icon, label, view } in buttons"
       :key="label"
