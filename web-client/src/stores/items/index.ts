@@ -170,9 +170,11 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
 }
 
 const itemsStoreIds = ["items", "search-items", "navbar-items"] as const;
-type ItemsStoreId = (typeof itemsStoreIds)[number];
 
-const _defineStore = (id: ItemsStoreId) =>
+// https://stackoverflow.com/questions/74467392/autocomplete-in-typescript-of-literal-type-and-string
+type ItemsStoreId = (typeof itemsStoreIds)[number] | (string & {}); // nosonar
+
+export const _defineStore = (id: ItemsStoreId) =>
   defineStore(id, createItemsStore.bind({ id }));
 
 export const stores = itemsStoreIds.map(_defineStore);
@@ -180,4 +182,4 @@ export const useItemsStore = stores[0];
 export const useSearchItemsStore = stores[1];
 export const useNavbarItemsStore = stores[2];
 
-export type ItemsStore = ReturnType<(typeof stores)[number]>;
+export type ItemsStore = ReturnType<ReturnType<typeof _defineStore>>;

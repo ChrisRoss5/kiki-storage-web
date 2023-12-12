@@ -12,6 +12,7 @@ const route = useRoute();
 const startupTranstion = ref(false);
 onMounted(() => setTimeout(() => (startupTranstion.value = true), 1000));
 
+// https://pinia.vuejs.org/api/interfaces/pinia._StoreWithState.html#-dispose
 /* setTimeout(() => {
   const stores = getActivePinia()?.state.value;
   console.log(stores);

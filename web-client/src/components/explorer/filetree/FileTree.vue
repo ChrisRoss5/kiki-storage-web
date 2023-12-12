@@ -1,18 +1,31 @@
 <script setup lang="ts">
-import { stores } from '@/stores/items';
+import { _defineStore } from "@/stores/items";
+import { roots } from "@/stores/settings/default";
+import { provide, ref } from "vue";
+import ExplorerGrid from "../ExplorerGrid.vue";
 
+provide("isFileTree", true);
+
+const props = defineProps<{
+  depth?: number;
+  path?: string;
+}>();
+
+const store = props.path ? _defineStore(`tree-items-${props.path}`) : null;
+const isExpanded = ref(false);
 </script>
 
 <template>
   <div class="relative flex flex-1 flex-col">
-<!--     <LoaderIcon :loading="itemsStore.itemsPending" />
-    <template v-if="itemsStore.items.length">
+    <div v-if="!depth" v-for="(rootValue, rootKey) in roots" :key="rootKey">
+      <span class="material-symbols-outlined pointer-events-none">
+        {{ rootValue.icon }}
+      </span>
+      {{ rootValue.name }}
       <ExplorerGrid
-        class="flex-1"
-        :items-store="itemsStore"
-        :current-path="pathStore.currentPath"
+        :items-store="_defineStore(`tree-items-${rootKey}`)()"
+        :current-path="rootKey"
       />
-      <ExplorerFooter :items-store="itemsStore" />
-    </template> -->
+    </div>
   </div>
 </template>

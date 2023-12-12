@@ -25,8 +25,9 @@ export function setDragOverStyle(e: DragEvent) {
   let { offsetX: x, offsetY: y } = e;
   if (willNeedRect) {
     const rect = target.getBoundingClientRect();
-    x = e.clientX - rect.left;
-    y = e.clientY - rect.top;
+    const scale = rect.width / target.offsetWidth;
+    x = (e.clientX - rect.left) / scale;
+    y = (e.clientY - rect.top) / scale;
   }
   target.classList.add("dragover");
   if (target.classList.contains("expl-body")) {

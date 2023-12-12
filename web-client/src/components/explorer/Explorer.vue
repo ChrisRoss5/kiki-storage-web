@@ -30,7 +30,7 @@ provide("isThemeLight", isThemeLight);
     <Uploads />
     <ExplorerNavbar />
     <div class="flex min-h-0 flex-1">
-      <FileTree class="hidden" />
+      <FileTree />
       <div class="relative flex flex-1 flex-col">
         <LoaderIcon :loading="itemsStore.itemsPending" />
         <template v-if="itemsStore.items.length">

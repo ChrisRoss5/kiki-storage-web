@@ -15,6 +15,7 @@ const props = defineProps<{
   currentPath: string;
 }>();
 
+const isFileTree = inject<boolean>("isFileTree")!;
 const isSearch = inject<boolean>("isSearch")!;
 const isThemeLight = inject<boolean>("isThemeLight")!;
 const pathStore = usePathStore();
