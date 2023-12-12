@@ -1,6 +1,7 @@
 import "file-icon-vectors/dist/file-icon-vivid.min.css";
 import "./styles/main.css"; // do not reorder (keep blank line)!
 
+// https://stackoverflow.com/questions/76247444/why-should-pinia-vuex-be-preferred-over-classic-approach-with-service-classes/76247596#76247596
 import { createPinia } from "pinia";
 import VWave from "v-wave";
 import { createApp } from "vue";

@@ -12,10 +12,31 @@ const route = useRoute();
 const startupTranstion = ref(false);
 onMounted(() => setTimeout(() => (startupTranstion.value = true), 1000));
 
+/* setTimeout(() => {
+  const stores = getActivePinia()?.state.value;
+  console.log(stores);
+  for (const store in stores) {
+    if (store == "user") continue;
+    try {
+      stores[store]?.$reset();
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  (getActivePinia() as any)._s.forEach((store: Store) => {
+    try {
+      store?.$reset();
+    } catch (e) {
+      console.log(e);
+    }
+  });
+}, 1000); */
+
 watch(user, async (currentUser) => {
   if (!currentUser) {
-    if (route.meta.requiresAuth) return router.push("/login");
-    return;
+    if (!route.meta.requiresAuth) return;
+    // Todo: $reset all stores that implement $reset
+    return router.push("/login");
   }
   if (typeof route.query.redirect == "string")
     return router.replace(route.query.redirect);

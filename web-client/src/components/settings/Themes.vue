@@ -10,7 +10,7 @@ const settingsStore = useSettingsStore();
 
 const activeTheme = computed(() => settingsStore.settings.theme);
 
-const themes = [
+const themes: Theme[] = [
   "light",
   "dark",
   "cupcake",
@@ -40,7 +40,7 @@ const themes = [
   "night",
   "coffee",
   "winter",
-] satisfies Theme[];
+];
 </script>
 
 <template>

@@ -111,7 +111,7 @@ const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
     pathStore.pushOnTab(`${item.path}/${item.name}`);
     if (props.itemsStore.$id != "items") props.itemsStore.isOpen = false;
-  } else dialogStore.showError("This item cannot be previewed."); // todo: add previews
+  } else dialogStore.showError("This item cannot be previewed."); // Todo: add previews
 };
 const handleDragStart = (item: Item, e: DragEvent) => {
   if (selectionRectStore.isActive || item.isRenaming || !item.isSelected)

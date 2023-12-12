@@ -6,9 +6,9 @@ export const roots = {
 
 export type RootKey = keyof typeof roots;
 
-export const defaultRoot = "drive" satisfies RootKey;
+export const defaultRoot: RootKey = "drive";
 
-const defaultActiveTab = { path: defaultRoot, id: crypto.randomUUID() };
+const defaultActiveTab: Tab = { path: defaultRoot, id: crypto.randomUUID() };
 
 export default () =>
   ({
@@ -24,7 +24,9 @@ export default () =>
       orderDesc: false,
     },
     view: "list",
-    searchView: "list", // todo?
+    // Todo: currently, both main and search use 'view' property.
+    // Maybe it's better to put ViewSelector.vue to SearchOptions.vue?
+    searchView: "list",
     tabs: [defaultActiveTab],
     activeTabId: defaultActiveTab.id,
   }) satisfies Settings;

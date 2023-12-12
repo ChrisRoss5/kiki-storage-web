@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { useTreeItemsStore } from '@/stores/items';
+import { stores } from '@/stores/items';
 
-const itemsStore = useTreeItemsStore();
 </script>
 
 <template>

@@ -24,13 +24,13 @@ provide("isThemeLight", isThemeLight);
 <template>
   <div
     id="explorer"
-    class="flex flex-1 flex-col gap-3 px-5"
+    class="flex min-h-0 flex-1 flex-col gap-3 px-5"
     :class="{ 'pt-3': !isThemeLight }"
   >
     <Uploads />
     <ExplorerNavbar />
-    <div class="flex flex-1">
-      <FileTree />
+    <div class="flex min-h-0 flex-1">
+      <FileTree class="hidden" />
       <div class="relative flex flex-1 flex-col">
         <LoaderIcon :loading="itemsStore.itemsPending" />
         <template v-if="itemsStore.items.length">

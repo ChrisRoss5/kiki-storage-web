@@ -2,7 +2,7 @@ import firebase from "firebase/compat/app";
 import { auth } from "firebaseui";
 //import { setLogLevel } from "firebase/firestore";
 
-//setLogLevel("debug"); // todo
+//setLogLevel("debug"); // Todo
 
 export const firebaseApp = firebase.initializeApp({
   apiKey: "AIzaSyAHN2MNGn8iTJAuzmgkYszyrS7m9tDEGeU",

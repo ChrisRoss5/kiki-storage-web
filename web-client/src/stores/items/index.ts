@@ -3,21 +3,19 @@ import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
-import { _RefFirestore, useCurrentUser } from "vuefire";
+import { _RefFirestore } from "vuefire";
 import { usePathStore } from "../path";
 import { useSearchStore } from "../search";
 import { RootKey } from "../settings/default";
 import { useShortDialogStore } from "../short-dialog";
 import { useItemsStorageStore } from "./storage";
 
-function createItemsStore(this: { id: ItemsStoreId }) {
-  const user = useCurrentUser();
+export function createItemsStore(this: { id: ItemsStoreId }) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
   const { api: firestoreApi } = useItemsFirestoreStore();
   const { api: storageApi } = useItemsStorageStore();
   const searchStore = useSearchStore();
-  const _stores = stores.map((s) => s());
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
@@ -27,11 +25,10 @@ function createItemsStore(this: { id: ItemsStoreId }) {
   const isFocused = ref(false);
   const isOpen = ref(false);
 
-  watch(user, (user) => {
-    if (user) return;
-    items.value = [];
+  const $reset = () => {
     dbItems.value = undefined;
-  });
+    items.value = [];
+  };
 
   const stopDbItems = () => dbItems.value?.stop(); // unused
   const setDbItems = (newItems: _RefFirestore<ItemCore[]>) => {
@@ -44,6 +41,7 @@ function createItemsStore(this: { id: ItemsStoreId }) {
   const setItems = () => {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
+    const _stores = stores.map((s) => s());
     items.value = newDbItems
       // Unsupported firestore query filters
       .filter((newDbItem) => {
@@ -167,20 +165,19 @@ function createItemsStore(this: { id: ItemsStoreId }) {
     stopRenaming,
     selectAll,
     deselectAll,
+    $reset,
   };
 }
 
-const itemsStoreIds = ["items", "search-items", "navbar-items", "tree-items"] as const;
+const itemsStoreIds = ["items", "search-items", "navbar-items"] as const;
 type ItemsStoreId = (typeof itemsStoreIds)[number];
 
 const _defineStore = (id: ItemsStoreId) =>
   defineStore(id, createItemsStore.bind({ id }));
 
-const stores = itemsStoreIds.map(_defineStore);
-
+export const stores = itemsStoreIds.map(_defineStore);
 export const useItemsStore = stores[0];
-export const useNavbarItemsStore = stores[1];
-export const useSearchItemsStore = stores[2];
-export const useTreeItemsStore = stores[3];
+export const useSearchItemsStore = stores[1];
+export const useNavbarItemsStore = stores[2];
 
 export type ItemsStore = ReturnType<(typeof stores)[number]>;
