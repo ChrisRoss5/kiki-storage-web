@@ -29,7 +29,7 @@ provide("isThemeLight", isThemeLight);
   >
     <Uploads />
     <ExplorerNavbar />
-    <div class="flex min-h-0 flex-1">
+    <div class="flex min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
       <FileTree />
       <div class="relative flex flex-1 flex-col">
         <LoaderIcon :loading="itemsStore.itemsPending" />
@@ -37,7 +37,7 @@ provide("isThemeLight", isThemeLight);
           <ExplorerGrid
             class="flex-1"
             :items-store="itemsStore"
-            :current-path="pathStore.currentPath"
+            :path="pathStore.currentPath"
           />
           <ExplorerFooter :items-store="itemsStore" />
         </template>

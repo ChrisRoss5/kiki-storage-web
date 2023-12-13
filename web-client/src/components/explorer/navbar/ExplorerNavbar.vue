@@ -4,7 +4,8 @@ import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { getPathName, usePathStore } from "@/stores/path";
 import { RootKey, roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
-import { inject, ref, watch } from "vue";
+import { computed, inject, ref, watch } from "vue";
+import Chevron from "../Chevron.vue";
 import CreateOrUpload from "./CreateOrUpload.vue";
 import ExplorerNavbarDropdown from "./ExplorerNavbarDropdown.vue";
 import ExplorerNavbarExplorer from "./ExplorerNavbarExplorer.vue";
@@ -21,6 +22,14 @@ const pathStore = usePathStore();
 const showPathInput = ref(false);
 const showRootsDropdown = ref(false);
 const explorerPath = ref("");
+
+const folderPaths = computed(() =>
+  pathStore.folderPaths.map((p, i) => ({
+    path: p,
+    isRoot: i == 0,
+    isPrevExpanded: explorerPath.value == pathStore.folderPaths[i - 1],
+  })),
+);
 
 watch(
   () => navbarItemsStore.isOpen,
@@ -60,63 +69,53 @@ const handleArrowClick = (path: string) => {
       <ExplorerNavbarInput v-model:show-path-input="showPathInput" />
       <template
         v-if="!showPathInput"
-        v-for="(path, i) in pathStore.folderPaths"
+        v-for="({ path, isRoot, isPrevExpanded }, i) in folderPaths"
       >
         <div
-          v-if="i"
-          class="relative flex py-2 items-center rounded-btn"
+          v-if="!isRoot"
+          class="relative flex items-center rounded-btn py-2"
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,
-            'bg-base-100':
-              isThemeLight && explorerPath == pathStore.folderPaths[i - 1],
-            'bg-base-300':
-              !isThemeLight && explorerPath == pathStore.folderPaths[i - 1],
+            'bg-base-100': isThemeLight && isPrevExpanded,
+            'bg-base-300': !isThemeLight && isPrevExpanded,
           }"
           @click.self="handleArrowClick(pathStore.folderPaths[i - 1])"
         >
-          <span class="material-symbols-outlined pointer-events-none">
-            chevron_right
-          </span>
+          <Chevron :is-expanded="isPrevExpanded" />
           <Transition name="slide-down">
             <ExplorerNavbarExplorer
-              v-if="
-                navbarItemsStore.isOpen &&
-                explorerPath == pathStore.folderPaths[i - 1]
-              "
-              :current-path="explorerPath"
+              v-if="navbarItemsStore.isOpen && isPrevExpanded"
+              :path="explorerPath"
               :items-store="navbarItemsStore"
             />
           </Transition>
         </div>
         <a
           :href="`/${path}`"
-          class="nav-path relative flex py-2 items-center whitespace-pre rounded-btn"
+          class="nav-path relative flex items-center whitespace-pre rounded-btn py-2"
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,
-            'is-current-path': i == pathStore.folderPaths.length - 1,
           }"
           @drop.stop.prevent="itemsStore.handleDrop($event, path)"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"
           @click.prevent="() => handlePathClick(path)"
-          @mouseover="showRootsDropdown = !i"
+          @mouseover="showRootsDropdown = isRoot"
           @mouseleave="showRootsDropdown = false"
           draggable="false"
           v-wave
         >
           <span
-            v-if="!i"
+            v-if="isRoot"
             class="material-symbols-outlined pointer-events-none pl-2 !align-text-bottom"
           >
             {{ roots[path as RootKey]?.icon }}
           </span>
           {{ getPathName(path) }}
-          <ExplorerNavbarDropdown
-            :show-roots-dropdown="!i && showRootsDropdown"
-          />
+          <ExplorerNavbarDropdown v-if="isRoot" :show="showRootsDropdown" />
         </a>
       </template>
     </div>

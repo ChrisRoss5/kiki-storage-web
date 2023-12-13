@@ -1,21 +1,23 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemsStore } from "@/stores/items";
+import { ItemsStore, defineTreeStore } from "@/stores/items";
+import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { usePathStore } from "@/stores/path";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { CSSProperties, computed, inject, nextTick, ref, watch } from "vue";
+import Chevron from "./Chevron.vue";
 import ExplorerGridHead from "./ExplorerGridHead.vue";
 import ExplorerGridItems from "./ExplorerGridItems.vue";
 
 const props = defineProps<{
   itemsStore: ItemsStore;
-  currentPath: string;
+  path: string;
+  depth?: number;
 }>();
 
-const isFileTree = inject<boolean>("isFileTree")!;
 const isSearch = inject<boolean>("isSearch")!;
 const isThemeLight = inject<boolean>("isThemeLight")!;
 const pathStore = usePathStore();
@@ -23,21 +25,29 @@ const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const settingsStore = useSettingsStore();
 const contextMenuStore = useContextMenuStore();
+const { api: firestoreApi } = useItemsFirestoreStore();
 
-const images = import.meta.glob(
-  "/node_modules/file-icon-vectors/dist/icons/vivid/*.svg",
-  { eager: true, as: "url" },
-);
+/* Filetree */
+const isFileTree = props.depth !== undefined;
+if (isFileTree) {
+  console.log(props.path);
+  props.itemsStore.setDbItems(firestoreApi.getItems(props.path));
+}
+
 const columnSettings = computed(
   () => settingsStore.settings[isSearch ? "searchColumns" : "columns"],
 );
-const view = computed(() => settingsStore.settings.view);
+const view = computed<ExplorerView>(() =>
+  isFileTree ? "list" : settingsStore.settings.view,
+);
 const gridStyle = computed<CSSProperties>(() => ({
   gridTemplateColumns:
-    view.value == "list"
-      ? columnSettings.value.order
-          .map((c) => (c == "name" ? "minmax(10rem, auto)" : "min-content"))
-          .join(" ")
+    view.value == "list" || isFileTree
+      ? isFileTree
+        ? "min-content 1fr"
+        : columnSettings.value.order
+            .map((c) => (c == "name" ? "minmax(10rem, auto)" : "min-content"))
+            .join(" ")
       : "repeat(auto-fill, minmax(5rem, 1fr))",
 }));
 
@@ -72,7 +82,7 @@ watch(
   { immediate: true },
 );
 watch(
-  () => props.currentPath,
+  () => props.path,
   () => {
     lastSelectedItemIdx = 0;
     preventTransition.value = true;
@@ -122,7 +132,7 @@ const handleDragStart = (item: Item, e: DragEvent) => {
     "items",
     JSON.stringify(props.itemsStore.selectedItems),
   );
-  document.body.setAttribute("dragging-items", props.currentPath);
+  document.body.setAttribute("dragging-items", props.path);
 };
 const handleDragStop = () => {
   document.body.removeAttribute("dragging-items");
@@ -133,8 +143,11 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
       e,
       `${item.path ? `${item.path}/` : ""}${item.name}`,
     );
-  else if (document.body.getAttribute("dragging-items") != props.currentPath)
-    props.itemsStore.handleDrop(e, props.currentPath);
+  else if (
+    document.body.getAttribute("dragging-items") != props.path &&
+    !isSearch
+  )
+    props.itemsStore.handleDrop(e, props.path);
 };
 </script>
 
@@ -144,28 +157,33 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     :class="{
       'grid-rows-1': view == 'grid',
       'grid-rows-[auto_1fr]': view == 'list',
+      '!overflow-hidden': isFileTree,
     }"
     :style="gridStyle"
   >
     <ExplorerGridHead
-      v-if="view == 'list'"
+      v-if="view == 'list' && !isFileTree"
       :scroll-top="scrollTop"
       :items-store="itemsStore"
     />
     <div
       ref="explBody"
       class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll rounded-box"
-      :class="{ 'items-start gap-x-2 gap-y-1': view == 'grid' }"
-      :path="props.currentPath"
-      @drop.stop.prevent="itemsStore.handleDrop"
+      :class="{
+        'items-start gap-x-2 gap-y-1': view == 'grid',
+        '!overflow-hidden': isFileTree,
+      }"
+      :path="props.path"
+      @drop.stop.prevent="($event) => itemsStore.handleDrop($event, props.path)"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
       @dragend.stop.prevent="clearDragOverStyle"
-      @mousedown.left="
+      @mousedown.left.stop="
         selectionRectStore.handleLeftMouseDown(
           explBody,
           rectEl,
           itemsStore.items,
+          isFileTree,
           $event,
         )
       "
@@ -175,59 +193,88 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
         :name="!preventTransition ? 'rows' : ''"
         :css="!preventTransition"
       >
-        <a
-          v-for="item in itemsStore.items"
-          :key="item.id"
-          :id="item.id"
-          :href="
-            item.isFolder
-              ? `${item.path ? `/${item.path}` : ''}/${item.name}`
-              : undefined
-          "
-          class="expl-item"
-          :class="{
-            ['is-' + view]: true,
-            folder: item.isFolder,
-            'is-selected': item.isSelected,
-            'col-span-full grid grid-cols-[subgrid]': view == 'list',
-            'hover:bg-base-200': isThemeLight,
-            'hover:bg-base-100/25': !isThemeLight,
-            '!bg-base-300': isThemeLight && item.isSelected,
-            '!bg-base-100/50': !isThemeLight && item.isSelected,
-          }"
-          tabindex="0"
-          :draggable="item.isSelected"
-          @dragstart="handleDragStart(item, $event)"
-          @dragend="handleDragStop"
-          @drop.stop.prevent="handleDropOnItem(item, $event)"
-          @click.stop.prevent="handleItemSelect(item, $event)"
-          @dblclick.stop.prevent="handleItemOpen(item)"
-          @keyup.space.stop.prevent="handleItemSelect(item, $event)"
-          @keyup.enter.stop.prevent="handleItemOpen(item)"
-          @contextmenu.stop.prevent="handleItemContextMenu(item, $event)"
-        >
-          <div
-            v-for="columnName in view == 'list'
-              ? columnSettings.order
-              : (['name'] as (keyof ItemCore)[])"
-            :key="columnName"
+        <template v-for="item in itemsStore.items" :key="item.id">
+          <a
+            :id="item.id"
+            :href="
+              item.isFolder
+                ? `${item.path ? `/${item.path}` : ''}/${item.name}`
+                : undefined
+            "
+            class="expl-item"
             :class="{
-              'is-renaming': item.isRenaming && columnName == 'name',
-              'text-right': columnName == 'size',
-              'flex min-w-0 items-center gap-3': columnName == 'name',
-              'flex-col text-center': view == 'grid',
+              ['is-' + view]: true,
+              folder: item.isFolder,
+              'is-selected': item.isSelected,
+              'col-span-full grid grid-cols-[subgrid]': view == 'list',
+              'hover:bg-base-200': isThemeLight,
+              'hover:bg-base-100/25': !isThemeLight,
+              '!bg-base-300': isThemeLight && item.isSelected,
+              '!bg-base-100/50': !isThemeLight && item.isSelected,
             }"
+            tabindex="0"
+            :draggable="item.isSelected"
+            @dragstart="handleDragStart(item, $event)"
+            @dragend="handleDragStop"
+            @drop.stop.prevent="handleDropOnItem(item, $event)"
+            @click.stop.prevent="handleItemSelect(item, $event)"
+            @dblclick.stop.prevent="handleItemOpen(item)"
+            @keyup.space.stop.prevent="handleItemSelect(item, $event)"
+            @keyup.enter.stop.prevent="handleItemOpen(item)"
+            @contextmenu.stop.prevent="handleItemContextMenu(item, $event)"
           >
-            <ExplorerGridItems
-              :is-search="isSearch"
-              :item="item"
-              :items-store="itemsStore"
-              :column-name="columnName"
-              :view="view"
-              :images="images"
+            <div
+              v-if="isFileTree && item.isFolder"
+              class="!pointer-events-auto rounded-box !px-0 hover:bg-base-300"
+              @click.stop.prevent="item.isExpanded = !item.isExpanded"
+              @dblclick.stop="null"
+            >
+              <Chevron
+                :class="{
+                  'opacity-40': !item.isExpanded,
+                  'opacity-100': item.isExpanded,
+                }"
+                :is-expanded="item.isExpanded"
+              />
+            </div>
+            <div
+              v-for="columnName in view == 'list' && !isFileTree
+                ? columnSettings.order
+                : (['name'] satisfies (keyof ItemCore)[])"
+              :key="columnName"
+              :class="{
+                '!pointer-events-auto': item.isRenaming && columnName == 'name',
+                'text-right': columnName == 'size',
+                'flex min-w-0 items-center gap-3': columnName == 'name',
+                'flex-col text-center': view == 'grid',
+                'col-span-full': isFileTree && !item.isFolder,
+              }"
+            >
+              <ExplorerGridItems
+                :is-search="isSearch"
+                :item="item"
+                :items-store="itemsStore"
+                :column-name="columnName"
+                :view="view"
+              />
+            </div>
+          </a>
+          <div
+            v-if="isFileTree && item.isExpanded"
+            class="col-span-full grid-cols-[subgrid]"
+            style="grid-column: 2"
+          >
+            <ExplorerGrid
+              :items-store="
+                defineTreeStore(
+                  `${item.path ? `${item.path}/` : ''}${item.name}`,
+                )
+              "
+              :path="`${item.path ? `${item.path}/` : ''}${item.name}`"
+              :depth="depth ? depth + 1 : 1"
             />
           </div>
-        </a>
+        </template>
       </TransitionGroup>
       <div
         ref="rectEl"
@@ -239,8 +286,8 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
 
 <style>
 .expl-item {
-  @apply cursor-pointer items-center whitespace-nowrap rounded-box;
-  & > *:not(.is-renaming) {
+  @apply relative cursor-pointer items-center whitespace-nowrap rounded-box;
+  & > * {
     pointer-events: none;
   }
   &.is-list > * {

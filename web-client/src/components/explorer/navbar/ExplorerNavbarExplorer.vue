@@ -8,7 +8,7 @@ import { provide } from "vue";
 
 defineProps<{
   itemsStore: ItemsStore;
-  currentPath: string;
+  path: string;
 }>();
 
 provide("isThemeLight", true);
@@ -25,7 +25,7 @@ provide("isThemeLight", true);
     <CloseExplorer @click="itemsStore.isOpen = false" />
     <ExplorerGrid
       :items-store="itemsStore"
-      :current-path="currentPath"
+      :path="path"
       class="max-h-[50vh] max-w-[70vw]"
     />
     <ExplorerFooter :items-store="itemsStore" class="mt-3" />

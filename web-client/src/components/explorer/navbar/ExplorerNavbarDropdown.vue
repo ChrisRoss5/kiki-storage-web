@@ -4,15 +4,13 @@ import { RootKey, roots } from "@/stores/settings/default";
 
 const pathStore = usePathStore();
 
-defineProps<{
-  showRootsDropdown: boolean;
-}>();
+defineProps<{ show: boolean }>();
 </script>
 
 <template>
   <div
     class="dsy-dropdown absolute left-0 top-full min-w-full"
-    :class="{ 'dsy-dropdown-open': showRootsDropdown }"
+    :class="{ 'dsy-dropdown-open': show }"
   >
     <ul
       tabindex="0"

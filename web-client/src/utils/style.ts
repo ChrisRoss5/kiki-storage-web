@@ -16,7 +16,6 @@ export function setDragOverStyle(e: DragEvent) {
       ((target.classList.contains("expl-body") &&
         target.getAttribute("path") ==
           document.body.getAttribute("dragging-items")) ||
-        target.classList.contains("is-current-path") ||
         target.classList.contains("is-selected"))) ||
     (target.classList.contains("expl-body") &&
       target.closest("#search-results"))
@@ -53,11 +52,11 @@ export function clearDragOverStyle(e: DragEvent) {
   target = target.closest(".folder") ?? target.closest(".expl-body") ?? target;
   if (target.classList.contains("expl-body")) {
     isDragoverOverExplBody = false;
-    setTimeout(() => {
+    /* setTimeout(() => { */
       if (isDragoverOverExplBody) return;
       target.classList.remove("dragover");
       target.style.background = "";
-    }, 100);
+    /* }, 100); */
   } else {
     target.classList.remove("dragover");
     target.style.background = "";

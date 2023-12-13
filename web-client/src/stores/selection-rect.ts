@@ -2,14 +2,16 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useSelectionRectStore = defineStore("selection-rect", () => {
-  const rectEl = ref<HTMLElement | null>(null);
-  const explEl = ref<HTMLElement | null>(null);
   const isLeftMouseDown = ref<boolean>(false);
   const isActive = ref<boolean>(false);
   const wasActive = ref<boolean>(false);
 
   let items: { item: Item; el: HTMLAnchorElement }[] = [];
+  let rectEl = null as HTMLElement | null;
+  let explEl = null as HTMLElement | null;
   let explElRect = null as DOMRect | null;
+  let scrollEl = null as HTMLElement | null;
+  let scrollElRect = null as DOMRect | null;
   let startCoords = { x: 0, y: 0 };
   let left = 0; // left and width must be global because they are used in the interval
   let width = 0;
@@ -21,25 +23,27 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
   let isThrottled = false;
   let interval: NodeJS.Timeout | undefined;
   let scrollStrength = 0;
+  let isFileTree = false;
+  let fileTreeOffsetTopTotal = 0;
 
   const activate = () => {
     isActive.value = true;
     document.body.style.userSelect = "none";
-    rectEl.value!.style.transition = "";
-    rectEl.value!.style.opacity = "1";
-    rectEl.value!.style.pointerEvents = "";
+    rectEl!.style.transition = "";
+    rectEl!.style.opacity = "1";
+    rectEl!.style.pointerEvents = "";
   };
   const deactivate = () => {
-    if (!rectEl.value) return;
     isActive.value = false;
     document.body.style.userSelect = "";
     lastScrollDirection = null;
-    rectEl.value.style.transition = "opacity 300ms";
-    rectEl.value.style.opacity = "0";
-    rectEl.value.style.pointerEvents = "none";
+    rectEl!.style.transition = "opacity 300ms";
+    rectEl!.style.opacity = "0";
+    rectEl!.style.pointerEvents = "none";
     setTimeout(() => {
-      if (!isActive.value)
-        rectEl.value!.style.width = rectEl.value!.style.height = "0";
+      if (isActive.value) return;
+      rectEl!.style.top = rectEl!.style.left = "0";
+      rectEl!.style.width = rectEl!.style.height = "0";
     }, 300);
     clearInterval(interval);
   };
@@ -47,6 +51,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     _explEl: HTMLElement | null,
     _rectEl: HTMLElement | null,
     _items: Item[],
+    _isFileTree: boolean,
     e: MouseEvent,
   ) => {
     if (!_explEl || !_rectEl) return;
@@ -59,24 +64,39 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
           (_i) => _i.id == i.id,
         ) as HTMLAnchorElement,
       }));
-    explEl.value = _explEl;
-    rectEl.value = _rectEl;
-    explElRect = _explEl.getBoundingClientRect();
-    scale = explElRect.width / _explEl.offsetWidth;
-    startScrollTop = _explEl.scrollTop;
-    startMaxScrollTop = _explEl.scrollHeight - _explEl.offsetHeight;
+    rectEl = _rectEl;
+    explEl = _explEl;
+    isFileTree = _isFileTree;
+    explElRect = explEl.getBoundingClientRect();
+    scrollEl = isFileTree ? explEl.closest("#filetree")! : explEl;
+    scrollElRect = isFileTree ? scrollEl.getBoundingClientRect() : explElRect;
+    scale = explElRect.width / explEl.offsetWidth;
+    startScrollTop = scrollEl.scrollTop;
+    if (isFileTree) {
+      fileTreeOffsetTopTotal = 0;
+      let el = explEl;
+      while (el.id != "filetree") {
+        fileTreeOffsetTopTotal += el.offsetTop;
+        el = el.offsetParent as HTMLElement;
+      }
+      startScrollTop -= fileTreeOffsetTopTotal;
+    }
+    startMaxScrollTop = isFileTree
+      ? explEl.offsetHeight - scrollEl.offsetHeight + fileTreeOffsetTopTotal
+      : scrollEl.scrollHeight - scrollEl.offsetHeight;
     startCoords = {
       x: (e.clientX - explElRect.left) / scale,
-      y: (e.clientY - explElRect.top) / scale + startScrollTop,
+      y: (e.clientY - scrollElRect.top) / scale + startScrollTop,
     };
     isLeftMouseDown.value = true;
   };
   const handleMouseMove = (e: MouseEvent) => {
     if (!isLeftMouseDown.value) return;
-    const scrolledDown = explEl.value!.scrollTop - startScrollTop;
+    let scrolledDown = scrollEl!.scrollTop;
+    if (isFileTree) scrolledDown -= fileTreeOffsetTopTotal;
     const newCoords = {
       x: (e.clientX - explElRect!.left) / scale,
-      y: (e.clientY - explElRect!.top) / scale + startScrollTop + scrolledDown,
+      y: (e.clientY - scrollElRect!.top) / scale + scrolledDown,
     };
     const x = newCoords.x - startCoords.x;
     const y = newCoords.y - startCoords.y;
@@ -88,10 +108,10 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     }
     left = x < 0 ? startCoords.x - width : startCoords.x;
     let top = y < 0 ? startCoords.y - height : startCoords.y;
-    rectEl.value!.style.top = `${top}px`;
-    rectEl.value!.style.left = `${left}px`;
-    rectEl.value!.style.width = `${width}px`;
-    rectEl.value!.style.height = `${height}px`;
+    rectEl!.style.top = `${top}px`;
+    rectEl!.style.left = `${left}px`;
+    rectEl!.style.width = `${width}px`;
+    rectEl!.style.height = `${height}px`;
     const checkOverlap = () => {
       for (const { item, el } of items)
         item.isSelected = !(
@@ -102,27 +122,29 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
         );
     };
     let scrollDirection = null as "up" | "down" | null;
-    if (e.clientY < explElRect!.top) {
+    if (e.clientY < scrollElRect!.top) {
       scrollDirection = "up";
-      scrollStrength = explElRect!.top - e.clientY;
+      scrollStrength = scrollElRect!.top - e.clientY;
     }
-    if (e.clientY > explElRect!.bottom) {
+    if (e.clientY > scrollElRect!.bottom) {
       scrollDirection = "down";
-      scrollStrength = e.clientY - explElRect!.bottom;
+      scrollStrength = e.clientY - scrollElRect!.bottom;
     }
     if (scrollDirection != lastScrollDirection) {
       lastScrollDirection = scrollDirection;
       clearInterval(interval);
       if (!scrollDirection) return;
       interval = setInterval(() => {
-        const strength = Math.max(5, scrollStrength / 8);
+        const strength = Math.max(4, scrollStrength / 4);
         const pixels = scrollDirection == "up" ? -strength : strength;
         if (
           scrollDirection == "down" &&
-          explEl.value!.scrollTop + pixels >= startMaxScrollTop
-        )
+          scrollEl!.scrollTop + pixels >= startMaxScrollTop
+        ) {
+          scrollEl!.scrollTop = startMaxScrollTop;
           return clearInterval(interval);
-        explEl.value!.scrollBy(0, pixels);
+        }
+        scrollEl!.scrollBy(0, pixels);
         if (top >= startCoords.y) {
           height += pixels;
           if (scrollDirection == "up" && height < 0) top = startCoords.y - 1;
@@ -130,8 +152,8 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
           top += pixels;
           height -= pixels;
         }
-        rectEl.value!.style.top = `${top}px`;
-        rectEl.value!.style.height = `${height}px`;
+        rectEl!.style.top = `${top}px`;
+        rectEl!.style.height = `${height}px`;
         checkOverlap();
       }, 10);
     }
@@ -147,13 +169,11 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
   };
 
   return {
-    rectEl,
-    explEl,
-    handleMouseMove,
-    handleLeftMouseDown,
-    handleLeftMouseUp,
     isLeftMouseDown,
     isActive,
     wasActive,
+    handleMouseMove,
+    handleLeftMouseDown,
+    handleLeftMouseUp,
   };
 });

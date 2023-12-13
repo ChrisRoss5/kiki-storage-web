@@ -3,6 +3,7 @@ import { ItemsStore } from "@/stores/items";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { formatDate, formatSize } from "@/utils/format";
 import { computed, nextTick, ref, watch } from "vue";
+import { fileIconVectors } from "@/main";
 
 const props = defineProps<{
   isSearch: boolean;
@@ -10,7 +11,6 @@ const props = defineProps<{
   itemsStore: ItemsStore;
   columnName: keyof ItemCore;
   view: ExplorerView;
-  images: Record<string, string>;
 }>();
 
 const selectionRectStore = useSelectionRectStore();
@@ -24,10 +24,10 @@ const showFullText = computed(
 const imgSrc = computed(() => {
   let path = "/node_modules/file-icon-vectors/dist/icons/vivid/";
   if (props.item.isFolder) path += "folder.svg";
-  else if (!(path + `${props.item.type}.svg` in props.images))
+  else if (!(path + `${props.item.type}.svg` in fileIconVectors))
     path += "blank.svg";
   else path += `${props.item.type}.svg`;
-  return props.images[path];
+  return fileIconVectors[path];
 });
 
 watch(
@@ -53,7 +53,7 @@ watch(
     <div
       v-if="item.isRenaming"
       id="rename-container"
-      class="inline-flex items-center flex-wrap z-[1]"
+      class="inline-flex items-center z-[1]"
       :class="{
         'justify-center text-center': view == 'grid',
         'ml-2': view == 'list',

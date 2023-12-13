@@ -9,11 +9,10 @@ interface ItemCore {
   size?: number;
 }
 interface Item extends ItemCore {
-  el?: HTMLElement;
-  searchEl?: HTMLElement;
   isSelected?: boolean;
   isRenaming?: boolean;
   newName?: string;
+  isExpanded?: boolean;
   storageFile?: any; // No type for ReturnType<typeof useStorageFile>
 }
 interface SearchFilters {
@@ -34,6 +33,7 @@ interface Settings {
 interface Tab {
   id: TabId;
   path: string;
+  expandedPaths?: string[];
 }
 type TabId = ReturnType<typeof crypto.randomUUID>;
 type ExplorerView = "list" | "grid";
