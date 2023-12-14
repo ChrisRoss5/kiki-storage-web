@@ -31,7 +31,7 @@ watch(
   >
     <div
       ref="dialogBoxEl"
-      class="dsy-modal-box w-auto py-0 px-0 flex flex-col transition-all duration-1000"
+      class="dsy-modal-box w-auto py-0 px-0 flex flex-col"
       :style="modalBoxStyle"
     >
       <div v-if="$slots.header" class="bg-base-100 pt-6 pb-3 px-6 text-2xl">

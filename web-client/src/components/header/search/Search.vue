@@ -10,6 +10,7 @@ import { provide } from "vue";
 import SearchOptions from "./SearchOptions.vue";
 
 provide("isSearch", true);
+provide("isFileTree", false);
 provide("isThemeLight", true);
 
 const searchStore = useSearchStore();
@@ -20,7 +21,7 @@ const pathStore = usePathStore();
 <template>
   <div
     id="search"
-    @mousedown="
+    @mousedown.capture="
       {
         searchItemsStore.isOpen = searchStore.areFiltersActive;
         searchItemsStore.isFocused = true;

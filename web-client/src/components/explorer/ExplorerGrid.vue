@@ -1,34 +1,36 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemsStore, defineTreeStore } from "@/stores/items";
+import { ItemsStore } from "@/stores/items";
 import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { usePathStore } from "@/stores/path";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
+import { useTabsStore } from "@/stores/tabs";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { CSSProperties, computed, inject, nextTick, ref, watch } from "vue";
-import Chevron from "./Chevron.vue";
 import ExplorerGridHead from "./ExplorerGridHead.vue";
 import ExplorerGridItems from "./ExplorerGridItems.vue";
+import LoaderIcon from "./LoaderIcon.vue";
+import ExpandButton from "./filetree/ExpandButton.vue";
+import FileTreeGrid from "./filetree/FileTreeGrid.vue";
 
 const props = defineProps<{
   itemsStore: ItemsStore;
   path: string;
-  depth?: number;
 }>();
 
+const isFileTree = inject<boolean>("isFileTree")!;
 const isSearch = inject<boolean>("isSearch")!;
 const isThemeLight = inject<boolean>("isThemeLight")!;
 const pathStore = usePathStore();
+const tabsStore = useTabsStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const settingsStore = useSettingsStore();
 const contextMenuStore = useContextMenuStore();
 const { api: firestoreApi } = useItemsFirestoreStore();
 
-/* Filetree */
-const isFileTree = props.depth !== undefined;
 if (isFileTree) {
   console.log(props.path);
   props.itemsStore.setDbItems(firestoreApi.getItems(props.path));
@@ -44,7 +46,7 @@ const gridStyle = computed<CSSProperties>(() => ({
   gridTemplateColumns:
     view.value == "list" || isFileTree
       ? isFileTree
-        ? "min-content 1fr"
+        ? "1.5rem 1fr"
         : columnSettings.value.order
             .map((c) => (c == "name" ? "minmax(10rem, auto)" : "min-content"))
             .join(" ")
@@ -138,11 +140,9 @@ const handleDragStop = () => {
   document.body.removeAttribute("dragging-items");
 };
 const handleDropOnItem = (item: Item, e: DragEvent) => {
+  const itemFullPath = `${item.path ? `${item.path}/` : ""}${item.name}`;
   if (item.isFolder && !item.isSelected)
-    props.itemsStore.handleDrop(
-      e,
-      `${item.path ? `${item.path}/` : ""}${item.name}`,
-    );
+    props.itemsStore.handleDrop(e, itemFullPath);
   else if (
     document.body.getAttribute("dragging-items") != props.path &&
     !isSearch
@@ -161,6 +161,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     }"
     :style="gridStyle"
   >
+    <LoaderIcon v-if="isFileTree" :loading="itemsStore.itemsPending" />
     <ExplorerGridHead
       v-if="view == 'list' && !isFileTree"
       :scroll-top="scrollTop"
@@ -174,7 +175,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
         '!overflow-hidden': isFileTree,
       }"
       :path="props.path"
-      @drop.stop.prevent="($event) => itemsStore.handleDrop($event, props.path)"
+      @drop.stop.prevent="itemsStore.handleDrop($event, props.path)"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
       @dragend.stop.prevent="clearDragOverStyle"
@@ -201,7 +202,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
                 ? `${item.path ? `/${item.path}` : ''}/${item.name}`
                 : undefined
             "
-            class="expl-item"
+            class="expl-item expl-grid-item"
             :class="{
               ['is-' + view]: true,
               folder: item.isFolder,
@@ -223,20 +224,10 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
             @keyup.enter.stop.prevent="handleItemOpen(item)"
             @contextmenu.stop.prevent="handleItemContextMenu(item, $event)"
           >
-            <div
+            <ExpandButton
               v-if="isFileTree && item.isFolder"
-              class="!pointer-events-auto rounded-box !px-0 hover:bg-base-300"
-              @click.stop.prevent="item.isExpanded = !item.isExpanded"
-              @dblclick.stop="null"
-            >
-              <Chevron
-                :class="{
-                  'opacity-40': !item.isExpanded,
-                  'opacity-100': item.isExpanded,
-                }"
-                :is-expanded="item.isExpanded"
-              />
-            </div>
+              :path="`${item.path ? `${item.path}/` : ''}${item.name}`"
+            />
             <div
               v-for="columnName in view == 'list' && !isFileTree
                 ? columnSettings.order
@@ -247,11 +238,10 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
                 'text-right': columnName == 'size',
                 'flex min-w-0 items-center gap-3': columnName == 'name',
                 'flex-col text-center': view == 'grid',
-                'col-span-full': isFileTree && !item.isFolder,
               }"
+              :style="{ 'grid-column': isFileTree ? 2 : undefined }"
             >
               <ExplorerGridItems
-                :is-search="isSearch"
                 :item="item"
                 :items-store="itemsStore"
                 :column-name="columnName"
@@ -259,21 +249,16 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
               />
             </div>
           </a>
-          <div
-            v-if="isFileTree && item.isExpanded"
-            class="col-span-full grid-cols-[subgrid]"
-            style="grid-column: 2"
-          >
-            <ExplorerGrid
-              :items-store="
-                defineTreeStore(
-                  `${item.path ? `${item.path}/` : ''}${item.name}`,
-                )
-              "
-              :path="`${item.path ? `${item.path}/` : ''}${item.name}`"
-              :depth="depth ? depth + 1 : 1"
-            />
-          </div>
+          <FileTreeGrid
+            v-if="
+              isFileTree &&
+              item.isFolder &&
+              tabsStore.activeTab.expandedPaths?.includes(
+                `${item.path ? `${item.path}/` : ''}${item.name}`,
+              )
+            "
+            :path="`${item.path ? `${item.path}/` : ''}${item.name}`"
+          />
         </template>
       </TransitionGroup>
       <div
@@ -285,7 +270,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
 </template>
 
 <style>
-.expl-item {
+.expl-grid-item {
   @apply relative cursor-pointer items-center whitespace-nowrap rounded-box;
   & > * {
     pointer-events: none;

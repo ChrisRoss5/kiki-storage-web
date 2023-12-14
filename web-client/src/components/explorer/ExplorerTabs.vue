@@ -77,7 +77,7 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
     <div class="flex-center mb-2 ml-4">
       <div
         class="material-symbols-outlined flex-center aspect-square h-full cursor-pointer rounded-badge bg-base-200 !text-xl hover:bg-base-300"
-        @click="() => tabsStore.createTab()"
+        @click="tabsStore.createTab()"
         v-wave
       >
         add

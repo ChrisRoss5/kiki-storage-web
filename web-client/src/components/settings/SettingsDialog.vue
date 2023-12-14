@@ -24,6 +24,7 @@ const showThemes = ref(false);
           v-if="showThemes"
           class="dsy-btn dsy-btn-primary !leading-3"
           @click="showThemes = false"
+          v-wave
         >
           <span class="material-symbols-outlined">arrow_back</span>
         </button>

@@ -102,7 +102,7 @@ const handleArrowClick = (path: string) => {
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"
-          @click.prevent="() => handlePathClick(path)"
+          @click.prevent="handlePathClick(path)"
           @mouseover="showRootsDropdown = isRoot"
           @mouseleave="showRootsDropdown = false"
           draggable="false"

@@ -19,7 +19,7 @@ provide("isThemeLight", true);
     id="navbar-explorer"
     class="absolute left-0 top-full z-10 origin-top-left scale-75 cursor-default rounded-box bg-base-100 px-4 shadow-lg transition-shadow duration-300"
     :class="{ 'shadow-base-content/50': itemsStore.isFocused }"
-    @mousedown="itemsStore.isFocused = itemsStore.isOpen = true"
+    @mousedown.capture="itemsStore.isFocused = itemsStore.isOpen = true"
   >
     <LoaderIcon :loading="itemsStore.itemsPending" />
     <CloseExplorer @click="itemsStore.isOpen = false" />

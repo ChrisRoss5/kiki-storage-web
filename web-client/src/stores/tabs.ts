@@ -18,7 +18,11 @@ export const useTabsStore = defineStore("tabs", () => {
 
   const createTab = (path?: string) => {
     lastSelectedTabIdBeforeCreate = activeTab.value.id;
-    const newTab = { path: path ?? defaultRoot, id: crypto.randomUUID() };
+    const newTab: Tab = {
+      path: path ?? defaultRoot,
+      id: crypto.randomUUID(),
+      expandedPaths: [],
+    };
     settingsStore.updateSettings({
       activeTabId: newTab.id,
       tabs: [...tabs.value, newTab],
@@ -44,11 +48,11 @@ export const useTabsStore = defineStore("tabs", () => {
     settingsStore.setSetting("activeTabId", tab.id);
     lastSelectedTabIdBeforeCreate = null;
   };
-  const updateTab = (tab: Tab, newPath: string) => {
-    settingsStore.setSetting(
-      "tabs",
-      tabs.value.map((t) => (t.id == tab.id ? { ...t, path: newPath } : t)),
+  const updateActiveTab = (newProps: Partial<Tab>) => {
+    const _tabs = tabs.value.map((t) =>
+      t.id == activeTab.value.id ? { ...t, ...newProps } : t,
     );
+    settingsStore.setSetting("tabs", _tabs);
   };
 
   return {
@@ -57,6 +61,6 @@ export const useTabsStore = defineStore("tabs", () => {
     createTab,
     deleteTab,
     switchTab,
-    updateTab,
+    updateActiveTab,
   };
 });

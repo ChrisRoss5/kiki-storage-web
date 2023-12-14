@@ -59,7 +59,7 @@ export const usePathStore = defineStore("path", () => {
         pathSplit.slice(0, i + 1).join("/"),
       );
       itemsStore.setDbItems(firestoreApi.getItems(newPath));
-      tabsStore.updateTab(tabsStore.activeTab, newPath);
+      tabsStore.updateActiveTab({ path: newPath });
       tabsStore.switchTab(tabsStore.activeTab);
       isStartup = false;
     },
@@ -94,7 +94,7 @@ export const usePathStore = defineStore("path", () => {
   const pushOnTab = (path: string) => {
     path = sanitizePath(path);
     if (!isPathValid(path)) return;
-    tabsStore.updateTab(tabsStore.activeTab, path);
+    tabsStore.updateActiveTab({ path });
     push(path);
   };
   const push = (path: string) => {

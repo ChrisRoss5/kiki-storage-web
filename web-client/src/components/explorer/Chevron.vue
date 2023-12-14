@@ -1,7 +1,5 @@
 <script setup lang="ts">
-defineProps<{
-  isExpanded?: boolean;
-}>();
+defineProps<{ isExpanded?: boolean }>();
 </script>
 
 <template>

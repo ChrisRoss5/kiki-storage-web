@@ -43,6 +43,8 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
     if (!newDbItems || itemsPending.value) return;
     const _stores = stores.map((s) => s()).reverse();
     console.log("setItems", this.id);
+    console.log(_stores.length);
+    
 
     items.value = newDbItems
       // Unsupported firestore query filters
@@ -178,7 +180,7 @@ type ItemsStoreId = (typeof itemsStoreIds)[number] | (string & {}); // nosonar
 const _defineStore = (id: ItemsStoreId) =>
   defineStore(id, createItemsStore.bind({ id }));
 
-export const defineTreeStore = (path: string) => {
+export const useTreeStore = (path: string) => {
   const existingStore = stores.find((s) => s().$id == `tree-items-${path}`);
   if (existingStore) return existingStore();
   const newStore = _defineStore(`tree-items-${path}`);

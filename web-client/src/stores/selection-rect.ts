@@ -34,6 +34,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     rectEl!.style.pointerEvents = "";
   };
   const deactivate = () => {
+    if (!isActive.value) return;
     isActive.value = false;
     document.body.style.userSelect = "";
     lastScrollDirection = null;

@@ -12,7 +12,6 @@ interface Item extends ItemCore {
   isSelected?: boolean;
   isRenaming?: boolean;
   newName?: string;
-  isExpanded?: boolean;
   storageFile?: any; // No type for ReturnType<typeof useStorageFile>
 }
 interface SearchFilters {

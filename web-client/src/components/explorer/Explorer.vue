@@ -18,6 +18,7 @@ const pathStore = usePathStore();
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 
 provide("isSearch", false);
+provide("isFileTree", false);
 provide("isThemeLight", isThemeLight);
 </script>
 

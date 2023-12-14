@@ -34,7 +34,7 @@ const totalUploaded = computed(() =>
       class="group absolute bottom-20 left-1/2 z-10 flex w-full -translate-x-1/2 flex-col rounded-box bg-base-100 shadow-lg sm:w-[40rem]"
     >
       <div
-        class="max-h-0 overflow-y-scroll p-3 py-0 transition-all duration-300 group-hover:max-h-[25rem] group-hover:py-3"
+        class="max-h-0 overflow-y-scroll p-3 py-0 transition-[max-height,padding] duration-300 group-hover:max-h-[25rem] group-hover:py-3"
       >
         <TransitionGroup name="rows">
           <div
@@ -48,16 +48,13 @@ const totalUploaded = computed(() =>
                 'opacity-0': item.storageFile?.snapshot.state != 'running',
               }"
             ></div>
-            <div class="flex-1">
-              <div>
-                Uploading {{ item.name }}
-                <strong class="whitespace-nowrap">
-                  ({{
-                    formatSize(item.storageFile?.snapshot.bytesTransferred)
-                  }}
-                  / {{ formatSize(item.size) }})
-                </strong>
-              </div>
+            <div class="flex-1 overflow-hidden break-words">
+              <div>Uploading to {{ item.path }}:</div>
+              <div>{{ item.name }}</div>
+              <strong class="block whitespace-nowrap text-right">
+                {{ formatSize(item.storageFile?.snapshot.bytesTransferred) }} /
+                {{ formatSize(item.size) }}
+              </strong>
               <progress
                 class="dsy-progress dsy-progress-secondary h-1 w-full"
                 :value="
@@ -74,7 +71,7 @@ const totalUploaded = computed(() =>
                 data-tip="Resume upload"
               >
                 <div
-                  class="material-symbols-outlined text-primary"
+                  class="material-symbols-outlined text-primary !text-3xl"
                   @click="itemsStorage.api.resumeUpload(item)"
                 >
                   play_circle
@@ -86,7 +83,7 @@ const totalUploaded = computed(() =>
                 data-tip="Pause upload"
               >
                 <div
-                  class="material-symbols-outlined text-primary"
+                  class="material-symbols-outlined text-primary !text-3xl"
                   @click="itemsStorage.api.pauseUpload(item)"
                 >
                   pause_circle
@@ -97,7 +94,7 @@ const totalUploaded = computed(() =>
                 data-tip="Cancel upload"
               >
                 <div
-                  class="material-symbols-outlined text-primary"
+                  class="material-symbols-outlined text-primary !text-3xl"
                   @click="itemsStorage.api.cancelUpload(item)"
                 >
                   cancel
@@ -114,8 +111,8 @@ const totalUploaded = computed(() =>
         ></div>
         <div class="flex-1">
           Uploading {{ items.length }} {{ items.length > 1 ? "files" : "file" }}
-          <strong>
-            ({{ formatSize(totalUploaded) }} / {{ formatSize(totalSize) }})
+          <strong class="float-right">
+            {{ formatSize(totalUploaded) }} / {{ formatSize(totalSize) }}
           </strong>
           <progress
             class="dsy-progress dsy-progress-secondary w-full"

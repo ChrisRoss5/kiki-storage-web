@@ -1,18 +1,18 @@
 <script setup lang="ts">
+import { fileIconVectors } from "@/main";
 import { ItemsStore } from "@/stores/items";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { formatDate, formatSize } from "@/utils/format";
-import { computed, nextTick, ref, watch } from "vue";
-import { fileIconVectors } from "@/main";
+import { computed, inject, nextTick, ref, watch } from "vue";
 
 const props = defineProps<{
-  isSearch: boolean;
   item: Item;
   itemsStore: ItemsStore;
   columnName: keyof ItemCore;
   view: ExplorerView;
 }>();
 
+const isSearch = inject<boolean>("isSearch")!;
 const selectionRectStore = useSelectionRectStore();
 const renameInput = ref<HTMLInputElement | null>(null);
 const showFullText = computed(
@@ -53,7 +53,7 @@ watch(
     <div
       v-if="item.isRenaming"
       id="rename-container"
-      class="inline-flex items-center z-[1]"
+      class="z-[1] inline-flex items-center"
       :class="{
         'justify-center text-center': view == 'grid',
         'ml-2': view == 'list',

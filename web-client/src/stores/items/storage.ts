@@ -3,7 +3,7 @@
 
 import { deleteObject, getBlob, ref as storageRef } from "firebase/storage";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useCurrentUser, useFirebaseStorage, useStorageFile } from "vuefire";
 import { useShortDialogStore } from "../short-dialog";
 import { useItemsFirestoreStore } from "./firestore";
@@ -13,7 +13,7 @@ export const useItemsStorageStore = defineStore("items-storage", () => {
   const storage = useFirebaseStorage();
   const itemsFirestoreStore = useItemsFirestoreStore();
   const dialogStore = useShortDialogStore();
-  const storagePath = `user/${user.value?.uid}/`;
+  const storagePath = computed(() => `user/${user.value?.uid}/`);
 
   const itemsUploading = ref<Item[]>([]);
 
@@ -23,7 +23,10 @@ export const useItemsStorageStore = defineStore("items-storage", () => {
         const file = files.item(i)!;
         const item = items[i];
         const firestoreDoc = itemsFirestoreStore.api.createItemDoc();
-        const _storageRef = storageRef(storage, storagePath + firestoreDoc.id);
+        const _storageRef = storageRef(
+          storage,
+          storagePath.value + firestoreDoc.id,
+        );
         const storageFile = useStorageFile(_storageRef);
         item.id = firestoreDoc.id;
         item.storageFile = storageFile;
@@ -56,11 +59,11 @@ export const useItemsStorageStore = defineStore("items-storage", () => {
         itemsUploading.value.forEach(api.cancelUpload);
     },
     deleteFile(item: Item) {
-      const _storageRef = storageRef(storage, storagePath + item.id!);
+      const _storageRef = storageRef(storage, storagePath.value + item.id!);
       return deleteObject(_storageRef);
     },
     async downloadFile(item: Item) {
-      const _storageRef = storageRef(storage, storagePath + item.id!);
+      const _storageRef = storageRef(storage, storagePath.value + item.id!);
       const blob = await getBlob(_storageRef);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

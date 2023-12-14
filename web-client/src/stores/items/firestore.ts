@@ -18,11 +18,13 @@ import {
 import { defineStore } from "pinia";
 import {
   UseCollectionOptions,
+  _RefFirestore,
   useCollection,
   useCurrentUser,
   useFirestore,
 } from "vuefire";
 import { useItemsStorageStore } from "./storage";
+import { computed } from "vue";
 
 export interface DbItem {
   id?: string;
@@ -37,11 +39,15 @@ export interface DbItem {
 
 // Vuefire Issue #1315 - SSR console warning
 
+
 export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const user = useCurrentUser();
   const db = useFirestore();
   const { api: storageApi } = useItemsStorageStore();
-  const dbPath = `app/drive/${user.value?.uid}`;
+  const dbPath = computed(() => `app/drive/${user.value?.uid}`);
+  const pathItemCollections: Record<string, _RefFirestore<ItemCore[]>> = {};
+
+  // todo: $reset pathItemCollections!
 
   const api = {
     searchItems(filters: SearchFilters) {
@@ -62,7 +68,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         }
       }
       return useCollection(
-        query(collection(db, dbPath), ...constraints).withConverter(
+        query(collection(db, dbPath.value), ...constraints).withConverter(
           itemConverter,
         ),
       );
@@ -72,15 +78,17 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       nestedOnly?: boolean,
       options?: UseCollectionOptions,
     ) {
-      return useCollection(
+      if (path in pathItemCollections) return pathItemCollections[path];
+      pathItemCollections[path] = useCollection(
         query(
-          collection(db, dbPath),
+          collection(db, dbPath.value),
           ...(nestedOnly
             ? startsWithConstraints(path)
             : [where("path", "==", path)]),
         ).withConverter(itemConverter),
         { ...options },
       );
+      return pathItemCollections[path];
     },
     async getParentItem(path: string) {
       if (path in roots) return null;
@@ -88,7 +96,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       path = path.slice(0, -name.length - 1);
       const items = await useCollection(
         query(
-          collection(db, dbPath),
+          collection(db, dbPath.value),
           where("path", "==", path),
           where("name", "==", name),
           limit(1), // this costs one read no matter how many items match
@@ -102,15 +110,15 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       itemDoc?: DocumentReference<DocumentData, DocumentData>,
     ) {
       if (itemDoc) setDoc(itemDoc, item);
-      else addDoc(collection(db, dbPath).withConverter(itemConverter), item);
+      else addDoc(collection(db, dbPath.value).withConverter(itemConverter), item);
       updateParentDateModified(item);
     },
     createItemDoc() {
-      return doc(collection(db, dbPath).withConverter(itemConverter));
+      return doc(collection(db, dbPath.value).withConverter(itemConverter));
     },
     moveItems(items: Item[], newPath: string) {
       for (const item of items) {
-        updateDoc(doc(db, dbPath, item.id!), { path: newPath });
+        updateDoc(doc(db, dbPath.value, item.id!), { path: newPath });
         if (item.isFolder)
           updatePaths(
             `${item.path ? `${item.path}/` : ""}${item.name}`,
@@ -120,7 +128,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateParentDateModified(...items);
     },
     renameItem(item: Item) {
-      updateDoc(doc(db, dbPath, item.id!), { name: item.newName });
+      updateDoc(doc(db, dbPath.value, item.id!), { name: item.newName });
       if (item.isFolder)
         updatePaths(
           `${item.path ? `${item.path}/` : ""}${item.name}`,
@@ -144,8 +152,9 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
     },
     deleteItemPermanently(item: Item) {
       if (!item.isFolder) storageApi.deleteFile(item);
-      deleteDoc(doc(db, dbPath, item.id!));
+      deleteDoc(doc(db, dbPath.value, item.id!));
     },
+    // Todo: handle cleanup of deleted/renamed items: tabs, activeTabId, expandedPaths, currentpath
   };
 
   function startsWithConstraints(string: string) {
@@ -160,7 +169,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       .value;
     for (const nestedItem of items) {
       const regexp = new RegExp(`^${oldPath}`);
-      updateDoc(doc(db, dbPath, nestedItem.id!), {
+      updateDoc(doc(db, dbPath.value, nestedItem.id!), {
         path: nestedItem.path.replace(regexp, newPath),
       });
     }
@@ -171,7 +180,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       const parent = await api.getParentItem(path);
       if (!parent) continue;
       const updateData = { dateModified: Timestamp.now() };
-      updateDoc(doc(db, dbPath, parent.id!), updateData);
+      updateDoc(doc(db, dbPath.value, parent.id!), updateData);
     }
   }
 
