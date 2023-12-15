@@ -11,7 +11,7 @@ const handleLineClick = () => {
   const { expandedPaths } = tabsStore.activeTab;
   if (!expandedPaths) return;
   expandedPaths.splice(expandedPaths.indexOf(props.path), 1);
-  tabsStore.updateActiveTab({ expandedPaths: expandedPaths });
+  tabsStore.updateActiveTab({ expandedPaths });
 };
 </script>
 

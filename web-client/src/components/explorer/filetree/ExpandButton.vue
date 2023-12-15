@@ -16,7 +16,7 @@ const handleItemClick = () => {
   if (isItemExpanded.value)
     expandedPaths.splice(expandedPaths.indexOf(props.path), 1);
   else expandedPaths.push(props.path);
-  tabsStore.updateActiveTab({ expandedPaths: expandedPaths });
+  tabsStore.updateActiveTab({ expandedPaths });
 };
 </script>
 

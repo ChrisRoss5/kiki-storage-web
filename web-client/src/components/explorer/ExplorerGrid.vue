@@ -216,7 +216,7 @@ const handleDropOnBody = (e: DragEvent) => {
               'is-selected': item.isSelected,
               'col-span-full grid grid-cols-[subgrid]':
                 view == 'list' && !isFileTree,
-              flex: isFileTree,
+              'flex group': isFileTree,
               'hover:bg-base-200': isThemeLight,
               'hover:bg-base-100/25': !isThemeLight,
               '!bg-base-300': isThemeLight && item.isSelected,
