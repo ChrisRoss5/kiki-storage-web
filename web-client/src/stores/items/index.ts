@@ -45,7 +45,6 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
     /* console.log("setItems", this.id);
     console.log(_stores.length); */
 
-
     items.value = newDbItems
       // Unsupported firestore query filters
       .filter((newDbItem) => {
@@ -96,17 +95,10 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
       return;
     const folders = items.filter((i) => i.isFolder);
     const msg = "You can't move a folder into its own subfolder.";
-    if (
-      folders.some((f) =>
-        path.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
-      )
-    )
+    if (folders.some((f) => path.startsWith(getFullPath(f))))
       return dialogStore.showError(msg);
     items = items.filter(
-      (i) =>
-        !folders.some((f) =>
-          i.path.startsWith(`${f.path ? `${f.path}/` : ""}${f.name}`),
-        ),
+      (i) => !folders.some((f) => i.path.startsWith(getFullPath(f))),
     );
     firestoreApi.moveItems(items, path);
   };

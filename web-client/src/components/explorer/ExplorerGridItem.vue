@@ -5,6 +5,7 @@ import { usePathStore } from "@/stores/path";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { formatDate, formatSize } from "@/utils/format";
+import { getFullPath } from "@/utils/item";
 import { inject } from "vue";
 import ExplorerGridItemName from "./ExplorerGridItemName.vue";
 import ExpandButton from "./filetree/ExpandButton.vue";
@@ -79,9 +80,8 @@ const handleDragStop = () => {
   document.body.removeAttribute("dragging-items");
 };
 const handleDropOnItem = (item: Item, e: DragEvent) => {
-  const itemFullPath = `${item.path ? `${item.path}/` : ""}${item.name}`;
   if (item.isFolder && !item.isSelected)
-    props.itemsStore.handleDrop(e, itemFullPath);
+    props.itemsStore.handleDrop(e, getFullPath(item));
   else props.handleDropOnBody(e);
 };
 </script>
@@ -89,11 +89,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
 <template>
   <a
     :id="item.id"
-    :href="
-      item.isFolder
-        ? `${item.path ? `/${item.path}` : ''}/${item.name}`
-        : undefined
-    "
+    :href="item.isFolder ? `/${getFullPath(item)}` : undefined"
     class="expl-item"
     :class="{
       ['is-' + view]: true,
@@ -119,7 +115,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
   >
     <ExpandButton
       v-if="isFileTree && item.isFolder"
-      :path="`${item.path ? `${item.path}/` : ''}${item.name}`"
+      :path="getFullPath(item)"
     />
     <div
       v-for="columnName in view == 'list' && !isFileTree
@@ -160,7 +156,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     </div>
     <FolderOptions
       v-if="isFileTree && item.isFolder"
-      :path="`${item.path ? `${item.path}/` : ''}${item.name}`"
+      :path="getFullPath(item)"
     />
   </a>
 </template>

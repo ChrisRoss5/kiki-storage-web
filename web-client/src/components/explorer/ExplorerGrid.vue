@@ -4,6 +4,7 @@ import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useTabsStore } from "@/stores/tabs";
+import { getFullPath } from "@/utils/item";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { CSSProperties, computed, inject, nextTick, ref, watch } from "vue";
 import ExplorerGridHead from "./ExplorerGridHead.vue";
@@ -155,11 +156,9 @@ const handleDropOnBody = (e: DragEvent) => {
             v-if="
               isFileTree &&
               item.isFolder &&
-              tabsStore.activeTab.expandedPaths?.includes(
-                `${item.path ? `${item.path}/` : ''}${item.name}`,
-              )
+              tabsStore.activeTab.expandedPaths?.includes(getFullPath(item))
             "
-            :path="`${item.path ? `${item.path}/` : ''}${item.name}`"
+            :path="getFullPath(item)"
             :key="item.id + '-filetree'"
           />
         </template>

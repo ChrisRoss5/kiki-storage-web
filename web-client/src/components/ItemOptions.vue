@@ -5,6 +5,8 @@ import { useItemsStorageStore } from "@/stores/items/storage";
 import { usePathStore } from "@/stores/path";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
+import { useTabsStore } from "@/stores/tabs";
+import { getFullPath } from "@/utils/item";
 import { computed } from "vue";
 
 const contextMenuStore = useContextMenuStore();
@@ -12,8 +14,10 @@ const settingsStore = useSettingsStore();
 const itemsStorageStore = useItemsStorageStore();
 const dialogStore = useShortDialogStore();
 const pathStore = usePathStore();
+const tabsStore = useTabsStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
+const firstItem = computed(() => props.itemsStore.selectedItems[0]);
 
 const props = defineProps<{
   itemsStore: ItemsStore;
@@ -24,45 +28,54 @@ type Option = {
   icon: string;
   label: string;
   onClick: () => void;
+  showCondition?: () => boolean;
 };
-const options = computed<Option[]>(() => [
-  {
-    icon: "download",
-    label: "Download",
-    onClick: () => {
-      if (props.itemsStore.selectedItems.some((i) => i.isFolder))
-        return dialogStore.showError(
-          "Downloading folders is not supported yet.",
+const options = computed<Option[]>(() =>
+  [
+    {
+      icon: "open_in_new",
+      label: "Open in new tab",
+      onClick: () => {
+        tabsStore.createTab(getFullPath(firstItem.value));
+      },
+      showCondition: () =>
+        props.itemsStore.selectedItems.length == 1 && firstItem.value.isFolder,
+    },
+    {
+      icon: "download",
+      label: "Download",
+      onClick: () => {
+        if (props.itemsStore.selectedItems.some((i) => i.isFolder))
+          return dialogStore.showError(
+            "Downloading folders is not supported yet.",
+          );
+        props.itemsStore.selectedItems.forEach(
+          itemsStorageStore.api.downloadFile,
         );
-      props.itemsStore.selectedItems.forEach(
-        itemsStorageStore.api.downloadFile,
-      );
+      },
     },
-  },
-  {
-    icon: "share",
-    label: "Share",
-    onClick: () => {
-      dialogStore.showError("Sharing is not supported yet.");
+    {
+      icon: "share",
+      label: "Share",
+      onClick: () => {
+        dialogStore.showError("Sharing is not supported yet.");
+      },
     },
-  },
-  ...(props.itemsStore.selectedItems.length == 1
-    ? [
-        {
-          icon: "edit",
-          label: "Rename",
-          onClick: () => {
-            props.itemsStore.selectedItems[0].isRenaming = true;
-          },
-        },
-      ]
-    : []),
-  {
-    icon: pathStore.currentRoot == "bin" ? "delete_forever" : "delete",
-    label: pathStore.currentRoot == "bin" ? "Delete permanently" : "Delete",
-    onClick: props.itemsStore.deleteItems,
-  },
-]);
+    {
+      icon: "edit",
+      label: "Rename",
+      onClick: () => {
+        firstItem.value.isRenaming = true;
+      },
+      showCondition: () => props.itemsStore.selectedItems.length == 1,
+    },
+    {
+      icon: pathStore.currentRoot == "bin" ? "delete_forever" : "delete",
+      label: pathStore.currentRoot == "bin" ? "Delete permanently" : "Delete",
+      onClick: props.itemsStore.deleteItems,
+    },
+  ].filter((option) => !option.showCondition || option.showCondition()),
+);
 
 const handleClick = (onClickHandler: () => void) => {
   contextMenuStore.hide();

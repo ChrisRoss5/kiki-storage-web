@@ -39,7 +39,6 @@ export interface DbItem {
 
 // Vuefire Issue #1315 - SSR console warning
 
-
 export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const user = useCurrentUser();
   const db = useFirestore();
@@ -110,7 +109,8 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       itemDoc?: DocumentReference<DocumentData, DocumentData>,
     ) {
       if (itemDoc) setDoc(itemDoc, item);
-      else addDoc(collection(db, dbPath.value).withConverter(itemConverter), item);
+      else
+        addDoc(collection(db, dbPath.value).withConverter(itemConverter), item);
       updateParentDateModified(item);
     },
     createItemDoc() {
@@ -121,7 +121,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         updateDoc(doc(db, dbPath.value, item.id!), { path: newPath });
         if (item.isFolder)
           updatePaths(
-            `${item.path ? `${item.path}/` : ""}${item.name}`,
+            `${getFullPath(item)}`,
             `${newPath ? `${newPath}/` : ""}${item.name}`,
           );
       }
@@ -131,7 +131,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateDoc(doc(db, dbPath.value, item.id!), { name: item.newName });
       if (item.isFolder)
         updatePaths(
-          `${item.path ? `${item.path}/` : ""}${item.name}`,
+          `${getFullPath(item)}`,
           `${item.path ? `${item.path}/` : ""}${item.newName}`,
         );
       updateParentDateModified(item);
@@ -141,7 +141,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         this.deleteItemPermanently(item);
         if (item.isFolder)
           api
-            .getItems(`${item.path ? `${item.path}/` : ""}${item.name}`, true, {
+            .getItems(`${getFullPath(item)}`, true, {
               once: true,
             })
             .promise.value.then((items) => {

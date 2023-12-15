@@ -46,3 +46,7 @@ export function checkItem(item: Item, items: Item[]) {
       : undefined;
   return { error };
 }
+
+export function getFullPath(item: Item) {
+  return `${item.path ? `${item.path}/` : ""}${item.name}`;
+}
