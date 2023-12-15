@@ -45,9 +45,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="login" class="flex h-screen flex-col justify-center">
-    <Logo :is-login="true" class="mb-5 flex-col gap-3 text-black" />
-    <div id="firebaseui-auth-container" class="overflow-auto"></div>
+  <div id="login" class="grid items-center overflow-auto">
+    <div class="my-5">
+      <Logo :is-login="true" class="mb-5 flex-col gap-3 text-black" />
+      <div id="firebaseui-auth-container"></div>
+    </div>
   </div>
 </template>
 

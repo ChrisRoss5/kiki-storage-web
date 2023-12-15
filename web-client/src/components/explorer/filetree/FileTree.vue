@@ -51,6 +51,7 @@ const tabsStore = useTabsStore();
         <FileTreeGrid
           v-if="tabsStore.activeTab.expandedPaths?.includes(rootKey)"
           :path="rootKey"
+          :key="`${rootKey}-filetree`"
         />
       </template>
     </TransitionGroup>

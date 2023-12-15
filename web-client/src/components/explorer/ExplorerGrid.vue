@@ -29,10 +29,9 @@ const contextMenuStore = useContextMenuStore();
 
 const explBody = ref<HTMLElement | null>(null);
 const rectEl = ref<HTMLElement | null>(null);
-const scrollTop = ref(0);
-const preventTransition = ref(false);
-
-let lastSelectedItemIdx = 0;
+const scrollTop = ref(0); // for ExplorerGridHead shadow
+const preventTransition = ref(false); // between paths
+const viewChanged = ref(false); // for transition duration
 
 if (isFileTree) {
   console.log(props.path);
@@ -81,14 +80,23 @@ watch(
   },
   { immediate: true },
 );
+
+let lastSelectedItemIdx = ref(0);
 watch(
   () => props.path,
   () => {
-    lastSelectedItemIdx = 0;
+    lastSelectedItemIdx.value = 0;
     preventTransition.value = true;
   },
   { flush: "pre" },
 );
+
+let viewTimeout: NodeJS.Timeout;
+watch(view, () => {
+  viewChanged.value = true;
+  clearTimeout(viewTimeout);
+  viewTimeout = setTimeout(() => (viewChanged.value = false), 600);
+});
 
 const handleDropOnBody = (e: DragEvent) => {
   if (document.body.getAttribute("dragging-items") != props.path && !isSearch)
@@ -99,7 +107,7 @@ const handleDropOnBody = (e: DragEvent) => {
 <template>
   <!-- Initially, CSS Grid was implemented for all views, including the fileTree.
   However, nested subgrids in the fileTree, especially those several levels deep,
-  cause significant CSS lag when switching tabs (like, crazy!).
+  cause significant CSS lag when switching tabs (like, crazy!) - commit e47faf0.
   Surprisingly, the lag is less pronounced when items are loaded for the first time
   (one by one). Generally, CSS Grid performance is still terrible in 2023,
   so Flex is used instead. This adjustment preserves the Grid's visual style,
@@ -127,6 +135,7 @@ const handleDropOnBody = (e: DragEvent) => {
         'col-span-full grid auto-rows-min grid-cols-[subgrid]': !isFileTree,
         'items-start gap-x-2 gap-y-1': view == 'grid' && !isFileTree,
         '!overflow-hidden': isFileTree,
+        'view-changed': viewChanged,
       }"
       :path="props.path"
       @drop.stop.prevent="handleDropOnBody"
@@ -167,7 +176,7 @@ const handleDropOnBody = (e: DragEvent) => {
               tabsStore.activeTab.expandedPaths?.includes(getFullPath(item))
             "
             :path="getFullPath(item)"
-            :key="item.id + '-filetree'"
+            :key="`${item.id}-filetree`"
           />
         </template>
       </TransitionGroup>

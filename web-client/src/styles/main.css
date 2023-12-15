@@ -97,8 +97,11 @@ html:not([data-theme="light"]) {
 .rows-enter-active,
 .rows-leave-active {
   transition:
-    opacity 500ms,
-    transform 500ms;
+    opacity 300ms,
+    transform 300ms;
+}
+.view-changed > .rows-move {
+  transition-duration: 600ms;
 }
 .rows-enter-from {
   opacity: 0;

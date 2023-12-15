@@ -13,7 +13,7 @@ const showSettingsDialog = ref(false);
 </script>
 
 <template>
-  <div class="dsy-dropdown">
+  <div class="dsy-dropdown dsy-dropdown-hover">
     <label tabindex="0" class="cursor-pointer">
       <img
         alt="Profile picture"
