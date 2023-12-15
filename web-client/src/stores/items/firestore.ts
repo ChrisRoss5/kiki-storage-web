@@ -25,6 +25,7 @@ import {
 } from "vuefire";
 import { useItemsStorageStore } from "./storage";
 import { computed } from "vue";
+import { getFullPath } from "@/utils/item";
 
 export interface DbItem {
   id?: string;

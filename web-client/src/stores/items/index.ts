@@ -1,5 +1,5 @@
 import { useItemsFirestoreStore } from "@/stores/items/firestore";
-import { _createFolder, checkItem, convertFilesToItems } from "@/utils/item";
+import { _createFolder, checkItem, convertFilesToItems, getFullPath } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
