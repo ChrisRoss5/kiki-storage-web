@@ -4,7 +4,7 @@ defineProps<{ isExpanded?: boolean }>();
 
 <template>
   <span
-    class="material-symbols-outlined pointer-events-none transition-[transform,opacity] duration-300"
+    class="material-symbols-outlined pointer-events-none transition-[transform,opacity]"
     :class="{ 'rotate-90': isExpanded }"
   >
     chevron_right

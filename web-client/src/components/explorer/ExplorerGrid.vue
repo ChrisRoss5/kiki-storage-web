@@ -10,10 +10,11 @@ import { useTabsStore } from "@/stores/tabs";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { CSSProperties, computed, inject, nextTick, ref, watch } from "vue";
 import ExplorerGridHead from "./ExplorerGridHead.vue";
-import ExplorerGridItems from "./ExplorerGridItems.vue";
+import ExplorerGridItem from "./ExplorerGridItem.vue";
 import LoaderIcon from "./LoaderIcon.vue";
 import ExpandButton from "./filetree/ExpandButton.vue";
 import FileTreeGrid from "./filetree/FileTreeGrid.vue";
+import FolderOptions from "./filetree/FolderOptions.vue";
 
 const props = defineProps<{
   itemsStore: ItemsStore;
@@ -44,12 +45,10 @@ const view = computed<ExplorerView>(() =>
 );
 const gridStyle = computed<CSSProperties>(() => ({
   gridTemplateColumns:
-    view.value == "list" || isFileTree
-      ? isFileTree
-        ? "1.5rem 1fr"
-        : columnSettings.value.order
-            .map((c) => (c == "name" ? "minmax(10rem, auto)" : "min-content"))
-            .join(" ")
+    view.value == "list"
+      ? columnSettings.value.order
+          .map((c) => (c == "name" ? "minmax(10rem, auto)" : "min-content"))
+          .join(" ")
       : "repeat(auto-fill, minmax(5rem, 1fr))",
 }));
 
@@ -99,11 +98,8 @@ const handleItemContextMenu = (item: Item, e: MouseEvent) => {
 const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
   const idx = props.itemsStore.items.indexOf(item);
   if (e.ctrlKey) {
-    if (item.isSelected) item.isSelected = false;
-    else {
-      item.isSelected = true;
-      lastSelectedItemIdx = idx;
-    }
+    if (!item.isSelected) lastSelectedItemIdx = idx;
+    item.isSelected = !item.isSelected;
   } else if (e.shiftKey) {
     props.itemsStore.deselectAll();
     const start = Math.min(lastSelectedItemIdx, idx);
@@ -115,9 +111,11 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
     )
       props.itemsStore.items[i].isSelected = true;
   } else {
-    props.itemsStore.deselectAll();
-    item.isSelected = true;
-    lastSelectedItemIdx = idx;
+    if (!item.isSelected) {
+      props.itemsStore.deselectAll();
+      lastSelectedItemIdx = idx;
+    }
+    item.isSelected = !item.isSelected;
   }
 };
 const handleItemOpen = (item: Item) => {
@@ -143,23 +141,31 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
   const itemFullPath = `${item.path ? `${item.path}/` : ""}${item.name}`;
   if (item.isFolder && !item.isSelected)
     props.itemsStore.handleDrop(e, itemFullPath);
-  else if (
-    document.body.getAttribute("dragging-items") != props.path &&
-    !isSearch
-  )
+  else handleDropOnBody(e);
+};
+const handleDropOnBody = (e: DragEvent) => {
+  if (document.body.getAttribute("dragging-items") != props.path && !isSearch)
     props.itemsStore.handleDrop(e, props.path);
 };
 </script>
 
 <template>
+  <!-- Initially, CSS Grid was implemented for all views, including the fileTree.
+  However, nested subgrids in the fileTree, especially those several levels deep,
+  cause significant CSS lag when switching tabs (like, crazy!).
+  Surprisingly, the lag is less pronounced when items are loaded for the first time
+  (one by one). Generally, CSS Grid performance is still terrible in 2023,
+  so Flex is used instead. This adjustment preserves the Grid's visual style,
+  but it introduces extra conditional classes that require attention. -->
   <div
-    class="grid select-none overflow-x-auto"
+    class="overflow-x-auto"
     :class="{
-      'grid-rows-1': view == 'grid',
-      'grid-rows-[auto_1fr]': view == 'list',
-      '!overflow-hidden': isFileTree,
+      grid: !isFileTree,
+      'grid-rows-1': view == 'grid' && !isFileTree,
+      'grid-rows-[auto_1fr]': view == 'list' && !isFileTree,
+      'flex-1 !overflow-hidden': isFileTree,
     }"
-    :style="gridStyle"
+    :style="isFileTree ? undefined : gridStyle"
   >
     <LoaderIcon v-if="isFileTree" :loading="itemsStore.itemsPending" />
     <ExplorerGridHead
@@ -169,13 +175,14 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     />
     <div
       ref="explBody"
-      class="expl-body relative col-span-full grid auto-rows-min grid-cols-[subgrid] overflow-y-scroll rounded-box"
+      class="expl-body relative overflow-y-scroll rounded-box"
       :class="{
-        'items-start gap-x-2 gap-y-1': view == 'grid',
+        'col-span-full grid auto-rows-min grid-cols-[subgrid]': !isFileTree,
+        'items-start gap-x-2 gap-y-1': view == 'grid' && !isFileTree,
         '!overflow-hidden': isFileTree,
       }"
       :path="props.path"
-      @drop.stop.prevent="itemsStore.handleDrop($event, props.path)"
+      @drop.stop.prevent="handleDropOnBody"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
       @dragend.stop.prevent="clearDragOverStyle"
@@ -202,12 +209,14 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
                 ? `${item.path ? `/${item.path}` : ''}/${item.name}`
                 : undefined
             "
-            class="expl-item expl-grid-item"
+            class="expl-item"
             :class="{
               ['is-' + view]: true,
               folder: item.isFolder,
               'is-selected': item.isSelected,
-              'col-span-full grid grid-cols-[subgrid]': view == 'list',
+              'col-span-full grid grid-cols-[subgrid]':
+                view == 'list' && !isFileTree,
+              flex: isFileTree,
               'hover:bg-base-200': isThemeLight,
               'hover:bg-base-100/25': !isThemeLight,
               '!bg-base-300': isThemeLight && item.isSelected,
@@ -220,8 +229,8 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
             @drop.stop.prevent="handleDropOnItem(item, $event)"
             @click.stop.prevent="handleItemSelect(item, $event)"
             @dblclick.stop.prevent="handleItemOpen(item)"
-            @keyup.space.stop.prevent="handleItemSelect(item, $event)"
-            @keyup.enter.stop.prevent="handleItemOpen(item)"
+            @keydown.space.stop.prevent="handleItemSelect(item, $event)"
+            @keydown.enter.stop.prevent="handleItemOpen(item)"
             @contextmenu.stop.prevent="handleItemContextMenu(item, $event)"
           >
             <ExpandButton
@@ -239,15 +248,18 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
                 'flex min-w-0 items-center gap-3': columnName == 'name',
                 'flex-col text-center': view == 'grid',
               }"
-              :style="{ 'grid-column': isFileTree ? 2 : undefined }"
             >
-              <ExplorerGridItems
+              <ExplorerGridItem
                 :item="item"
                 :items-store="itemsStore"
                 :column-name="columnName"
                 :view="view"
               />
             </div>
+            <FolderOptions
+              v-if="isFileTree && item.isFolder"
+              :path="`${item.path ? `${item.path}/` : ''}${item.name}`"
+            />
           </a>
           <FileTreeGrid
             v-if="
@@ -258,6 +270,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
               )
             "
             :path="`${item.path ? `${item.path}/` : ''}${item.name}`"
+            :key="item.id + '-filetree'"
           />
         </template>
       </TransitionGroup>
@@ -270,7 +283,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
 </template>
 
 <style>
-.expl-grid-item {
+.expl-item {
   @apply relative cursor-pointer items-center whitespace-nowrap rounded-box;
   & > * {
     pointer-events: none;

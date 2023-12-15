@@ -42,7 +42,7 @@ const showTypeDialog = ref(false);
       {{ searchStore.type || "Type" }}
     </div>
     <div
-      class="dsy-tooltip dsy-tooltip-bottom cursor-pointer rounded-badge border border-primary bg-base-200 transition-opacity duration-300 hover:bg-base-300"
+      class="dsy-tooltip dsy-tooltip-bottom cursor-pointer rounded-badge border border-primary bg-base-200 transition-opacity hover:bg-base-300"
       :class="{
         'pointer-events-none opacity-30': !searchStore.areFiltersActive,
       }"

@@ -16,33 +16,43 @@ const tabsStore = useTabsStore();
 </script>
 
 <template>
-  <div id="filetree" class="relative flex flex-1 flex-col overflow-auto">
+  <div
+    id="filetree"
+    class="relative flex flex-col overflow-x-hidden overflow-y-scroll"
+    :style="{
+      width: tabsStore.activeTab.fileTreeWidth
+        ? `${tabsStore.activeTab.fileTreeWidth}px`
+        : 'auto',
+    }"
+  >
     <TransitionGroup name="rows">
-      <a
-        v-for="(rootValue, rootKey) in roots"
-        :key="rootKey"
-        :href="`/${rootKey}`"
-        tabindex="0"
-        draggable="false"
-        @drop.stop.prevent="itemsStore.handleDrop($event, rootKey)"
-        @click.stop.prevent="pathStore.pushOnTab(`/${rootKey}`)"
-      >
-        <!--  :class="{ expl-item folder grid grid-cols-2
-        'hover:bg-base-200': isThemeLight,
-        'hover:bg-base-100/25': !isThemeLight,
-      }" -->
-        <div class="expl-grid-item is-list folder flex">
+      <template v-for="(rootValue, rootKey) in roots" :key="rootKey">
+        <a
+          :href="`/${rootKey}`"
+          tabindex="0"
+          draggable="false"
+          class="expl-item is-list folder flex"
+          :class="{
+            'hover:bg-base-200': isThemeLight,
+            'hover:bg-base-100/25': !isThemeLight,
+          }"
+          @drop.stop.prevent="itemsStore.handleDrop($event, rootKey)"
+          @click.stop.prevent="pathStore.pushOnTab(`/${rootKey}`)"
+          v-wave
+        >
           <ExpandButton :path="rootKey" />
           <span class="material-symbols-outlined pointer-events-none">
             {{ rootValue.icon }}
           </span>
-          {{ rootValue.name }}
-        </div>
+          <span class="!pl-0">
+            {{ rootValue.name }}
+          </span>
+        </a>
         <FileTreeGrid
           v-if="tabsStore.activeTab.expandedPaths?.includes(rootKey)"
           :path="rootKey"
         />
-      </a>
+      </template>
     </TransitionGroup>
   </div>
 </template>

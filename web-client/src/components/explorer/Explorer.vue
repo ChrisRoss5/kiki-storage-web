@@ -9,6 +9,7 @@ import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
 import LoaderIcon from "./LoaderIcon.vue";
 import FileTree from "./filetree/FileTree.vue";
+import FileTreeResizer from "./filetree/FileTreeResizer.vue";
 import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
 
 const itemsStore = useItemsStore();
@@ -25,14 +26,15 @@ provide("isThemeLight", isThemeLight);
 <template>
   <div
     id="explorer"
-    class="flex min-h-0 flex-1 flex-col gap-3 px-5"
+    class="flex min-h-0 flex-1 select-none flex-col px-5"
     :class="{ 'pt-3': !isThemeLight }"
   >
     <Uploads />
     <ExplorerNavbar />
     <div class="flex min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
       <FileTree />
-      <div class="relative flex flex-1 flex-col">
+      <FileTreeResizer />
+      <div class="relative ml-3 mt-3 flex flex-1 flex-col">
         <LoaderIcon :loading="itemsStore.itemsPending" />
         <template v-if="itemsStore.items.length">
           <ExplorerGrid

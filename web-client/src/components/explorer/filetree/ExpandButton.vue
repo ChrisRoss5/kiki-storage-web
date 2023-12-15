@@ -22,9 +22,10 @@ const handleItemClick = () => {
 
 <template>
   <div
-    class="!pointer-events-auto rounded-box !px-0 hover:bg-base-300"
+    class="!pointer-events-auto rounded-box !px-0 hover:bg-base-300 w-6"
     @click.stop.prevent="handleItemClick"
     @dblclick.stop="null"
+    v-wave
   >
     <Chevron
       :class="{

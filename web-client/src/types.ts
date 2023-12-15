@@ -33,6 +33,7 @@ interface Tab {
   id: TabId;
   path: string;
   expandedPaths?: string[];
+  fileTreeWidth?: number;
 }
 type TabId = ReturnType<typeof crypto.randomUUID>;
 type ExplorerView = "list" | "grid";

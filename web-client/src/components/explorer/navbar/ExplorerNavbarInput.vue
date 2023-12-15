@@ -47,7 +47,7 @@ const handlePathSubmit = () => {
     />
     <div class="absolute bottom-0 right-2 top-0 flex items-center gap-2">
       <div
-        class="material-symbols-outlined cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 transition-opacity duration-300 hover:bg-base-300"
+        class="material-symbols-outlined cursor-pointer rounded-badge border border-primary bg-base-200 p-1 px-2 transition-opacity hover:bg-base-300"
         :class="{ 'pointer-events-none opacity-30': !newPath }"
         @mousedown="handlePathSubmit"
       >

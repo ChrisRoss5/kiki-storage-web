@@ -33,8 +33,13 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
         :index="i"
         class="relative mb-2 ml-2 min-w-0 max-w-[20vw] flex-grow basis-0 cursor-pointer whitespace-nowrap rounded-box bg-base-200 py-1 text-lg hover:bg-base-300"
         :class="{
-          'tab-active !mb-0 cursor-default rounded-b-none pb-3':
+          'tab-active rounded-outward !mb-0 cursor-default rounded-b-none pb-3':
             tab.id == tabsStore.activeTab.id,
+        }"
+        :style="{
+          '--tab-bg': isThemeLight
+            ? 'oklch(var(--b3))'
+            : 'oklch(var(--p) / 30%)',
         }"
         draggable="false"
         @auxclick.prevent.middle="tabsStore.deleteTab(tab)"
@@ -52,7 +57,7 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
             v-else
             class="fiv-viv fiv-icon-folder z-10 flex-shrink-0 text-xl"
           ></div>
-          <div class="mask flex-1 overflow-hidden">
+          <div class="tab-mask flex-1 overflow-hidden">
             {{ getPathName(tab.path) }}
           </div>
           <div
@@ -109,27 +114,18 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 .slick-tab-dragging {
   @apply cursor-grabbing bg-base-300;
 }
-.mask {
+.tab-mask {
   mask-image: linear-gradient(
     to right,
     rgb(0, 0, 0) calc(100% - 2rem),
     transparent
   );
 }
-[data-theme="light"] .tab-active {
-  --tab-bg: oklch(var(--b3));
-}
 .tab-active {
-  --tab-bg: oklch(var(--p) / 30%);
   background-color: var(--tab-bg) !important;
   &::before,
   &::after {
-    content: "";
-    position: absolute;
-    width: var(--rounded-box);
-    height: var(--rounded-box);
     bottom: 0;
-    pointer-events: none;
   }
   &::before {
     right: 100%;

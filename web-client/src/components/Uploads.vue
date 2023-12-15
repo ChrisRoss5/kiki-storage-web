@@ -34,7 +34,7 @@ const totalUploaded = computed(() =>
       class="group absolute bottom-20 left-1/2 z-10 flex w-full -translate-x-1/2 flex-col rounded-box bg-base-100 shadow-lg sm:w-[40rem]"
     >
       <div
-        class="max-h-0 overflow-y-scroll p-3 py-0 transition-[max-height,padding] duration-300 group-hover:max-h-[25rem] group-hover:py-3"
+        class="max-h-0 overflow-y-scroll p-3 py-0 transition-[max-height,padding] group-hover:max-h-[25rem] group-hover:py-3"
       >
         <TransitionGroup name="rows">
           <div
@@ -43,7 +43,7 @@ const totalUploaded = computed(() =>
             class="flex items-center gap-3 py-2 leading-5"
           >
             <div
-              class="dsy-loading dsy-loading-spinner text-secondary transition-opacity duration-300"
+              class="dsy-loading dsy-loading-spinner text-secondary transition-opacity"
               :class="{
                 'opacity-0': item.storageFile?.snapshot.state != 'running',
               }"
@@ -71,7 +71,7 @@ const totalUploaded = computed(() =>
                 data-tip="Resume upload"
               >
                 <div
-                  class="material-symbols-outlined text-primary !text-3xl"
+                  class="material-symbols-outlined !text-3xl text-primary"
                   @click="itemsStorage.api.resumeUpload(item)"
                 >
                   play_circle
@@ -83,7 +83,7 @@ const totalUploaded = computed(() =>
                 data-tip="Pause upload"
               >
                 <div
-                  class="material-symbols-outlined text-primary !text-3xl"
+                  class="material-symbols-outlined !text-3xl text-primary"
                   @click="itemsStorage.api.pauseUpload(item)"
                 >
                   pause_circle
@@ -94,7 +94,7 @@ const totalUploaded = computed(() =>
                 data-tip="Cancel upload"
               >
                 <div
-                  class="material-symbols-outlined text-primary !text-3xl"
+                  class="material-symbols-outlined !text-3xl text-primary"
                   @click="itemsStorage.api.cancelUpload(item)"
                 >
                   cancel
@@ -106,7 +106,7 @@ const totalUploaded = computed(() =>
       </div>
       <div class="flex items-center gap-3 p-3 py-3">
         <div
-          class="dsy-loading dsy-loading-spinner dsy-loading-lg text-secondary transition-opacity duration-300"
+          class="dsy-loading dsy-loading-spinner dsy-loading-lg text-secondary transition-opacity"
           :class="{ 'opacity-0': allItemsPaused }"
         ></div>
         <div class="flex-1">

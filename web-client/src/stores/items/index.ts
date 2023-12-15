@@ -44,7 +44,7 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
     const _stores = stores.map((s) => s()).reverse();
     console.log("setItems", this.id);
     console.log(_stores.length);
-    
+
 
     items.value = newDbItems
       // Unsupported firestore query filters

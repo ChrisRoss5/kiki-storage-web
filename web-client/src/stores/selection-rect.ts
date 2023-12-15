@@ -104,7 +104,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     width = Math.abs(x);
     let height = Math.abs(y);
     if (!isActive.value) {
-      if (width < 5 && height < 5) return;
+      if (width < 10 && height < 10) return;
       activate();
     }
     left = x < 0 ? startCoords.x - width : startCoords.x;

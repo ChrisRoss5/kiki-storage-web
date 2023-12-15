@@ -44,8 +44,20 @@ a {
   vertical-align: middle;
   user-select: none;
 }
-.flex-center {
-  @apply flex items-center justify-center;
+@layer utilities {
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+  .rounded-outward {
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      width: var(--rounded-box);
+      height: var(--rounded-box);
+      pointer-events: none;
+    }
+  }
 }
 
 /* daisyui */
@@ -81,10 +93,9 @@ html:not([data-theme="light"]) {
 .fade-leave-to {
   opacity: 0 !important;
 }
+.rows-move,
 .rows-enter-active,
-.rows-leave-active,
-.rows-enter-active ~ .rows-move,
-.rows-leave-active ~ .rows-move {
+.rows-leave-active {
   transition:
     opacity 300ms,
     transform 300ms;

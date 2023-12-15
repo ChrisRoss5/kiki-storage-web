@@ -40,7 +40,7 @@ const pathStore = usePathStore();
       <div
         id="search-results"
         v-if="searchItemsStore.isOpen"
-        class="absolute left-0 right-0 top-full mt-1 rounded-box bg-base-100 px-4 shadow-lg transition-shadow duration-300"
+        class="absolute left-0 right-0 top-full mt-1 rounded-box bg-base-100 px-4 shadow-lg transition-shadow"
         :class="{ 'shadow-base-content/50': searchItemsStore.isFocused }"
       >
         <LoaderIcon :loading="searchItemsStore.itemsPending" />

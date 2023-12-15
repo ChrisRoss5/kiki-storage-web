@@ -16,10 +16,9 @@ const handleLineClick = () => {
 </script>
 
 <template>
-  <div class="col-span-full grid grid-cols-[subgrid]">
+  <div class="flex">
     <div
-      class="cursor-pointer opacity-50 transition-opacity hover:opacity-100"
-      style="grid-column: 1"
+      class="w-6 cursor-pointer opacity-50 transition-opacity hover:opacity-100"
       @click.stop.prevent="handleLineClick"
     >
       <div
@@ -27,10 +26,6 @@ const handleLineClick = () => {
         style="height: calc(100% - 0.5rem)"
       ></div>
     </div>
-    <ExplorerGrid
-      :items-store="useTreeStore(path)"
-      :path="path"
-      style="grid-column: 2"
-    />
+    <ExplorerGrid :items-store="useTreeStore(path)" :path="path" />
   </div>
 </template>

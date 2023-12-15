@@ -79,20 +79,18 @@ const handleColumnClick = (key: keyof ItemCore) => {
       @click.stop="handleColumnClick(key)"
     >
       <DragHandle
-        class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 cursor-grab opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 cursor-grab opacity-0 transition-opacity group-hover:opacity-100"
       >
         drag_indicator
       </DragHandle>
       <div
         v-if="columnSettings.orderBy == key"
-        class="material-symbols-outlined absolute -top-2 left-1/2 -translate-x-1/2 transition-transform duration-300"
+        class="material-symbols-outlined absolute -top-2 left-1/2 -translate-x-1/2 transition-transform"
         :class="{ 'scale-y-[-1]': !columnSettings.orderDesc }"
       >
         expand_more
       </div>
-      <div
-        class="col-name transition-transform duration-300 group-hover:translate-x-3"
-      >
+      <div class="col-name transition-transform group-hover:translate-x-3">
         {{ columnNames[key] }}
       </div>
     </SlickItem>

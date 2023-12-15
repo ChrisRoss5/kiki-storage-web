@@ -46,7 +46,7 @@ watch(
   <template v-if="columnName == 'name'">
     <img
       :src="imgSrc"
-      class="fiv-viv flex-shrink-0 text-xl"
+      class="w-4 flex-shrink-0 text-xl"
       :class="{ 'w-full px-3': view == 'grid' }"
       alt="Icon"
     />
