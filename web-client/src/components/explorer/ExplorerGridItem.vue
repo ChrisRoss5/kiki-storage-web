@@ -19,7 +19,7 @@ const props = defineProps<{
   item: Item;
   itemsStore: ItemsStore;
   view: ExplorerView;
-  columnSettings: ColumnSettings;
+  columnOrder: Partial<keyof ItemCore>[];
   lastSelectedItemIdx: number;
   handleDropOnBody: (e: DragEvent) => void;
 }>();
@@ -118,9 +118,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
       :path="getFullPath(item)"
     />
     <div
-      v-for="columnName in view == 'list' && !isFileTree
-        ? columnSettings.order
-        : (['name'] satisfies (keyof ItemCore)[])"
+      v-for="columnName in columnOrder"
       :key="columnName"
       :class="{
         '!pointer-events-auto': item.isRenaming && columnName == 'name',
@@ -129,12 +127,6 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
         'flex-col text-center': view == 'grid',
       }"
     >
-      <!-- <ExplorerGridItem
-        :item="item"
-        :items-store="itemsStore"
-        :column-name="columnName"
-        :view="view"
-      /> -->
       <ExplorerGridItemName
         v-if="columnName == 'name'"
         :item="item"

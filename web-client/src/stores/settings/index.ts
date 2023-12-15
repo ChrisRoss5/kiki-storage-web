@@ -22,6 +22,14 @@ export const useSettingsStore = defineStore("settings", () => {
     return mergeDeep(getDefaultSettings(), dbSettings.value);
   });
 
+  watch(
+    () => settings.value.theme,
+    (theme) => {
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem("theme", theme);
+    },
+  );
+
   const updateSettings = (newSettings: Partial<Settings>) => {
     return update(dbRef(db, dbPath.value), newSettings);
   };
@@ -34,21 +42,25 @@ export const useSettingsStore = defineStore("settings", () => {
   const setSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     return set(dbRef(db, `${dbPath.value}/${key}`), value);
   };
-
-  watch(
-    () => settings.value.theme,
-    (theme) => {
-      document.documentElement.dataset.theme = theme;
-      localStorage.setItem("theme", theme);
-    },
-  );
-
   const reset = async () => {
     const msg =
       "Reset all settings to default? " +
       "This includes open tabs, views, column settings and other settings outside this window.";
     if (!(await dialogStore.confirm(msg))) return;
     remove(dbRef(db, dbPath.value));
+  };
+  const updateColumnOrder = (key: keyof ItemCore, isSearch: boolean) => {
+    const columnSettings =
+      settings.value[isSearch ? "searchColumns" : "columns"];
+    updateSetting(isSearch ? "searchColumns" : "columns", {
+      ...(columnSettings.orderBy == key
+        ? { orderDesc: !columnSettings.orderDesc }
+        : {
+            orderBy: key,
+            orderDesc:
+              key == "dateAdded" || key == "dateModified" || key == "size",
+          }),
+    });
   };
 
   return {
@@ -59,5 +71,6 @@ export const useSettingsStore = defineStore("settings", () => {
     updateSetting,
     setSetting,
     reset,
+    updateColumnOrder,
   };
 });

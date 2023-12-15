@@ -13,9 +13,8 @@ const ctxmenu = ref<HTMLElement | null>(null);
 const isSearch = computed(
   () => contextMenuStore.itemsStore?.$id == "search-items",
 );
-const activeColumnsOrder = computed(
-  () =>
-    settingsStore.settings[isSearch.value ? "searchColumns" : "columns"].order,
+const columnSettings = computed(
+  () => settingsStore.settings[isSearch.value ? "searchColumns" : "columns"],
 );
 const allColumnsOrder =
   getDefaultSettings()[isSearch.value ? "searchColumns" : "columns"].order;
@@ -42,9 +41,9 @@ watchPostEffect(() => {
 
 const handleColumnChange = (key: keyof ItemCore) => {
   settingsStore.updateSetting(isSearch.value ? "searchColumns" : "columns", {
-    order: activeColumnsOrder.value.includes(key)
-      ? activeColumnsOrder.value.filter((k) => k != key)
-      : [...activeColumnsOrder.value, key],
+    order: columnSettings.value.order.includes(key)
+      ? columnSettings.value.order.filter((k) => k != key)
+      : [...columnSettings.value.order, key],
   });
 };
 </script>
@@ -73,11 +72,30 @@ const handleColumnChange = (key: keyof ItemCore) => {
           type="checkbox"
           class="dsy-checkbox-primary dsy-checkbox dsy-checkbox-sm mr-3"
           @change.prevent="handleColumnChange(key)"
-          :checked="activeColumnsOrder.includes(key)"
+          :checked="columnSettings.order.includes(key)"
           :disabled="key == 'name'"
         />
         {{ columnNames[key] }}
       </label>
+    </div>
+    <div v-else-if="contextMenuStore.activeContextMenu == 'explorer'">
+      <div
+        v-for="key in allColumnsOrder"
+        :key="key"
+        class="relative flex cursor-pointer items-center rounded-box px-3 py-2 hover:bg-base-300"
+        @click="settingsStore.updateColumnOrder(key, isSearch)"
+      >
+        <div
+          v-if="columnSettings.orderBy == key"
+          class="material-symbols-outlined absolute -top-2 left-1/2 -translate-x-1/2 transition-transform"
+          :class="{ 'scale-y-[-1]': !columnSettings.orderDesc }"
+        >
+          expand_more
+        </div>
+        <div>
+          {{ columnNames[key] }}
+        </div>
+      </div>
     </div>
   </div>
 </template>

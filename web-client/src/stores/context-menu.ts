@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { ItemsStore } from "./items";
 
-type ContextMenu = "item" | "column";
+type ContextMenu = "item" | "column" | "explorer";
 
 export const useContextMenuStore = defineStore("context-menu", () => {
   const activeContextMenu = ref<ContextMenu | null>(null);

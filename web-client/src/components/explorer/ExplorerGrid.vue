@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useContextMenuStore } from "@/stores/context-menu";
 import { ItemsStore } from "@/stores/items";
 import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { useSelectionRectStore } from "@/stores/selection-rect";
@@ -24,6 +25,12 @@ const tabsStore = useTabsStore();
 const selectionRectStore = useSelectionRectStore();
 const settingsStore = useSettingsStore();
 const { api: firestoreApi } = useItemsFirestoreStore();
+const contextMenuStore = useContextMenuStore();
+
+const explBody = ref<HTMLElement | null>(null);
+const rectEl = ref<HTMLElement | null>(null);
+const scrollTop = ref(0);
+const preventTransition = ref(false);
 
 let lastSelectedItemIdx = 0;
 
@@ -32,11 +39,14 @@ if (isFileTree) {
   props.itemsStore.setDbItems(firestoreApi.getItems(props.path));
 }
 
+const view = computed<ExplorerView>(() =>
+  isFileTree ? "list" : settingsStore.settings.view,
+);
 const columnSettings = computed(
   () => settingsStore.settings[isSearch ? "searchColumns" : "columns"],
 );
-const view = computed<ExplorerView>(() =>
-  isFileTree ? "list" : settingsStore.settings.view,
+const columnOrder = computed<Partial<keyof ItemCore>[]>(() =>
+  view.value == "list" && !isFileTree ? columnSettings.value.order : ["name"],
 );
 const gridStyle = computed<CSSProperties>(() => ({
   gridTemplateColumns:
@@ -46,11 +56,6 @@ const gridStyle = computed<CSSProperties>(() => ({
           .join(" ")
       : "repeat(auto-fill, minmax(5rem, 1fr))",
 }));
-
-const explBody = ref<HTMLElement | null>(null);
-const rectEl = ref<HTMLElement | null>(null);
-const scrollTop = ref(0);
-const preventTransition = ref(false);
 
 watch(
   [
@@ -138,6 +143,9 @@ const handleDropOnBody = (e: DragEvent) => {
         )
       "
       @scroll="scrollTop = explBody?.scrollTop ?? 0"
+      @contextmenu.stop.prevent="
+        contextMenuStore.show('explorer', props.itemsStore, $event)
+      "
     >
       <TransitionGroup
         :name="!preventTransition ? 'rows' : ''"
@@ -148,7 +156,7 @@ const handleDropOnBody = (e: DragEvent) => {
             :item="item"
             :items-store="itemsStore"
             :view="view"
-            :column-settings="columnSettings"
+            :column-order="columnOrder"
             :handle-drop-on-body="handleDropOnBody"
             v-model:last-selected-item-idx="lastSelectedItemIdx"
           />

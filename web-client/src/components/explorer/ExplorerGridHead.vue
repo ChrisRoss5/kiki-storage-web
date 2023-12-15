@@ -25,7 +25,7 @@ let savingNewColumnOrder = false;
 const columnOrder = computed({
   get: () => columnSettings.value.order,
   set: async (order) => {
-    if (savingNewColumnOrder) return; // SlickSort bug
+    if (savingNewColumnOrder) return; // SlickSort bug: fires twice
     savingNewColumnOrder = true;
     await settingsStore.updateSetting(isSearch ? "searchColumns" : "columns", {
       order,
@@ -33,18 +33,6 @@ const columnOrder = computed({
     savingNewColumnOrder = false;
   },
 });
-
-const handleColumnClick = (key: keyof ItemCore) => {
-  settingsStore.updateSetting(isSearch ? "searchColumns" : "columns", {
-    ...(columnSettings.value.orderBy == key
-      ? { orderDesc: !columnSettings.value.orderDesc }
-      : {
-          orderBy: key,
-          orderDesc:
-            key == "dateAdded" || key == "dateModified" || key == "size",
-        }),
-  });
-};
 </script>
 
 <template>
@@ -76,7 +64,7 @@ const handleColumnClick = (key: keyof ItemCore) => {
         'hover:bg-base-300': isThemeLight,
         'hover:bg-base-100/25': !isThemeLight,
       }"
-      @click.stop="handleColumnClick(key)"
+      @click.stop="settingsStore.updateColumnOrder(key, isSearch)"
     >
       <DragHandle
         class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 cursor-grab opacity-0 transition-opacity group-hover:opacity-100"

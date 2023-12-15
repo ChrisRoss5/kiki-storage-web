@@ -97,8 +97,8 @@ html:not([data-theme="light"]) {
 .rows-enter-active,
 .rows-leave-active {
   transition:
-    opacity 300ms,
-    transform 300ms;
+    opacity 500ms,
+    transform 500ms;
 }
 .rows-enter-from {
   opacity: 0;
