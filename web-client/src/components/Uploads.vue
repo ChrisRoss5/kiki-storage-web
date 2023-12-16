@@ -171,9 +171,4 @@ const totalUploaded = computed(() =>
   opacity: 0;
   transform: translate(-50%, 0.5rem);
 }
-.rows-move {
-  transition:
-    opacity 300ms,
-    transform 300ms;
-}
 </style>
