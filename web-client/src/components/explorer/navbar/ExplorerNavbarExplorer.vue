@@ -6,10 +6,7 @@ import LoaderIcon from "@/components/explorer/LoaderIcon.vue";
 import { ItemsStore } from "@/stores/items";
 import { provide } from "vue";
 
-defineProps<{
-  itemsStore: ItemsStore;
-  path: string;
-}>();
+defineProps<{ itemsStore: ItemsStore }>();
 
 provide("isThemeLight", true);
 </script>
@@ -23,11 +20,7 @@ provide("isThemeLight", true);
   >
     <LoaderIcon :loading="itemsStore.itemsPending" />
     <CloseExplorer @click="itemsStore.isOpen = false" />
-    <ExplorerGrid
-      :items-store="itemsStore"
-      :path="path"
-      class="max-h-[50vh] max-w-[70vw]"
-    />
+    <ExplorerGrid :items-store="itemsStore" class="max-h-[50vh] max-w-[70vw]" />
     <ExplorerFooter :items-store="itemsStore" class="mt-3" />
   </div>
 </template>

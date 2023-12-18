@@ -58,7 +58,7 @@ export const usePathStore = defineStore("path", () => {
       folderPaths.value = pathSplit.map((_, i) =>
         pathSplit.slice(0, i + 1).join("/"),
       );
-      itemsStore.setDbItems(firestoreApi.getItems(newPath));
+      itemsStore.path = newPath;
       tabsStore.updateActiveTab({ path: newPath });
       tabsStore.switchTab(tabsStore.activeTab);
       isStartup = false;

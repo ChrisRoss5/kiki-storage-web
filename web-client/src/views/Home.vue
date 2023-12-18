@@ -111,5 +111,17 @@ const handleMouseDownCapture = (e: MouseEvent) => {
     <Header />
     <ExplorerTabs />
     <Explorer />
+    <!--     <div class="flex flex-col min-h-0">
+      <ExplorerTabs />
+      <Explorer />
+    </div>
+    <div class="flex flex-col min-h-0">
+      <ExplorerTabs />
+      <Explorer />
+    </div>
+    <div class="flex flex-col min-h-0">
+      <ExplorerTabs />
+      <Explorer />
+    </div> -->
   </div>
 </template>

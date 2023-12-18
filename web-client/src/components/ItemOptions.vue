@@ -2,7 +2,6 @@
 import { useContextMenuStore } from "@/stores/context-menu";
 import { ItemsStore } from "@/stores/items";
 import { useItemsStorageStore } from "@/stores/items/storage";
-import { usePathStore } from "@/stores/path";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { useTabsStore } from "@/stores/tabs";
@@ -13,7 +12,6 @@ const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
 const itemsStorageStore = useItemsStorageStore();
 const dialogStore = useShortDialogStore();
-const pathStore = usePathStore();
 const tabsStore = useTabsStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
@@ -70,8 +68,8 @@ const options = computed<Option[]>(() =>
       showCondition: () => props.itemsStore.selectedItems.length == 1,
     },
     {
-      icon: pathStore.currentRoot == "bin" ? "delete_forever" : "delete",
-      label: pathStore.currentRoot == "bin" ? "Delete permanently" : "Delete",
+      icon: props.itemsStore.root == "bin" ? "delete_forever" : "delete",
+      label: props.itemsStore.root == "bin" ? "Delete permanently" : "Delete",
       onClick: props.itemsStore.deleteItems,
     },
   ].filter((option) => !option.showCondition || option.showCondition()),

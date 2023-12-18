@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useItemsStore } from "@/stores/items";
-import { usePathStore } from "@/stores/path";
 import { useSettingsStore } from "@/stores/settings";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { computed, provide } from "vue";
@@ -14,7 +13,6 @@ import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
 
 const itemsStore = useItemsStore();
 const settingsStore = useSettingsStore();
-const pathStore = usePathStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 
@@ -31,17 +29,13 @@ provide("isThemeLight", isThemeLight);
   >
     <Uploads />
     <ExplorerNavbar />
-    <div class="flex min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
+    <div class="flex min-h-0 flex-1 overflow-hidden">
       <FileTree />
       <FileTreeResizer />
-      <div class="relative ml-3 mt-3 flex flex-1 flex-col">
+      <div class="relative ml-3 mt-3 flex flex-1 flex-col min-w-0">
         <LoaderIcon :loading="itemsStore.itemsPending" />
         <template v-if="itemsStore.items.length">
-          <ExplorerGrid
-            class="flex-1"
-            :items-store="itemsStore"
-            :path="pathStore.currentPath"
-          />
+          <ExplorerGrid class="flex-1" :items-store="itemsStore" />
           <ExplorerFooter :items-store="itemsStore" />
         </template>
         <div

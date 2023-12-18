@@ -31,6 +31,8 @@ export const useSettingsStore = defineStore("settings", () => {
   );
 
   const updateSettings = (newSettings: Partial<Settings>) => {
+    console.log("updateSettings", newSettings);
+    
     return update(dbRef(db, dbPath.value), newSettings);
   };
   const updateSetting = <K extends keyof Settings>(

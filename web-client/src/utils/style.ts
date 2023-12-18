@@ -1,6 +1,8 @@
 let isThrottled = false; // To prevent lag
 let isDragoverOverExplBody = false; // To prevent flicker between items
 
+// Todo: figure out how to solve flickering the better way
+
 export function setDragOverStyle(e: DragEvent) {
   if (isThrottled) return;
   isThrottled = true;
@@ -33,9 +35,9 @@ export function setDragOverStyle(e: DragEvent) {
     isDragoverOverExplBody = true;
     target.style.background = `radial-gradient(
     circle at ${x}px ${y}px,
-    oklch(var(--a) / 100%) 5%,
-    oklch(var(--a) / 50%) 10%,
-    transparent 20%
+    oklch(var(--a) / 100%) 2rem,
+    oklch(var(--a) / 50%) 4rem,
+    transparent 8rem
   ) no-repeat`;
   } else {
     target.style.background = `radial-gradient(

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
 import { ItemsStore } from "@/stores/items";
-import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useTabsStore } from "@/stores/tabs";
@@ -16,15 +15,11 @@ import FileTreeGrid from "./filetree/FileTreeGrid.vue";
 const isFileTree = inject<boolean>("isFileTree")!;
 const isSearch = inject<boolean>("isSearch")!;
 
-const props = defineProps<{
-  itemsStore: ItemsStore;
-  path: string;
-}>();
+const props = defineProps<{ itemsStore: ItemsStore }>();
 
 const tabsStore = useTabsStore();
 const selectionRectStore = useSelectionRectStore();
 const settingsStore = useSettingsStore();
-const { api: firestoreApi } = useItemsFirestoreStore();
 const contextMenuStore = useContextMenuStore();
 
 const explBody = ref<HTMLElement | null>(null);
@@ -32,11 +27,6 @@ const rectEl = ref<HTMLElement | null>(null);
 const scrollTop = ref(0); // for ExplorerGridHead shadow
 const preventTransition = ref(false); // between paths
 const viewChanged = ref(false); // for transition duration
-
-if (isFileTree) {
-  console.log(props.path);
-  props.itemsStore.setDbItems(firestoreApi.getItems(props.path));
-}
 
 const view = computed<ExplorerView>(() =>
   isFileTree ? "list" : settingsStore.settings.view,
@@ -83,7 +73,7 @@ watch(
 
 let lastSelectedItemIdx = ref(0);
 watch(
-  () => props.path,
+  () => props.itemsStore.path,
   () => {
     lastSelectedItemIdx.value = 0;
     preventTransition.value = true;
@@ -99,8 +89,11 @@ watch(view, () => {
 });
 
 const handleDropOnBody = (e: DragEvent) => {
-  if (document.body.getAttribute("dragging-items") != props.path && !isSearch)
-    props.itemsStore.handleDrop(e, props.path);
+  if (
+    document.body.getAttribute("dragging-items") != props.itemsStore.path &&
+    !isSearch
+  )
+    props.itemsStore.handleDrop(e, props.itemsStore.path);
 };
 </script>
 
@@ -137,7 +130,7 @@ const handleDropOnBody = (e: DragEvent) => {
         '!overflow-hidden': isFileTree,
         'view-changed': viewChanged,
       }"
-      :path="props.path"
+      :path="itemsStore.path"
       @drop.stop.prevent="handleDropOnBody"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
@@ -153,7 +146,7 @@ const handleDropOnBody = (e: DragEvent) => {
       "
       @scroll="scrollTop = explBody?.scrollTop ?? 0"
       @contextmenu.stop.prevent="
-        contextMenuStore.show('explorer', props.itemsStore, $event)
+        contextMenuStore.show('explorer', itemsStore, $event)
       "
     >
       <TransitionGroup

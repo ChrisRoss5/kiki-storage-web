@@ -1,5 +1,10 @@
 import { useItemsFirestoreStore } from "@/stores/items/firestore";
-import { _createFolder, checkItem, convertFilesToItems, getFullPath } from "@/utils/item";
+import {
+  _createFolder,
+  checkItem,
+  convertFilesToItems,
+  getFullPath,
+} from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
@@ -19,11 +24,17 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
-  const itemsPending = computed(() => !!dbItems.value?.pending);
-  const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
+
   const newFolderName = ref("");
   const isFocused = ref(false);
   const isOpen = ref(false);
+  const path = ref(
+    this.id.startsWith("tree-items-") ? this.id.replace("tree-items-", "") : "",
+  );
+
+  const itemsPending = computed(() => !!dbItems.value?.pending);
+  const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
+  const root = computed(() => path.value.split("/")[0] as RootKey);
 
   const $reset = () => {
     dbItems.value = undefined;
@@ -42,8 +53,8 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
     const _stores = stores.map((s) => s()).reverse();
-    /* console.log("setItems", this.id);
-    console.log(_stores.length); */
+    console.log("setItems", this.id); //todo: remove
+    console.log(_stores.length);
 
     items.value = newDbItems
       // Unsupported firestore query filters
@@ -60,7 +71,7 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
       .map((newDbItem) => {
         let prevItem: Item | undefined;
         for (const store of _stores) {
-          prevItem = store.items.find((item) => item.id === newDbItem.id);
+          prevItem = store.items.find((item) => item.id == newDbItem.id);
           if (prevItem) break;
         }
         return Object.assign(prevItem ?? { ...newDbItem }, newDbItem);
@@ -70,13 +81,17 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
   // VUEFIRE BUG: pending is false when it should be true!
   watch(itemsPending, setItems); // BUGFIX!
   watch(() => dbItems.value?.data, setItems, { deep: true });
+  watch(
+    path,
+    (newPath) => newPath && setDbItems(firestoreApi.getItems(newPath)), // warn: onServerPrefetch
+    { immediate: true },
+  );
 
-  const areItemsInvalid = async (newItems: Item[], path: string) => {
+  const areItemsInvalid = async (newItems: Item[], _path: string) => {
     const scopedItems =
-      path == pathStore.currentPath
+      _path == path.value
         ? items.value
-        : await firestoreApi.getItems(path, false, { once: true }).promise
-            .value;
+        : await firestoreApi.getItems(_path).promise.value;
     return newItems.some((i) => isItemInvalid(i, scopedItems));
   };
   const isItemInvalid = (item: Item, _items?: Item[]) => {
@@ -84,40 +99,40 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
     if (error) dialogStore.showError(error);
     return !!error;
   };
-  const handleDrop = (e: DragEvent, path: string) => {
+  const handleDrop = (e: DragEvent, _path: string) => {
     clearDragOverStyle(e);
     const itemsData = e.dataTransfer?.getData("items");
-    if (itemsData) handleMove(JSON.parse(itemsData), path);
-    else if (e.dataTransfer) createFiles(e.dataTransfer.files, path);
+    if (itemsData) handleMove(JSON.parse(itemsData), _path);
+    else if (e.dataTransfer) createFiles(e.dataTransfer.files, _path);
   };
-  const handleMove = async (items: Item[], path: string) => {
-    if ((path as RootKey) != "bin" && (await areItemsInvalid(items, path)))
+  const handleMove = async (items: Item[], _path: string) => {
+    if ((_path as RootKey) != "bin" && (await areItemsInvalid(items, _path)))
       return;
     const folders = items.filter((i) => i.isFolder);
     const msg = "You can't move a folder into its own subfolder.";
-    if (folders.some((f) => path.startsWith(getFullPath(f))))
+    if (folders.some((f) => _path.startsWith(getFullPath(f))))
       return dialogStore.showError(msg);
     items = items.filter(
       (i) => !folders.some((f) => i.path.startsWith(getFullPath(f))),
     );
-    firestoreApi.moveItems(items, path);
+    firestoreApi.moveItems(items, _path);
   };
   const createFolder = async () => {
-    const item = _createFolder(newFolderName.value, pathStore.currentPath);
+    const item = _createFolder(newFolderName.value, path.value);
     if (isItemInvalid(item)) return;
     newFolderName.value = "";
     firestoreApi.createItem(item);
   };
-  const createFiles = async (files: FileList, path?: string) => {
-    path ??= pathStore.currentPath;
-    let newItems = convertFilesToItems(files, path);
+  const createFiles = async (files: FileList, _path?: string) => {
+    _path ??= path.value;
+    let newItems = convertFilesToItems(files, _path);
     if (!newItems.length)
       return dialogStore.showError("No valid files were selected.");
-    if (await areItemsInvalid(newItems, path)) return;
+    if (await areItemsInvalid(newItems, _path)) return;
     storageApi.createFiles(newItems, files);
   };
   const deleteItems = async () => {
-    const permanent = pathStore.currentRoot == "bin";
+    const permanent = root.value == "bin";
     const _items = selectedItems.value;
     const toDelete = _items.length > 1 ? `${_items.length} items` : "one item";
     const message = `Are you sure you want to delete ${toDelete}${
@@ -152,6 +167,8 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
     newFolderName,
     isFocused,
     isOpen,
+    path,
+    root,
     handleDrop,
     createFolder,
     createFiles,

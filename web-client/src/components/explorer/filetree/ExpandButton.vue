@@ -11,19 +11,21 @@ const isItemExpanded = computed(
   () => tabsStore.activeTab.expandedPaths?.includes(props.path),
 );
 
-const handleItemClick = () => {
+const handleItemClick = (keepOpen?: boolean) => {
   const { expandedPaths = [] } = tabsStore.activeTab;
-  if (isItemExpanded.value)
-    expandedPaths.splice(expandedPaths.indexOf(props.path), 1);
-  else expandedPaths.push(props.path);
+  const idx = expandedPaths.indexOf(props.path);
+  if (isItemExpanded.value && idx != -1 && !keepOpen)
+    expandedPaths.splice(idx, 1);
+  else if (idx == -1) expandedPaths.push(props.path);
   tabsStore.updateActiveTab({ expandedPaths });
 };
 </script>
 
 <template>
   <div
-    class="!pointer-events-auto rounded-box !px-0 hover:bg-base-300 w-6"
-    @click.stop.prevent="handleItemClick"
+    class="!pointer-events-auto w-6 rounded-box !px-0 hover:bg-base-300"
+    @click.stop.prevent="handleItemClick()"
+    @dragover.stop.prevent="handleItemClick(true)"
     @dblclick.stop="null"
     v-wave
   >

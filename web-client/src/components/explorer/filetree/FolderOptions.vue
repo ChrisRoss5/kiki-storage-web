@@ -57,3 +57,9 @@ const handleCollapseAll = () => {
     </Transition>
   </div>
 </template>
+
+<style scoped>
+.fade-leave-active {
+  display: none; /* Because of extra width */
+}
+</style>

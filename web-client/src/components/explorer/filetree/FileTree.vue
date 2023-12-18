@@ -3,9 +3,11 @@ import { useItemsStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { roots } from "@/stores/settings/default";
 import { useTabsStore } from "@/stores/tabs";
+import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { inject, provide } from "vue";
 import ExpandButton from "./ExpandButton.vue";
 import FileTreeGrid from "./FileTreeGrid.vue";
+import FolderOptions from "./FolderOptions.vue";
 
 provide("isFileTree", true);
 const isThemeLight = inject<boolean>("isThemeLight")!;
@@ -31,12 +33,15 @@ const tabsStore = useTabsStore();
           :href="`/${rootKey}`"
           tabindex="0"
           draggable="false"
-          class="expl-item is-list folder flex"
+          class="group expl-item is-list folder flex"
           :class="{
             'hover:bg-base-200': isThemeLight,
             'hover:bg-base-100/25': !isThemeLight,
           }"
           @drop.stop.prevent="itemsStore.handleDrop($event, rootKey)"
+          @dragover.stop.prevent="setDragOverStyle"
+          @dragleave.stop.prevent="clearDragOverStyle"
+          @dragend.stop.prevent="clearDragOverStyle"
           @click.stop.prevent="pathStore.pushOnTab(`/${rootKey}`)"
           v-wave
         >
@@ -47,6 +52,7 @@ const tabsStore = useTabsStore();
           <span class="!pl-0">
             {{ rootValue.name }}
           </span>
+          <FolderOptions :path="rootKey" />
         </a>
         <FileTreeGrid
           v-if="tabsStore.activeTab.expandedPaths?.includes(rootKey)"

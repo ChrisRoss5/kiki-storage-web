@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useItemsStore, useNavbarItemsStore } from "@/stores/items";
-import { useItemsFirestoreStore } from "@/stores/items/firestore";
 import { getPathName, usePathStore } from "@/stores/path";
 import { RootKey, roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
@@ -14,7 +13,6 @@ import ViewSelector from "./ViewSelector.vue";
 
 const isThemeLight = inject<boolean>("isThemeLight")!;
 
-const { api: firestoreApi } = useItemsFirestoreStore();
 const itemsStore = useItemsStore();
 const navbarItemsStore = useNavbarItemsStore();
 const pathStore = usePathStore();
@@ -42,15 +40,15 @@ const handlePathClick = (path: string) => {
   showRootsDropdown.value = false;
   pathStore.pushOnTab(path);
 };
-const handleArrowClick = (path: string) => {
-  if (explorerPath.value == path) {
+const openNavbarExplorer = (path: string, keepOpen?: boolean) => {
+  if (explorerPath.value == path && !keepOpen) {
     navbarItemsStore.isOpen = false;
     return;
   }
   explorerPath.value = path;
   navbarItemsStore.isOpen = navbarItemsStore.isFocused = true;
   if (!navbarItemsStore.isOpen) return;
-  navbarItemsStore.setDbItems(firestoreApi.getItems(path));
+  navbarItemsStore.path = path;
 };
 </script>
 
@@ -80,7 +78,8 @@ const handleArrowClick = (path: string) => {
             'bg-base-100': isThemeLight && isPrevExpanded,
             'bg-base-300': !isThemeLight && isPrevExpanded,
           }"
-          @click.self="handleArrowClick(pathStore.folderPaths[i - 1])"
+          @click.self="openNavbarExplorer(pathStore.folderPaths[i - 1])"
+          @dragover.self="openNavbarExplorer(pathStore.folderPaths[i - 1], true)"
         >
           <Chevron :is-expanded="isPrevExpanded" />
           <Transition name="slide-down">

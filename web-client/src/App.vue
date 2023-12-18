@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getActivePinia } from "pinia";
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useCurrentUser } from "vuefire";
@@ -12,36 +13,29 @@ const route = useRoute();
 const startupTranstion = ref(false);
 onMounted(() => setTimeout(() => (startupTranstion.value = true), 1000));
 
-// https://pinia.vuejs.org/api/interfaces/pinia._StoreWithState.html#-dispose
-/* setTimeout(() => {
-  const stores = getActivePinia()?.state.value;
-  console.log(stores);
-  for (const store in stores) {
-    if (store == "user") continue;
-    try {
-      stores[store]?.$reset();
-    } catch (e) {
-      console.log(e);
-    }
-  }
-  (getActivePinia() as any)._s.forEach((store: Store) => {
-    try {
-      store?.$reset();
-    } catch (e) {
-      console.log(e);
-    }
-  });
-}, 1000); */
-
 watch(user, async (currentUser) => {
   if (!currentUser) {
     if (!route.meta.requiresAuth) return;
-    // Todo: $reset all stores that implement $reset
+    resetAllStores();
     return router.push("/login");
   }
   if (typeof route.query.redirect == "string")
     return router.replace(route.query.redirect);
 });
+
+const resetAllStores = () => {
+  // https://pinia.vuejs.org/api/interfaces/pinia._StoreWithState.html#-reset
+  // https://github.com/vuejs/pinia/discussions/1859
+  try {
+    (getActivePinia() as any)._s.forEach((store: any) => {
+      try {
+        store.$reset();
+      } catch (e) {}
+    });
+  } catch (e) {
+    location.reload();
+  }
+};
 </script>
 
 <template>
@@ -52,7 +46,7 @@ watch(user, async (currentUser) => {
     >
       <component
         :is="Component"
-        class="absolute bottom-0 left-0 right-0 top-0 transition duration-500"
+        class="duration-500 absolute bottom-0 left-0 right-0 top-0 transition-[transform,opacity]"
       />
     </Transition>
   </RouterView>

@@ -48,7 +48,6 @@ const pathStore = usePathStore();
           <CloseExplorer @click="searchItemsStore.isOpen = false" />
           <ExplorerGrid
             :items-store="searchItemsStore"
-            :path="pathStore.currentPath"
             class="in-search max-h-[70vh]"
           />
           <ExplorerFooter :items-store="searchItemsStore" class="mt-3" />

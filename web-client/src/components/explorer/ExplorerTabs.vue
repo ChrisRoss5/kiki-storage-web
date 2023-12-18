@@ -101,7 +101,7 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
   transition: padding 300ms;
 }
 .expl-tab-leave-active {
-  transition-delay: -100ms; /* Todo: FIGURE OUT WHY THERE'S A DELAY! */
+  transition-delay: -100ms; /* Todo: Figure out why there's a delay */
 }
 .expl-tab-enter-from,
 .expl-tab-leave-to {

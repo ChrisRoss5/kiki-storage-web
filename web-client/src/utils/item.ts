@@ -1,3 +1,6 @@
+import { DbItem } from "@/stores/items/firestore";
+import { FirestoreDataConverter, Timestamp } from "firebase/firestore";
+
 export function _createFolder(name: string, path: string): ItemCore {
   return {
     name,
@@ -50,3 +53,27 @@ export function checkItem(item: Item, items: Item[]) {
 export function getFullPath(item: Item) {
   return `${item.path ? `${item.path}/` : ""}${item.name}`;
 }
+
+export const firestoreItemConverter: FirestoreDataConverter<ItemCore, DbItem> =
+  {
+    fromFirestore: (snapshot, options): ItemCore => {
+      const data = snapshot.data(options) as DbItem;
+      return {
+        ...data,
+        id: snapshot.id,
+        dateAdded: data.dateAdded.toDate(),
+        dateModified: data.dateModified.toDate(),
+      };
+    },
+    toFirestore: (i: Item): DbItem => {
+      return {
+        name: i.name,
+        type: i.type,
+        dateAdded: Timestamp.fromDate(i.dateAdded),
+        dateModified: Timestamp.fromDate(i.dateModified),
+        path: i.path,
+        isFolder: i.isFolder,
+        ...(i.size ? { size: i.size } : {}),
+      };
+    },
+  };

@@ -4,9 +4,7 @@ import { formatSize } from "@/utils/format";
 import { computed, inject } from "vue";
 import ItemOptions from "../ItemOptions.vue";
 
-const props = defineProps<{
-  itemsStore: ItemsStore;
-}>();
+const props = defineProps<{ itemsStore: ItemsStore }>();
 
 const isThemeLight = inject<boolean>("isThemeLight")!;
 

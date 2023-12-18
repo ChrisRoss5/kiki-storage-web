@@ -20,6 +20,8 @@ const handleLineClick = () => {
     <div
       class="w-6 cursor-pointer opacity-50 transition-opacity hover:opacity-100"
       @click.stop.prevent="handleLineClick"
+      @dragover.stop.prevent="null"
+      @drop.stop.prevent="null"
     >
       <div
         class="mx-auto w-1 rounded-box bg-accent"
