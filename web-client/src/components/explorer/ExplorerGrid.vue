@@ -106,12 +106,12 @@ const handleDropOnBody = (e: DragEvent) => {
   so Flex is used instead. This adjustment preserves the Grid's visual style,
   but it introduces extra conditional classes that require attention. -->
   <div
-    class="overflow-x-auto"
+    class="flex-1 overflow-x-auto"
     :class="{
       grid: !isFileTree,
       'grid-rows-1': view == 'grid' && !isFileTree,
       'grid-rows-[auto_1fr]': view == 'list' && !isFileTree,
-      'flex-1 !overflow-hidden': isFileTree,
+      '!overflow-hidden': isFileTree,
     }"
     :style="isFileTree ? undefined : gridStyle"
   >

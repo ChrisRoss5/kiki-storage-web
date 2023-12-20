@@ -35,7 +35,7 @@ provide("isThemeLight", isThemeLight);
       <div class="relative ml-3 mt-3 flex flex-1 flex-col min-w-0">
         <LoaderIcon :loading="itemsStore.itemsPending" />
         <template v-if="itemsStore.items.length">
-          <ExplorerGrid class="flex-1" :items-store="itemsStore" />
+          <ExplorerGrid :items-store="itemsStore" />
           <ExplorerFooter :items-store="itemsStore" />
         </template>
         <div

@@ -13,6 +13,7 @@ import router from "./router";
 const pinia = createPinia();
 const app = createApp(App);
 
+app.config.compilerOptions.comments = true  //todo remove
 export const fileIconVectors = import.meta.glob(
   "/node_modules/file-icon-vectors/dist/icons/vivid/*.svg",
   { eager: true, as: "url" },

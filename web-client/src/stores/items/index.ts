@@ -53,8 +53,8 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
     const _stores = stores.map((s) => s()).reverse();
-    console.log("setItems", this.id); //todo: remove
-    console.log(_stores.length);
+   /*  console.log("setItems", this.id); //todo: remove
+    console.log(_stores.length); */
 
     items.value = newDbItems
       // Unsupported firestore query filters

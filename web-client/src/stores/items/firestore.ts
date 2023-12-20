@@ -131,29 +131,25 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       );
     },
     moveItems(items: Item[], newPath: string) {
-      cleanup.onDelete(items);
+      /* Todo: move to backend */
       for (const item of items) {
         updateDoc(doc(db, dbPath.value, item.id!), { path: newPath });
-        if (item.isFolder)
-          updatePaths(
-            `${getFullPath(item)}`,
-            `${newPath ? `${newPath}/` : ""}${item.name}`,
-          );
+        const newFullPath = `${newPath ? `${newPath}/` : ""}${item.name}`;
+        if (item.isFolder) updatePaths(getFullPath(item), newFullPath);
       }
       updateParentDateModified(...items);
+      cleanup.onMove(items, newPath);
     },
     renameItem(item: Item) {
-      cleanup.onDelete([item]);
+      /* Todo: move to backend */
+      const newFullPath = `${item.path ? `${item.path}/` : ""}${item.newName}`;
       updateDoc(doc(db, dbPath.value, item.id!), { name: item.newName });
-      if (item.isFolder)
-        updatePaths(
-          `${getFullPath(item)}`,
-          `${item.path ? `${item.path}/` : ""}${item.newName}`,
-        );
+      if (item.isFolder) updatePaths(getFullPath(item), newFullPath);
       updateParentDateModified(item);
+      cleanup.onMove([item], newFullPath);
     },
     deleteItemsPermanently(items: Item[]) {
-      cleanup.onDelete(items);
+      /* Todo: move to backend */
       for (const item of items) {
         this.deleteItemPermanently(item);
         if (item.isFolder)
@@ -166,8 +162,10 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
             });
       }
       updateParentDateModified(...items);
+      cleanup.onDelete(items);
     },
     deleteItemPermanently(item: Item) {
+      /* Todo: move to backend */
       if (!item.isFolder) storageApi.deleteFile(item);
       deleteDoc(doc(db, dbPath.value, item.id!));
     },
