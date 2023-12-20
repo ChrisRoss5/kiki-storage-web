@@ -13,6 +13,9 @@ export function useCleanup() {
 
     for (const tab of tabsStore.tabs) {
       for (const fullPath of folderPaths) {
+        const newFolderPath= folders.map(
+          (f) => `${newPath ? `${newPath}/` : ""}${f.name}`,
+        );
         const regexp = new RegExp(`^${fullPath}`);
         if (tab.path.startsWith(fullPath)) {
           tab.path = tab.path.replace(regexp, newPath);

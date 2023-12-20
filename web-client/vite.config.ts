@@ -4,29 +4,13 @@ import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue({
-      // preserve comments: todo remove
-      template: {
-        compilerOptions: {
-          comments: true,
-        },
-      },
-    }),
-  ],
+  plugins: [vue()],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
-  build: {
-    minify: true, // Disable minification
-    rollupOptions: {
-      treeshake: true
-    },
-
-  },
-  /* build: {
+  /* build: {  // Better compression, more time to build
     target: "esnext",
     minify: "terser",
     terserOptions: {
