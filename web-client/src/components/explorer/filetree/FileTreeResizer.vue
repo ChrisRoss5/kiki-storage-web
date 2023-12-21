@@ -4,16 +4,16 @@ import { inject, onMounted, onUnmounted, ref } from "vue";
 
 const isThemeLight = inject<boolean>("isThemeLight")!;
 
+const props = defineProps<{ fileTreeEl: HTMLElement | null }>();
+
 const tabsStore = useTabsStore();
 
 const isMouseDown = ref(false);
 const startX = ref(0);
 const startWidth = ref(0);
 const newWidth = ref(0);
-let fileTreeEl: HTMLElement;
 
 onMounted(() => {
-  fileTreeEl = document.getElementById("filetree")!;
   document.addEventListener("mouseup", handleMouseUp);
   document.addEventListener("mousemove", handleMouseMove);
 });
@@ -26,7 +26,7 @@ onUnmounted(() => {
 const handleMouseDown = (e: MouseEvent) => {
   isMouseDown.value = true;
   startX.value = e.pageX;
-  newWidth.value = startWidth.value = fileTreeEl.offsetWidth;
+  newWidth.value = startWidth.value = props.fileTreeEl!.offsetWidth;
 };
 const handleMouseUp = () => {
   if (!isMouseDown.value) return;
@@ -38,7 +38,7 @@ const handleMouseMove = (e: MouseEvent) => {
   if (!isMouseDown.value) return;
   const diff = e.pageX - startX.value;
   newWidth.value = startWidth.value + diff;
-  fileTreeEl.style.width = `${newWidth.value}px`;
+  props.fileTreeEl!.style.width = `${newWidth.value}px`;
 };
 const handleDblClick = () => {
   tabsStore.updateActiveTab({ fileTreeWidth: 0 });

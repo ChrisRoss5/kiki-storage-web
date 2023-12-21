@@ -6,7 +6,7 @@ import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { formatDate, formatSize } from "@/utils/format";
 import { getFullPath } from "@/utils/item";
-import { inject } from "vue";
+import { Ref, inject } from "vue";
 import ExplorerGridItemName from "./ExplorerGridItemName.vue";
 import ExpandButton from "./filetree/ExpandButton.vue";
 import FolderOptions from "./filetree/FolderOptions.vue";
@@ -14,6 +14,7 @@ import FolderOptions from "./filetree/FolderOptions.vue";
 const isFileTree = inject<boolean>("isFileTree")!;
 const isSearch = inject<boolean>("isSearch")!;
 const isThemeLight = inject<boolean>("isThemeLight")!;
+const ghostDragDiv = inject<Ref<HTMLDivElement | null>>("ghostDragDiv")!;
 
 const props = defineProps<{
   item: Item;
@@ -70,10 +71,13 @@ const handleDragStart = (item: Item, e: DragEvent) => {
   if (selectionRectStore.isActive || item.isRenaming || !item.isSelected)
     return e.preventDefault();
   else selectionRectStore.isLeftMouseDown = false;
-  e.dataTransfer?.setData(
-    "items",
-    JSON.stringify(props.itemStore.selectedItems),
-  );
+  const count = props.itemStore.selectedItems.length;
+  const dragData = JSON.stringify(props.itemStore.selectedItems);
+  if (count > 1) {
+    ghostDragDiv.value!.textContent = `moving ${count} items`;
+    e.dataTransfer?.setDragImage(ghostDragDiv.value!, 0, 0);
+  }
+  e.dataTransfer?.setData("items", dragData);
   if (!isSearch) document.body.setAttribute("dragging-items", props.item.path);
 };
 const handleDragStop = () => {

@@ -2,7 +2,7 @@
 import { useItemStore } from "@/stores/items";
 import { useSettingsStore } from "@/stores/settings";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
-import { computed, provide } from "vue";
+import { computed, provide, ref } from "vue";
 import Uploads from "../Uploads.vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
@@ -13,6 +13,8 @@ import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
 
 const itemStore = useItemStore();
 const settingsStore = useSettingsStore();
+
+const fileTreeComp = ref<InstanceType<typeof FileTree> | null>(null);
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 
@@ -30,8 +32,8 @@ provide("isThemeLight", isThemeLight);
     <Uploads />
     <ExplorerNavbar />
     <div class="flex min-h-0 flex-1 overflow-hidden">
-      <FileTree />
-      <FileTreeResizer />
+      <FileTree ref="fileTreeComp" />
+      <FileTreeResizer :file-tree-el="fileTreeComp?.fileTreeDiv ?? null" />
       <div class="relative ml-3 mt-3 flex min-w-0 flex-1 flex-col">
         <LoaderIcon :loading="itemStore.itemsPending" />
         <template v-if="itemStore.items.length">

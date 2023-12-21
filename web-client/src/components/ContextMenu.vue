@@ -8,7 +8,7 @@ import ItemOptions from "./ItemOptions.vue";
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
 
-const ctxmenu = ref<HTMLElement | null>(null);
+const ctxmenuDiv = ref<HTMLDivElement | null>(null);
 
 const isSearch = computed(
   () => contextMenuStore.itemStore?.$id == "search-items",
@@ -20,7 +20,7 @@ const allColumnsOrder =
   getDefaultSettings()[isSearch.value ? "searchColumns" : "columns"].order;
 
 watchPostEffect(() => {
-  const el = ctxmenu.value!;
+  const el = ctxmenuDiv.value!;
   let { x, y } = contextMenuStore.position;
   const { offsetWidth, offsetHeight } = el;
   const { innerWidth, innerHeight } = window;
@@ -51,7 +51,7 @@ const handleColumnChange = (key: keyof ItemCore) => {
 <template>
   <div
     class="fixed z-20 select-none rounded-box bg-base-200 shadow-md"
-    ref="ctxmenu"
+    ref="ctxmenuDiv"
     @click.stop="null"
     @contextmenu.prevent="contextMenuStore.hide"
   >

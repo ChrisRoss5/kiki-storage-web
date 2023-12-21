@@ -4,13 +4,16 @@ import { usePathStore } from "@/stores/path";
 import { roots } from "@/stores/settings/default";
 import { useTabsStore } from "@/stores/tabs";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
-import { inject, provide } from "vue";
+import { inject, provide, ref } from "vue";
 import ExpandButton from "./ExpandButton.vue";
 import FileTreeGrid from "./FileTreeGrid.vue";
 import FolderOptions from "./FolderOptions.vue";
 
 provide("isFileTree", true);
 const isThemeLight = inject<boolean>("isThemeLight")!;
+
+const fileTreeDiv = ref<HTMLDivElement | null>(null);
+defineExpose({ fileTreeDiv });
 
 const itemStore = useItemStore();
 const pathStore = usePathStore();
@@ -20,6 +23,7 @@ const tabsStore = useTabsStore();
 <template>
   <div
     id="filetree"
+    ref="fileTreeDiv"
     class="relative flex flex-col overflow-x-hidden overflow-y-scroll"
     :style="{
       width: tabsStore.activeTab.fileTreeWidth

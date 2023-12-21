@@ -22,8 +22,8 @@ const selectionRectStore = useSelectionRectStore();
 const settingsStore = useSettingsStore();
 const contextMenuStore = useContextMenuStore();
 
-const explBody = ref<HTMLElement | null>(null);
-const rectEl = ref<HTMLElement | null>(null);
+const explBodyDiv = ref<HTMLDivElement | null>(null);
+const rectElDiv = ref<HTMLDivElement | null>(null);
 const scrollTop = ref(0); // for ExplorerGridHead shadow
 const preventTransition = ref(false); // between paths
 const viewChanged = ref(false); // for transition duration
@@ -122,7 +122,7 @@ const handleDropOnBody = (e: DragEvent) => {
       :item-store="itemStore"
     />
     <div
-      ref="explBody"
+      ref="explBodyDiv"
       class="expl-body relative overflow-y-scroll rounded-box"
       :class="{
         'col-span-full grid auto-rows-min grid-cols-[subgrid]': !isFileTree,
@@ -137,14 +137,14 @@ const handleDropOnBody = (e: DragEvent) => {
       @dragend.stop.prevent="clearDragOverStyle"
       @mousedown.left.stop="
         selectionRectStore.handleLeftMouseDown(
-          explBody,
-          rectEl,
+          explBodyDiv,
+          rectElDiv,
           itemStore.items,
           isFileTree,
           $event,
         )
       "
-      @scroll="scrollTop = explBody?.scrollTop ?? 0"
+      @scroll="scrollTop = explBodyDiv?.scrollTop ?? 0"
       @contextmenu.stop.prevent="
         contextMenuStore.show('explorer', itemStore, $event)
       "
@@ -174,7 +174,7 @@ const handleDropOnBody = (e: DragEvent) => {
         </template>
       </TransitionGroup>
       <div
-        ref="rectEl"
+        ref="rectElDiv"
         class="pointer-events-none absolute z-10 border border-primary bg-primary/20"
       ></div>
     </div>
