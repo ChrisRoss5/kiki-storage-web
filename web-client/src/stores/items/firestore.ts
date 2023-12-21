@@ -132,42 +132,56 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
     },
     moveItems(items: Item[], newPath: string) {
       /* Todo: move to backend */
+      const promises: Promise<void>[] = [];
       for (const item of items) {
-        updateDoc(doc(db, dbPath.value, item.id!), { path: newPath });
+        promises.push(
+          updateDoc(doc(db, dbPath.value, item.id!), { path: newPath }),
+        );
         const newFullPath = `${newPath ? `${newPath}/` : ""}${item.name}`;
-        if (item.isFolder) updatePaths(getFullPath(item), newFullPath);
+        if (item.isFolder)
+          promises.push(updatePaths(getFullPath(item), newFullPath));
       }
       updateParentDateModified(...items);
-      cleanup.onMove(items, newPath);
+      Promise.allSettled(promises).then(() => {
+        cleanup.onMoveComplete(items, newPath);
+      });
     },
     renameItem(item: Item) {
       /* Todo: move to backend */
+      const promises: Promise<void>[] = [];
       const newFullPath = `${item.path ? `${item.path}/` : ""}${item.newName}`;
-      updateDoc(doc(db, dbPath.value, item.id!), { name: item.newName });
-      if (item.isFolder) updatePaths(getFullPath(item), newFullPath);
+      const updateData = { name: item.newName };
+      promises.push(updateDoc(doc(db, dbPath.value, item.id!), updateData));
+      if (item.isFolder)
+        promises.push(updatePaths(getFullPath(item), newFullPath));
       updateParentDateModified(item);
-      cleanup.onMove([item], newFullPath);
+      Promise.allSettled(promises).then(() => {
+        cleanup.onMoveComplete([item], newFullPath);
+      });
     },
     deleteItemsPermanently(items: Item[]) {
       /* Todo: move to backend */
+      const promises: Promise<void>[] = [];
       for (const item of items) {
-        this.deleteItemPermanently(item);
-        if (item.isFolder)
-          api
-            .getItems(`${getFullPath(item)}`, true, {
-              once: true,
-            })
-            .promise.value.then((items) => {
-              items.forEach(this.deleteItemPermanently);
-            });
+        promises.push(this.deleteItemPermanently(item));
+        if (!item.isFolder) continue;
+        api
+          .getItems(getFullPath(item), true, {
+            once: true,
+          })
+          .promise.value.then((items) => {
+            promises.push(...items.map(this.deleteItemPermanently));
+          });
       }
       updateParentDateModified(...items);
-      cleanup.onDelete(items);
+      Promise.allSettled(promises).then(() => {
+        cleanup.onDeleteComplete(items);
+      });
     },
-    deleteItemPermanently(item: Item) {
+    async deleteItemPermanently(item: Item) {
       /* Todo: move to backend */
-      if (!item.isFolder) storageApi.deleteFile(item);
-      deleteDoc(doc(db, dbPath.value, item.id!));
+      if (!item.isFolder) await storageApi.deleteFile(item);
+      await deleteDoc(doc(db, dbPath.value, item.id!));
     },
   };
 
@@ -181,12 +195,16 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   async function updatePaths(oldPath: string, newPath: string) {
     const items = await api.getItems(oldPath, true, { once: true }).promise
       .value;
+    const promises: Promise<void>[] = [];
     for (const nestedItem of items) {
       const regexp = new RegExp(`^${oldPath}`);
-      updateDoc(doc(db, dbPath.value, nestedItem.id!), {
-        path: nestedItem.path.replace(regexp, newPath),
-      });
+      promises.push(
+        updateDoc(doc(db, dbPath.value, nestedItem.id!), {
+          path: nestedItem.path.replace(regexp, newPath),
+        }),
+      );
     }
+    await Promise.allSettled(promises);
   }
 
   async function updateParentDateModified(...items: Item[]) {

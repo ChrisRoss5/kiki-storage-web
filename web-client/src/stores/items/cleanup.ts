@@ -7,32 +7,28 @@ export function useCleanup() {
   const tabsStore = useTabsStore();
   const settingsStore = useSettingsStore();
 
-  const onMove = (items: Item[], newPath: string) => {
-    const folderPaths = items.filter((i) => i.isFolder).map(getFullPath);
-    console.log("onMove", folderPaths, JSON.parse(JSON.stringify(tabsStore.tabs)));
+  const onMoveComplete = (items: Item[], newPath: string) => {
+    const folders = items.filter((i) => i.isFolder);
 
     for (const tab of tabsStore.tabs) {
-      for (const fullPath of folderPaths) {
-        const newFolderPath= folders.map(
-          (f) => `${newPath ? `${newPath}/` : ""}${f.name}`,
-        );
+      for (const item of folders) {
+        const fullPath = getFullPath(item);
+        const newFullPath = `${newPath ? `${newPath}/` : ""}${item.name}`;
         const regexp = new RegExp(`^${fullPath}`);
-        if (tab.path.startsWith(fullPath)) {
-          tab.path = tab.path.replace(regexp, newPath);
-          break;
-        }
+        if (tab.path.startsWith(fullPath))
+          tab.path = tab.path.replace(regexp, newFullPath);
         tab.expandedPaths =
           tab.expandedPaths?.map((p) => {
-            return p.startsWith(fullPath) ? p.replace(regexp, newPath) : p;
+            return p.startsWith(fullPath) ? p.replace(regexp, newFullPath) : p;
           }) ?? [];
       }
     }
-    console.log("onMove", tabsStore.tabs);
-    deleteStores(folderPaths);
+
+    deleteStores(folders.map(getFullPath));
     settingsStore.setSetting("tabs", tabsStore.tabs);
   };
 
-  const onDelete = (items: Item[]) => {
+  const onDeleteComplete = (items: Item[]) => {
     const folderPaths = items.filter((i) => i.isFolder).map(getFullPath);
     const isPathNotDeleted = (path: string) =>
       !folderPaths.some((p) => path.startsWith(p));
@@ -43,7 +39,6 @@ export function useCleanup() {
         tab.path = tab.path.split("/").slice(0, -1).join("/");
     }
 
-    console.log("cleaningup");
     deleteStores(folderPaths);
     settingsStore.setSetting("tabs", tabsStore.tabs);
   };
@@ -60,5 +55,5 @@ export function useCleanup() {
     }
   };
 
-  return { onMove, onDelete };
+  return { onMoveComplete, onDeleteComplete };
 }
