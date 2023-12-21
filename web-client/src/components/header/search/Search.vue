@@ -3,7 +3,7 @@ import CloseExplorer from "@/components/explorer/CloseExplorer.vue";
 import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
 import LoaderIcon from "@/components/explorer/LoaderIcon.vue";
-import { useSearchItemsStore } from "@/stores/items";
+import { useSearchItemStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { useSearchStore } from "@/stores/search";
 import { provide } from "vue";
@@ -14,7 +14,7 @@ provide("isFileTree", false);
 provide("isThemeLight", true);
 
 const searchStore = useSearchStore();
-const searchItemsStore = useSearchItemsStore();
+const searchItemStore = useSearchItemStore();
 const pathStore = usePathStore();
 </script>
 
@@ -23,8 +23,8 @@ const pathStore = usePathStore();
     id="search"
     @mousedown.capture="
       {
-        searchItemsStore.isOpen = searchStore.areFiltersActive;
-        searchItemsStore.isFocused = true;
+        searchItemStore.isOpen = searchStore.areFiltersActive;
+        searchItemStore.isFocused = true;
       }
     "
   >
@@ -39,18 +39,18 @@ const pathStore = usePathStore();
     <Transition name="slide-down">
       <div
         id="search-results"
-        v-if="searchItemsStore.isOpen"
+        v-if="searchItemStore.isOpen"
         class="absolute left-0 right-0 top-full mt-1 rounded-box bg-base-100 px-4 shadow-lg transition-shadow"
-        :class="{ 'shadow-base-content/50': searchItemsStore.isFocused }"
+        :class="{ 'shadow-base-content/50': searchItemStore.isFocused }"
       >
-        <LoaderIcon :loading="searchItemsStore.itemsPending" />
-        <template v-if="searchItemsStore.items.length">
-          <CloseExplorer @click="searchItemsStore.isOpen = false" />
+        <LoaderIcon :loading="searchItemStore.itemsPending" />
+        <template v-if="searchItemStore.items.length">
+          <CloseExplorer @click="searchItemStore.isOpen = false" />
           <ExplorerGrid
-            :items-store="searchItemsStore"
+            :item-store="searchItemStore"
             class="in-search max-h-[70vh]"
           />
-          <ExplorerFooter :items-store="searchItemsStore" class="mt-3" />
+          <ExplorerFooter :item-store="searchItemStore" class="mt-3" />
         </template>
         <div v-else class="flex-center flex-col gap-3 py-3">
           <span class="material-symbols-outlined"> search </span>

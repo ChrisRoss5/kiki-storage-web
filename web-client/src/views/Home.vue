@@ -4,29 +4,28 @@ import ExplorerTabs from "@/components/explorer/ExplorerTabs.vue";
 import Header from "@/components/header/Header.vue";
 import { useContextMenuStore } from "@/stores/context-menu";
 import {
-  useItemsStore,
-  useNavbarItemsStore,
-  useSearchItemsStore,
+  useItemStore,
+  useNavbarItemStore,
+  useSearchItemStore,
 } from "@/stores/items";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { computed, onBeforeMount, onBeforeUnmount } from "vue";
 
-const itemsStore = useItemsStore();
-const searchItemsStore = useSearchItemsStore();
-const navbarItemsStore = useNavbarItemsStore();
+const itemStore = useItemStore();
+const searchItemStore = useSearchItemStore();
+const navbarItemStore = useNavbarItemStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
-const focusedItemsStore = computed(
+const focusedItemStore = computed(
   () =>
-    [searchItemsStore, navbarItemsStore].find((s) => s.isFocused) ?? itemsStore,
+    [searchItemStore, navbarItemStore].find((s) => s.isFocused) ?? itemStore,
 );
-const openItemsStore = computed(
-  () =>
-    [searchItemsStore, navbarItemsStore].find((s) => s.isOpen) ?? itemsStore,
+const openItemStore = computed(
+  () => [searchItemStore, navbarItemStore].find((s) => s.isOpen) ?? itemStore,
 );
 
 onBeforeMount(() => {
@@ -48,19 +47,16 @@ const handleLeftMouseUp = (e: MouseEvent) => {
 };
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key == "Escape") {
-    openItemsStore.value.isOpen = openItemsStore.value.isFocused = false;
-    focusedItemsStore.value.deselectAll();
-  } else if (
-    e.key == "Delete" &&
-    focusedItemsStore.value.selectedItems.length
-  ) {
-    focusedItemsStore.value.deleteItems();
+    openItemStore.value.isOpen = openItemStore.value.isFocused = false;
+    focusedItemStore.value.deselectAll();
+  } else if (e.key == "Delete" && focusedItemStore.value.selectedItems.length) {
+    focusedItemStore.value.deleteItems();
   } else if (
     e.key == "F2" &&
-    focusedItemsStore.value.selectedItems.length == 1
+    focusedItemStore.value.selectedItems.length == 1
   ) {
     e.preventDefault();
-    focusedItemsStore.value.selectedItems[0].isRenaming = true;
+    focusedItemStore.value.selectedItems[0].isRenaming = true;
   } else if (e.ctrlKey && e.key == "a") {
     const inEditable =
       document.activeElement?.tagName == "INPUT" ||
@@ -69,7 +65,7 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (inEditable) return;
     e.preventDefault();
     document.body.style.userSelect = "none";
-    focusedItemsStore.value.selectAll();
+    focusedItemStore.value.selectAll();
     document.body.style.userSelect = "";
   }
 };
@@ -87,15 +83,15 @@ const handleClickLeft = (e: MouseEvent) => {
     return;
   }
   if (e.ctrlKey || e.shiftKey) return;
-  focusedItemsStore.value.deselectAll();
+  focusedItemStore.value.deselectAll();
 };
 const handleMouseDownCapture = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   if (!target.closest("#rename-container"))
-    focusedItemsStore.value.stopRenaming();
-  focusedItemsStore.value.isFocused = false;
-  if (!searchItemsStore.items.length && !target.closest("#search"))
-    searchItemsStore.isOpen = false;
+    focusedItemStore.value.stopRenaming();
+  focusedItemStore.value.isFocused = false;
+  if (!searchItemStore.items.length && !target.closest("#search"))
+    searchItemStore.isOpen = false;
   contextMenuStore.hide();
 };
 </script>

@@ -8,7 +8,7 @@ import { useCurrentUser, useFirebaseStorage, useStorageFile } from "vuefire";
 import { useShortDialogStore } from "../../short-dialog";
 import { useItemsFirestoreStore } from "./firestore";
 
-export const useItemsStorageStore = defineStore("items-storage", () => {
+export const useItemStorageStore = defineStore("items-storage", () => {
   const user = useCurrentUser();
   const storage = useFirebaseStorage();
   const itemsFirestoreStore = useItemsFirestoreStore();

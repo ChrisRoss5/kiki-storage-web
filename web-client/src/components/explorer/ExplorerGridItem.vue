@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemsStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useShortDialogStore } from "@/stores/short-dialog";
@@ -17,7 +17,7 @@ const isThemeLight = inject<boolean>("isThemeLight")!;
 
 const props = defineProps<{
   item: Item;
-  itemsStore: ItemsStore;
+  itemStore: ItemStore;
   view: ExplorerView;
   columnOrder: Partial<keyof ItemCore>[];
   lastSelectedItemIdx: number;
@@ -35,26 +35,26 @@ const selectionRectStore = useSelectionRectStore();
 
 const handleItemContextMenu = (item: Item, e: MouseEvent) => {
   if (!item.isSelected) handleItemSelect(item, e);
-  contextMenuStore.show("item", props.itemsStore, e);
+  contextMenuStore.show("item", props.itemStore, e);
 };
 const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
-  const idx = props.itemsStore.items.indexOf(item);
+  const idx = props.itemStore.items.indexOf(item);
   if (e.ctrlKey) {
     if (!item.isSelected) emit("update:lastSelectedItemIdx", idx);
     item.isSelected = !item.isSelected;
   } else if (e.shiftKey) {
-    props.itemsStore.deselectAll();
+    props.itemStore.deselectAll();
     const start = Math.min(props.lastSelectedItemIdx, idx);
     const end = Math.max(props.lastSelectedItemIdx, idx);
     for (
       let i = start;
-      i <= Math.min(end, props.itemsStore.items.length - 1);
+      i <= Math.min(end, props.itemStore.items.length - 1);
       i++
     )
-      props.itemsStore.items[i].isSelected = true;
+      props.itemStore.items[i].isSelected = true;
   } else {
     if (!item.isSelected) {
-      props.itemsStore.deselectAll();
+      props.itemStore.deselectAll();
       emit("update:lastSelectedItemIdx", idx);
     }
     item.isSelected = !item.isSelected;
@@ -63,7 +63,7 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
 const handleItemOpen = (item: Item) => {
   if (item.isFolder) {
     pathStore.pushOnTab(`${item.path}/${item.name}`);
-    if (props.itemsStore.$id != "items") props.itemsStore.isOpen = false;
+    if (props.itemStore.$id != "items") props.itemStore.isOpen = false;
   } else dialogStore.showError("This item cannot be previewed."); // Todo: add previews
 };
 const handleDragStart = (item: Item, e: DragEvent) => {
@@ -72,7 +72,7 @@ const handleDragStart = (item: Item, e: DragEvent) => {
   else selectionRectStore.isLeftMouseDown = false;
   e.dataTransfer?.setData(
     "items",
-    JSON.stringify(props.itemsStore.selectedItems),
+    JSON.stringify(props.itemStore.selectedItems),
   );
   if (!isSearch) document.body.setAttribute("dragging-items", props.item.path);
 };
@@ -81,7 +81,7 @@ const handleDragStop = () => {
 };
 const handleDropOnItem = (item: Item, e: DragEvent) => {
   if (item.isFolder && !item.isSelected)
-    props.itemsStore.handleDrop(e, getFullPath(item));
+    props.itemStore.handleDrop(e, getFullPath(item));
   else props.handleDropOnBody(e);
 };
 </script>
@@ -130,7 +130,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
       <ExplorerGridItemName
         v-if="columnName == 'name'"
         :item="item"
-        :items-store="itemsStore"
+        :item-store="itemStore"
         :view="view"
       />
       <template v-else-if="columnName == 'size'">

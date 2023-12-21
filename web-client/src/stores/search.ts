@@ -1,7 +1,7 @@
 import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
-import { useSearchItemsStore } from "./items";
+import { useSearchItemStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firebase/firestore";
 import { usePathStore } from "./path";
 
@@ -20,7 +20,7 @@ const initialSizeFilter: SizeFilter = {
 };
 
 export const useSearchStore = defineStore("search", () => {
-  const searchItemsStore = useSearchItemsStore();
+  const searchItemStore = useSearchItemStore();
   const { api: firestoreApi } = useItemsFirestoreStore();
   const pathStore = usePathStore();
 
@@ -41,9 +41,9 @@ export const useSearchStore = defineStore("search", () => {
   watch(() => pathStore.currentRoot, queryItems);
 
   async function queryItems() {
-    searchItemsStore.isOpen = areFiltersActive.value;
-    if (!searchItemsStore.isOpen) return;
-    searchItemsStore.setDbItems(firestoreApi.searchItems(filters.value));
+    searchItemStore.isOpen = areFiltersActive.value;
+    if (!searchItemStore.isOpen) return;
+    searchItemStore.setDbItems(firestoreApi.searchItems(filters.value));
   }
   const resetSizeFilter = () => {
     sizeFilter.value = { ...initialSizeFilter };

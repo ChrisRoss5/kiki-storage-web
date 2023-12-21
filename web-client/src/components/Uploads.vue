@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useItemsStorageStore } from "@/stores/items/firebase/storage";
+import { useItemStorageStore } from "@/stores/items/firebase/storage";
 import { formatSize } from "@/utils/format";
 import { computed } from "vue";
 
-const itemsStorage = useItemsStorageStore();
-const items = computed(() => itemsStorage.itemsUploading);
+const itemStorage = useItemStorageStore();
+const items = computed(() => itemStorage.itemsUploading);
 const totalSize = computed(() =>
   items.value.reduce((acc, item) => acc + item.size!, 0),
 );
@@ -72,7 +72,7 @@ const totalUploaded = computed(() =>
               >
                 <div
                   class="material-symbols-outlined !text-3xl text-primary"
-                  @click="itemsStorage.api.resumeUpload(item)"
+                  @click="itemStorage.api.resumeUpload(item)"
                 >
                   play_circle
                 </div>
@@ -84,7 +84,7 @@ const totalUploaded = computed(() =>
               >
                 <div
                   class="material-symbols-outlined !text-3xl text-primary"
-                  @click="itemsStorage.api.pauseUpload(item)"
+                  @click="itemStorage.api.pauseUpload(item)"
                 >
                   pause_circle
                 </div>
@@ -95,7 +95,7 @@ const totalUploaded = computed(() =>
               >
                 <div
                   class="material-symbols-outlined !text-3xl text-primary"
-                  @click="itemsStorage.api.cancelUpload(item)"
+                  @click="itemStorage.api.cancelUpload(item)"
                 >
                   cancel
                 </div>
@@ -128,7 +128,7 @@ const totalUploaded = computed(() =>
           >
             <div
               class="material-symbols-outlined !text-5xl text-primary"
-              @click="itemsStorage.api.resumeUploads"
+              @click="itemStorage.api.resumeUploads"
             >
               play_circle
             </div>
@@ -140,7 +140,7 @@ const totalUploaded = computed(() =>
           >
             <div
               class="material-symbols-outlined !text-5xl text-primary"
-              @click="itemsStorage.api.pauseUploads"
+              @click="itemStorage.api.pauseUploads"
             >
               pause_circle
             </div>
@@ -148,7 +148,7 @@ const totalUploaded = computed(() =>
           <div class="dsy-tooltip cursor-pointer" data-tip="Cancel all uploads">
             <div
               class="material-symbols-outlined !text-5xl text-primary"
-              @click="itemsStorage.api.cancelUploads"
+              @click="itemStorage.api.cancelUploads"
             >
               cancel
             </div>

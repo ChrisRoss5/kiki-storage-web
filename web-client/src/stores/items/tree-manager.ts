@@ -1,10 +1,10 @@
-import { defineItemsStore } from ".";
+import { defineItemStore } from ".";
 
-const stores: Record<string, ReturnType<typeof defineItemsStore>> = {};
+const stores: Record<string, ReturnType<typeof defineItemStore>> = {};
 
 export const getTreeStore = (path: string) => {
   if (path in stores) return stores[path];
-  const newStore = defineItemsStore(`tree-items-${path}`);
+  const newStore = defineItemStore(`tree-items-${path}`);
   stores[path] = newStore;
   return newStore;
 };

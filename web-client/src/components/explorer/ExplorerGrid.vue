@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemsStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useTabsStore } from "@/stores/tabs";
@@ -15,7 +15,7 @@ import FileTreeGrid from "./filetree/FileTreeGrid.vue";
 const isFileTree = inject<boolean>("isFileTree")!;
 const isSearch = inject<boolean>("isSearch")!;
 
-const props = defineProps<{ itemsStore: ItemsStore }>();
+const props = defineProps<{ itemStore: ItemStore }>();
 
 const tabsStore = useTabsStore();
 const selectionRectStore = useSelectionRectStore();
@@ -50,11 +50,11 @@ watch(
   [
     () => columnSettings.value.orderBy,
     () => columnSettings.value.orderDesc,
-    () => props.itemsStore.items,
+    () => props.itemStore.items,
   ],
   () => {
     const { orderBy, orderDesc } = columnSettings.value;
-    props.itemsStore.items.sort((a, b) => {
+    props.itemStore.items.sort((a, b) => {
       const desc = orderDesc ? -1 : 1;
       if (a.isFolder && !b.isFolder) return -desc;
       if (!a.isFolder && b.isFolder) return desc;
@@ -73,7 +73,7 @@ watch(
 
 let lastSelectedItemIdx = ref(0);
 watch(
-  () => props.itemsStore.path,
+  () => props.itemStore.path,
   () => {
     lastSelectedItemIdx.value = 0;
     preventTransition.value = true;
@@ -90,10 +90,10 @@ watch(view, () => {
 
 const handleDropOnBody = (e: DragEvent) => {
   if (
-    document.body.getAttribute("dragging-items") != props.itemsStore.path &&
+    document.body.getAttribute("dragging-items") != props.itemStore.path &&
     !isSearch
   )
-    props.itemsStore.handleDrop(e, props.itemsStore.path);
+    props.itemStore.handleDrop(e);
 };
 </script>
 
@@ -115,11 +115,11 @@ const handleDropOnBody = (e: DragEvent) => {
     }"
     :style="isFileTree ? undefined : gridStyle"
   >
-    <LoaderIcon v-if="isFileTree" :loading="itemsStore.itemsPending" />
+    <LoaderIcon v-if="isFileTree" :loading="itemStore.itemsPending" />
     <ExplorerGridHead
       v-if="view == 'list' && !isFileTree"
       :scroll-top="scrollTop"
-      :items-store="itemsStore"
+      :item-store="itemStore"
     />
     <div
       ref="explBody"
@@ -130,7 +130,7 @@ const handleDropOnBody = (e: DragEvent) => {
         '!overflow-hidden': isFileTree,
         'view-changed': viewChanged,
       }"
-      :path="itemsStore.path"
+      :path="itemStore.path"
       @drop.stop.prevent="handleDropOnBody"
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
@@ -139,24 +139,24 @@ const handleDropOnBody = (e: DragEvent) => {
         selectionRectStore.handleLeftMouseDown(
           explBody,
           rectEl,
-          itemsStore.items,
+          itemStore.items,
           isFileTree,
           $event,
         )
       "
       @scroll="scrollTop = explBody?.scrollTop ?? 0"
       @contextmenu.stop.prevent="
-        contextMenuStore.show('explorer', itemsStore, $event)
+        contextMenuStore.show('explorer', itemStore, $event)
       "
     >
       <TransitionGroup
         :name="!preventTransition ? 'rows' : ''"
         :css="!preventTransition"
       >
-        <template v-for="item in itemsStore.items" :key="item.id">
+        <template v-for="item in itemStore.items" :key="item.id">
           <ExplorerGridItem
             :item="item"
-            :items-store="itemsStore"
+            :item-store="itemStore"
             :view="view"
             :column-order="columnOrder"
             :handle-drop-on-body="handleDropOnBody"

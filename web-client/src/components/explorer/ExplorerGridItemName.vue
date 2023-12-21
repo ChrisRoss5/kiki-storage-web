@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { fileIconVectors } from "@/main";
-import { ItemsStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { computed, inject, nextTick, ref, watch } from "vue";
 
 const props = defineProps<{
   item: Item;
-  itemsStore: ItemsStore;
+  itemStore: ItemStore;
   view: ExplorerView;
 }>();
 
@@ -16,7 +16,7 @@ const renameInput = ref<HTMLInputElement | null>(null);
 const showFullText = computed(
   () =>
     props.item.isSelected &&
-    props.itemsStore.selectedItems.length == 1 &&
+    props.itemStore.selectedItems.length == 1 &&
     !selectionRectStore.isActive,
 );
 const imgSrc = computed(() => {
@@ -65,7 +65,7 @@ watch(
       :placeholder="`Enter a new ${item.isFolder ? 'folder' : 'file'} name`"
       class="dsy-input dsy-join-item dsy-input-primary outline-none"
       :class="{ 'max-w-[calc(100%+2rem)] !p-0 text-center': view == 'grid' }"
-      @keyup.enter.stop="itemsStore.renameItem(item)"
+      @keyup.enter.stop="itemStore.renameItem(item)"
       @keydown.esc.stop="item.isRenaming = false"
       spellcheck="false"
       autocomplete="off"
@@ -73,7 +73,7 @@ watch(
     <button
       class="dsy-btn dsy-btn-primary dsy-join-item"
       :class="{ 'dsy-btn-disabled': !item.newName }"
-      @click="itemsStore.renameItem(item)"
+      @click="itemStore.renameItem(item)"
       v-wave
     >
       <span class="material-symbols-outlined"> check </span>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore } from "@/stores/items";
+import { useItemStore } from "@/stores/items";
 import { usePathStore } from "@/stores/path";
 import { roots } from "@/stores/settings/default";
 import { useTabsStore } from "@/stores/tabs";
@@ -12,7 +12,7 @@ import FolderOptions from "./FolderOptions.vue";
 provide("isFileTree", true);
 const isThemeLight = inject<boolean>("isThemeLight")!;
 
-const itemsStore = useItemsStore();
+const itemStore = useItemStore();
 const pathStore = usePathStore();
 const tabsStore = useTabsStore();
 </script>
@@ -33,12 +33,12 @@ const tabsStore = useTabsStore();
           :href="`/${rootKey}`"
           tabindex="0"
           draggable="false"
-          class="group expl-item is-list folder flex"
+          class="expl-item is-list folder group flex"
           :class="{
             'hover:bg-base-200': isThemeLight,
             'hover:bg-base-100/25': !isThemeLight,
           }"
-          @drop.stop.prevent="itemsStore.handleDrop($event, rootKey)"
+          @drop.stop.prevent="itemStore.handleDrop($event, rootKey)"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore, useNavbarItemsStore } from "@/stores/items";
+import { useItemStore, useNavbarItemStore } from "@/stores/items";
 import { getPathName, usePathStore } from "@/stores/path";
 import { RootKey, roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
@@ -13,8 +13,8 @@ import ViewSelector from "./ViewSelector.vue";
 
 const isThemeLight = inject<boolean>("isThemeLight")!;
 
-const itemsStore = useItemsStore();
-const navbarItemsStore = useNavbarItemsStore();
+const itemStore = useItemStore();
+const navbarItemStore = useNavbarItemStore();
 const pathStore = usePathStore();
 
 const showPathInput = ref(false);
@@ -30,7 +30,7 @@ const folderPaths = computed(() =>
 );
 
 watch(
-  () => navbarItemsStore.isOpen,
+  () => navbarItemStore.isOpen,
   (isOpen) => {
     if (!isOpen) explorerPath.value = "";
   },
@@ -42,13 +42,13 @@ const handlePathClick = (path: string) => {
 };
 const openNavbarExplorer = (path: string, keepOpen?: boolean) => {
   if (explorerPath.value == path && !keepOpen) {
-    navbarItemsStore.isOpen = false;
+    navbarItemStore.isOpen = false;
     return;
   }
   explorerPath.value = path;
-  navbarItemsStore.isOpen = navbarItemsStore.isFocused = true;
-  if (!navbarItemsStore.isOpen) return;
-  navbarItemsStore.path = path;
+  navbarItemStore.isOpen = navbarItemStore.isFocused = true;
+  if (!navbarItemStore.isOpen) return;
+  navbarItemStore.path = path;
 };
 </script>
 
@@ -79,14 +79,16 @@ const openNavbarExplorer = (path: string, keepOpen?: boolean) => {
             'bg-base-300': !isThemeLight && isPrevExpanded,
           }"
           @click.self="openNavbarExplorer(pathStore.folderPaths[i - 1])"
-          @dragover.self="openNavbarExplorer(pathStore.folderPaths[i - 1], true)"
+          @dragover.self="
+            openNavbarExplorer(pathStore.folderPaths[i - 1], true)
+          "
         >
           <Chevron :is-expanded="isPrevExpanded" />
           <Transition name="slide-down">
             <ExplorerNavbarExplorer
-              v-if="navbarItemsStore.isOpen && isPrevExpanded"
+              v-if="navbarItemStore.isOpen && isPrevExpanded"
               :path="explorerPath"
-              :items-store="navbarItemsStore"
+              :item-store="navbarItemStore"
             />
           </Transition>
         </div>
@@ -97,7 +99,7 @@ const openNavbarExplorer = (path: string, keepOpen?: boolean) => {
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,
           }"
-          @drop.stop.prevent="itemsStore.handleDrop($event, path)"
+          @drop.stop.prevent="itemStore.handleDrop($event, path)"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"

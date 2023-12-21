@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { ItemsStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items";
 import { formatSize } from "@/utils/format";
 import { computed, inject } from "vue";
 import ItemOptions from "../ItemOptions.vue";
 
-const props = defineProps<{ itemsStore: ItemsStore }>();
+const props = defineProps<{ itemStore: ItemStore }>();
 
 const isThemeLight = inject<boolean>("isThemeLight")!;
 
-const selectedItemsSize = computed(() => {
+const selectedItemSize = computed(() => {
   const showSize =
-    props.itemsStore.selectedItems.length &&
-    !props.itemsStore.selectedItems.some((i) => i.isFolder);
+    props.itemStore.selectedItems.length &&
+    !props.itemStore.selectedItems.some((i) => i.isFolder);
   if (showSize)
-    return props.itemsStore.selectedItems.reduce((acc, i) => acc + i.size!, 0);
+    return props.itemStore.selectedItems.reduce((acc, i) => acc + i.size!, 0);
   return "";
 });
 </script>
@@ -27,20 +27,20 @@ const selectedItemsSize = computed(() => {
     }"
   >
     <div class="p-4 pr-0">
-      {{ itemsStore.items.length }}
-      {{ itemsStore.items.length == 1 ? "item" : "items" }}
+      {{ itemStore.items.length }}
+      {{ itemStore.items.length == 1 ? "item" : "items" }}
     </div>
     <Transition name="fade">
-      <div v-if="itemsStore.selectedItems?.length">
-        <span class="px-3">|</span>{{ itemsStore.selectedItems.length }}
-        {{ itemsStore.selectedItems.length == 1 ? "item" : "items" }} selected
+      <div v-if="itemStore.selectedItems?.length">
+        <span class="px-3">|</span>{{ itemStore.selectedItems.length }}
+        {{ itemStore.selectedItems.length == 1 ? "item" : "items" }} selected
         <Transition name="fade">
-          <span v-if="selectedItemsSize">
-            ({{ formatSize(selectedItemsSize) }})
+          <span v-if="selectedItemSize">
+            ({{ formatSize(selectedItemSize) }})
           </span>
         </Transition>
       </div>
     </Transition>
-    <ItemOptions :items-store="itemsStore" />
+    <ItemOptions :item-store="itemStore" />
   </div>
 </template>

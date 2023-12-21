@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemsStore } from "@/stores/items";
-import { useItemsStorageStore } from "@/stores/items/firebase/storage";
+import { ItemStore } from "@/stores/items";
+import { useItemStorageStore } from "@/stores/items/firebase/storage";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { useTabsStore } from "@/stores/tabs";
@@ -10,15 +10,15 @@ import { computed } from "vue";
 
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
-const itemsStorageStore = useItemsStorageStore();
+const itemStorageStore = useItemStorageStore();
 const dialogStore = useShortDialogStore();
 const tabsStore = useTabsStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
-const firstItem = computed(() => props.itemsStore.selectedItems[0]);
+const firstItem = computed(() => props.itemStore.selectedItems[0]);
 
 const props = defineProps<{
-  itemsStore: ItemsStore;
+  itemStore: ItemStore;
   inContextMenu?: boolean;
 }>();
 
@@ -37,18 +37,18 @@ const options = computed<Option[]>(() =>
         tabsStore.createTab(getFullPath(firstItem.value));
       },
       showCondition: () =>
-        props.itemsStore.selectedItems.length == 1 && firstItem.value.isFolder,
+        props.itemStore.selectedItems.length == 1 && firstItem.value.isFolder,
     },
     {
       icon: "download",
       label: "Download",
       onClick: () => {
-        if (props.itemsStore.selectedItems.some((i) => i.isFolder))
+        if (props.itemStore.selectedItems.some((i) => i.isFolder))
           return dialogStore.showError(
             "Downloading folders is not supported yet.",
           );
-        props.itemsStore.selectedItems.forEach(
-          itemsStorageStore.api.downloadFile,
+        props.itemStore.selectedItems.forEach(
+          itemStorageStore.api.downloadFile,
         );
       },
     },
@@ -65,12 +65,12 @@ const options = computed<Option[]>(() =>
       onClick: () => {
         firstItem.value.isRenaming = true;
       },
-      showCondition: () => props.itemsStore.selectedItems.length == 1,
+      showCondition: () => props.itemStore.selectedItems.length == 1,
     },
     {
-      icon: props.itemsStore.root == "bin" ? "delete_forever" : "delete",
-      label: props.itemsStore.root == "bin" ? "Delete permanently" : "Delete",
-      onClick: props.itemsStore.deleteItems,
+      icon: props.itemStore.root == "bin" ? "delete_forever" : "delete",
+      label: props.itemStore.root == "bin" ? "Delete permanently" : "Delete",
+      onClick: props.itemStore.deleteItems,
     },
   ].filter((option) => !option.showCondition || option.showCondition()),
 );
@@ -83,7 +83,7 @@ const handleClick = (onClickHandler: () => void) => {
 
 <template>
   <Transition name="fade">
-    <div class="ml-auto flex" v-if="itemsStore.selectedItems.length">
+    <div class="ml-auto flex" v-if="itemStore.selectedItems.length">
       <div
         v-for="{ icon, label, onClick } in options"
         :key="label"

@@ -13,14 +13,14 @@ import { usePathStore } from "../path";
 import { useSearchStore } from "../search";
 import { RootKey } from "../settings/default";
 import { useShortDialogStore } from "../short-dialog";
-import { useItemsStorageStore } from "./firebase/storage";
+import { useItemStorageStore } from "./firebase/storage";
 import treeStores from "./tree-manager";
 
-export function createItemsStore(this: { id: ItemsStoreId }) {
+export function createItemStore(this: { id: ItemStoreId }) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
   const { api: firestoreApi } = useItemsFirestoreStore();
-  const { api: storageApi } = useItemsStorageStore();
+  const { api: storageApi } = useItemStorageStore();
   const searchStore = useSearchStore();
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
@@ -102,7 +102,8 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
     if (error) dialogStore.showError(error);
     return !!error;
   };
-  const handleDrop = (e: DragEvent, _path: string) => {
+  const handleDrop = (e: DragEvent, _path?: string) => {
+    _path ??= path.value;
     clearDragOverStyle(e);
     const itemsData = e.dataTransfer?.getData("items");
     if (itemsData) handleMove(JSON.parse(itemsData), _path);
@@ -184,17 +185,17 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
   };
 }
 
-export const itemsStoreIds = ["items", "search-items", "navbar-items"] as const;
+export const itemStoreIds = ["items", "search-items", "navbar-items"] as const;
 
 // https://stackoverflow.com/questions/74467392/autocomplete-in-typescript-of-literal-type-and-string
-type ItemsStoreId = (typeof itemsStoreIds)[number] | (string & {}); // nosonar
+type ItemStoreId = (typeof itemStoreIds)[number] | (string & {}); // nosonar
 
-export const defineItemsStore = (id: ItemsStoreId) =>
-  defineStore(id, createItemsStore.bind({ id }));
+export const defineItemStore = (id: ItemStoreId) =>
+  defineStore(id, createItemStore.bind({ id }));
 
-export const stores = itemsStoreIds.map(defineItemsStore);
-export const useItemsStore = stores[0];
-export const useSearchItemsStore = stores[1];
-export const useNavbarItemsStore = stores[2];
+export const stores = itemStoreIds.map(defineItemStore);
+export const useItemStore = stores[0];
+export const useSearchItemStore = stores[1];
+export const useNavbarItemStore = stores[2];
 
-export type ItemsStore = ReturnType<ReturnType<typeof defineItemsStore>>;
+export type ItemStore = ReturnType<ReturnType<typeof defineItemStore>>;

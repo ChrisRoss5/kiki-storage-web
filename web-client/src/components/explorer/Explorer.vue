@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStore } from "@/stores/items";
+import { useItemStore } from "@/stores/items";
 import { useSettingsStore } from "@/stores/settings";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { computed, provide } from "vue";
@@ -11,7 +11,7 @@ import FileTree from "./filetree/FileTree.vue";
 import FileTreeResizer from "./filetree/FileTreeResizer.vue";
 import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
 
-const itemsStore = useItemsStore();
+const itemStore = useItemStore();
 const settingsStore = useSettingsStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
@@ -32,16 +32,16 @@ provide("isThemeLight", isThemeLight);
     <div class="flex min-h-0 flex-1 overflow-hidden">
       <FileTree />
       <FileTreeResizer />
-      <div class="relative ml-3 mt-3 flex flex-1 flex-col min-w-0">
-        <LoaderIcon :loading="itemsStore.itemsPending" />
-        <template v-if="itemsStore.items.length">
-          <ExplorerGrid :items-store="itemsStore" />
-          <ExplorerFooter :items-store="itemsStore" />
+      <div class="relative ml-3 mt-3 flex min-w-0 flex-1 flex-col">
+        <LoaderIcon :loading="itemStore.itemsPending" />
+        <template v-if="itemStore.items.length">
+          <ExplorerGrid :item-store="itemStore" />
+          <ExplorerFooter :item-store="itemStore" />
         </template>
         <div
-          v-else-if="!itemsStore.itemsPending"
+          v-else-if="!itemStore.itemsPending"
           class="flex-center expl-body mb-3 flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content"
-          @drop.stop.prevent="itemsStore.handleDrop"
+          @drop.stop.prevent="itemStore.handleDrop"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"

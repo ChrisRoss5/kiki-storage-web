@@ -11,7 +11,7 @@ const settingsStore = useSettingsStore();
 const ctxmenu = ref<HTMLElement | null>(null);
 
 const isSearch = computed(
-  () => contextMenuStore.itemsStore?.$id == "search-items",
+  () => contextMenuStore.itemStore?.$id == "search-items",
 );
 const columnSettings = computed(
   () => settingsStore.settings[isSearch.value ? "searchColumns" : "columns"],
@@ -58,7 +58,7 @@ const handleColumnChange = (key: keyof ItemCore) => {
     <ItemOptions
       v-if="contextMenuStore.activeContextMenu == 'item'"
       class="rounded-box bg-base-200 shadow-lg"
-      :items-store="contextMenuStore.itemsStore!"
+      :item-store="contextMenuStore.itemStore!"
       :in-context-menu="true"
       @click="contextMenuStore.hide"
     />

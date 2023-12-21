@@ -25,7 +25,7 @@ import {
   useFirestore,
 } from "vuefire";
 import { useCleanup } from "../cleanup";
-import { useItemsStorageStore } from "./storage";
+import { useItemStorageStore } from "./storage";
 
 export interface DbItem {
   id?: string;
@@ -44,7 +44,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const user = useCurrentUser();
   const db = useFirestore();
   const cleanup = useCleanup();
-  const { api: storageApi } = useItemsStorageStore();
+  const { api: storageApi } = useItemStorageStore();
   const dbPath = computed(() => `app/drive/${user.value?.uid}`);
   const PATH_ITEM_COLLECTIONS: Record<string, _RefFirestore<ItemCore[]>> = {};
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemsStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items";
 import { useSettingsStore } from "@/stores/settings";
 import { columnNames } from "@/stores/settings/default";
 import { computed, inject, ref } from "vue";
@@ -8,7 +8,7 @@ import { DragHandle, SlickItem, SlickList } from "vue-slicksort";
 
 defineProps<{
   scrollTop: number;
-  itemsStore: ItemsStore;
+  itemStore: ItemStore;
 }>();
 
 const isSearch = inject<boolean>("isSearch")!;
@@ -52,7 +52,7 @@ const columnOrder = computed({
     @sort-start="isDraggingColumn = true"
     @sort-end="isDraggingColumn = false"
     @contextmenu.stop.prevent="
-      contextMenuStore.show('column', itemsStore, $event)
+      contextMenuStore.show('column', itemStore, $event)
     "
   >
     <SlickItem

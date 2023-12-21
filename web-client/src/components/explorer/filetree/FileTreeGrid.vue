@@ -28,6 +28,6 @@ const handleLineClick = () => {
         style="height: calc(100% - 0.5rem)"
       ></div>
     </div>
-    <ExplorerGrid :items-store="getTreeStore(path)()" :path="path" />
+    <ExplorerGrid :item-store="getTreeStore(path)()" :path="path" />
   </div>
 </template>

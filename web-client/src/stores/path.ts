@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useItemsStore } from "./items";
+import { useItemStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firebase/firestore";
 import { useSettingsStore } from "./settings";
 import { RootKey, defaultRoot, roots } from "./settings/default";
@@ -16,7 +16,7 @@ export const getPathName = (path: string) => {
 export const usePathStore = defineStore("path", () => {
   const route = useRoute();
   const router = useRouter();
-  const itemsStore = useItemsStore();
+  const itemStore = useItemStore();
   const { api: firestoreApi } = useItemsFirestoreStore();
   const settingsStore = useSettingsStore();
   const tabsStore = useTabsStore();
@@ -58,7 +58,7 @@ export const usePathStore = defineStore("path", () => {
       folderPaths.value = pathSplit.map((_, i) =>
         pathSplit.slice(0, i + 1).join("/"),
       );
-      itemsStore.path = newPath;
+      itemStore.path = newPath;
       tabsStore.updateActiveTab({ path: newPath });
       tabsStore.switchTab(tabsStore.activeTab);
       isStartup = false;
