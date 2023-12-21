@@ -2,7 +2,7 @@ import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { useSearchItemsStore } from "./items";
-import { useItemsFirestoreStore } from "./items/firestore";
+import { useItemsFirestoreStore } from "./items/firebase/firestore";
 import { usePathStore } from "./path";
 
 export interface SizeFilter {

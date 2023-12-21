@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
 import { ItemsStore } from "@/stores/items";
-import { useItemsStorageStore } from "@/stores/items/storage";
+import { useItemsStorageStore } from "@/stores/items/firebase/storage";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { useTabsStore } from "@/stores/tabs";
@@ -103,3 +103,4 @@ const handleClick = (onClickHandler: () => void) => {
     </div>
   </Transition>
 </template>
+@/stores/items/firebase/storage

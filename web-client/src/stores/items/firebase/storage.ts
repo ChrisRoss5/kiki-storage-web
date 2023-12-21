@@ -5,7 +5,7 @@ import { deleteObject, getBlob, ref as storageRef } from "firebase/storage";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useCurrentUser, useFirebaseStorage, useStorageFile } from "vuefire";
-import { useShortDialogStore } from "../short-dialog";
+import { useShortDialogStore } from "../../short-dialog";
 import { useItemsFirestoreStore } from "./firestore";
 
 export const useItemsStorageStore = defineStore("items-storage", () => {

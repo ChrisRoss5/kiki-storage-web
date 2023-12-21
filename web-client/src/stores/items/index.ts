@@ -1,4 +1,4 @@
-import { useItemsFirestoreStore } from "@/stores/items/firestore";
+import { useItemsFirestoreStore } from "@/stores/items/firebase/firestore";
 import {
   _createFolder,
   checkItem,
@@ -13,7 +13,8 @@ import { usePathStore } from "../path";
 import { useSearchStore } from "../search";
 import { RootKey } from "../settings/default";
 import { useShortDialogStore } from "../short-dialog";
-import { useItemsStorageStore } from "./storage";
+import { useItemsStorageStore } from "./firebase/storage";
+import treeStores from "./tree-manager";
 
 export function createItemsStore(this: { id: ItemsStoreId }) {
   const dialogStore = useShortDialogStore();
@@ -52,9 +53,11 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
   const setItems = () => {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
-    const _stores = stores.map((s) => s()).reverse();
-   /*  console.log("setItems", this.id); //todo: remove
-    console.log(_stores.length); */
+    const _stores = Object.values(treeStores)
+      .concat(stores)
+      .map((s) => s());
+
+    console.log("totalStores: ", _stores.length, "setItems", this.id); //todo: remove
 
     items.value = newDbItems
       // Unsupported firestore query filters
@@ -181,25 +184,17 @@ export function createItemsStore(this: { id: ItemsStoreId }) {
   };
 }
 
-const itemsStoreIds = ["items", "search-items", "navbar-items"] as const;
+export const itemsStoreIds = ["items", "search-items", "navbar-items"] as const;
 
 // https://stackoverflow.com/questions/74467392/autocomplete-in-typescript-of-literal-type-and-string
 type ItemsStoreId = (typeof itemsStoreIds)[number] | (string & {}); // nosonar
 
-const _defineStore = (id: ItemsStoreId) =>
+export const defineItemsStore = (id: ItemsStoreId) =>
   defineStore(id, createItemsStore.bind({ id }));
 
-export const useTreeStore = (path: string) => {
-  const existingStore = stores.find((s) => s().$id == `tree-items-${path}`);
-  if (existingStore) return existingStore();
-  const newStore = _defineStore(`tree-items-${path}`);
-  stores.push(newStore);
-  return newStore();
-};
-
-export const stores = itemsStoreIds.map(_defineStore);
+export const stores = itemsStoreIds.map(defineItemsStore);
 export const useItemsStore = stores[0];
 export const useSearchItemsStore = stores[1];
 export const useNavbarItemsStore = stores[2];
 
-export type ItemsStore = ReturnType<ReturnType<typeof _defineStore>>;
+export type ItemsStore = ReturnType<ReturnType<typeof defineItemsStore>>;

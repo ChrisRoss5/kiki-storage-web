@@ -1,41 +1,29 @@
 <script setup lang="ts">
-import { getActivePinia } from "pinia";
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useCurrentUser } from "vuefire";
 import ContextMenu from "./components/ContextMenu.vue";
 import ShortDialog from "./components/ShortDialog.vue";
+import resetStores from "./stores/reset";
 
 const user = useCurrentUser();
 const router = useRouter();
 const route = useRoute();
 
 const startupTranstion = ref(false);
+
+// I hate to do this, but there's no easy alternative
 onMounted(() => setTimeout(() => (startupTranstion.value = true), 1000));
 
 watch(user, async (currentUser) => {
   if (!currentUser) {
     if (!route.meta.requiresAuth) return;
-    resetAllStores();
+    resetStores();
     return router.push("/login");
   }
   if (typeof route.query.redirect == "string")
     return router.replace(route.query.redirect);
 });
-
-const resetAllStores = () => {
-  // https://pinia.vuejs.org/api/interfaces/pinia._StoreWithState.html#-reset
-  // https://github.com/vuejs/pinia/discussions/1859
-  try {
-    (getActivePinia() as any)._s.forEach((store: any) => {
-      try {
-        store.$reset();
-      } catch (e) {}
-    });
-  } catch (e) {
-    location.reload();
-  }
-};
 </script>
 
 <template>

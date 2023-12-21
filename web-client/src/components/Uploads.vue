@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemsStorageStore } from "@/stores/items/storage";
+import { useItemsStorageStore } from "@/stores/items/firebase/storage";
 import { formatSize } from "@/utils/format";
 import { computed } from "vue";
 
@@ -172,3 +172,4 @@ const totalUploaded = computed(() =>
   transform: translate(-50%, 0.5rem);
 }
 </style>
+@/stores/items/firebase/storage

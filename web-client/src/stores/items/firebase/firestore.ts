@@ -24,7 +24,7 @@ import {
   useCurrentUser,
   useFirestore,
 } from "vuefire";
-import { useCleanup } from "./cleanup";
+import { useCleanup } from "../cleanup";
 import { useItemsStorageStore } from "./storage";
 
 export interface DbItem {
@@ -46,12 +46,12 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const cleanup = useCleanup();
   const { api: storageApi } = useItemsStorageStore();
   const dbPath = computed(() => `app/drive/${user.value?.uid}`);
-  const pathItemCollections: Record<string, _RefFirestore<ItemCore[]>> = {};
+  const PATH_ITEM_COLLECTIONS: Record<string, _RefFirestore<ItemCore[]>> = {};
 
   const $reset = () => {
-    for (const path in pathItemCollections) {
-      pathItemCollections[path].stop();
-      delete pathItemCollections[path];
+    for (const path in PATH_ITEM_COLLECTIONS) {
+      PATH_ITEM_COLLECTIONS[path].stop();
+      delete PATH_ITEM_COLLECTIONS[path];
     }
   };
 
@@ -84,8 +84,8 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       nestedOnly?: boolean,
       options?: UseCollectionOptions,
     ) {
-      if (path in pathItemCollections && !nestedOnly)
-        return pathItemCollections[path];
+      if (path in PATH_ITEM_COLLECTIONS && !nestedOnly)
+        return PATH_ITEM_COLLECTIONS[path];
       const coll = useCollection(
         query(
           collection(db, dbPath.value),
@@ -95,7 +95,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         ).withConverter(firestoreItemConverter),
         { ...options },
       );
-      if (!nestedOnly && !options) pathItemCollections[path] = coll;
+      if (!nestedOnly && !options) PATH_ITEM_COLLECTIONS[path] = coll;
       return coll;
     },
     async getParentItem(path: string) {

@@ -1,4 +1,4 @@
-import { DbItem } from "@/stores/items/firestore";
+import { DbItem } from "@/stores/items/firebase/firestore";
 import { FirestoreDataConverter, Timestamp } from "firebase/firestore";
 
 export function _createFolder(name: string, path: string): ItemCore {

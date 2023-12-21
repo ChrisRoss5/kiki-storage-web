@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTreeStore } from "@/stores/items";
+import { getTreeStore } from "@/stores/items/tree-manager";
 import { useTabsStore } from "@/stores/tabs";
 import ExplorerGrid from "../ExplorerGrid.vue";
 
@@ -28,6 +28,6 @@ const handleLineClick = () => {
         style="height: calc(100% - 0.5rem)"
       ></div>
     </div>
-    <ExplorerGrid :items-store="useTreeStore(path)" :path="path" />
+    <ExplorerGrid :items-store="getTreeStore(path)()" :path="path" />
   </div>
 </template>
