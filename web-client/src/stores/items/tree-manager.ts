@@ -4,7 +4,7 @@ const stores: Record<string, ReturnType<typeof defineItemStore>> = {};
 
 export const getTreeStore = (path: string) => {
   if (path in stores) return stores[path];
-  const newStore = defineItemStore(`tree-items-${path}`);
+  const newStore = defineItemStore({ id: `tree-items-${path}`, path });
   stores[path] = newStore;
   return newStore;
 };

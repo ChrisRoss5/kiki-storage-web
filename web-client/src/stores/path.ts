@@ -27,14 +27,14 @@ export const usePathStore = defineStore("path", () => {
   const currentRoot = computed(
     () => currentPath.value.split("/")[0] as RootKey,
   );
-  let isStartup = true;
+  let IS_STARTUP = true;
 
   watch(
     () => tabsStore.activeTab,
     (activeTab) => {
       if (activeTab.path == currentPath.value) return;
-      if (isStartup) {
-        isStartup = false;
+      if (IS_STARTUP) {
+        IS_STARTUP = false;
         const startupPath = sanitizePath(route.path);
         if (!isPathValid(startupPath)) return;
         if (activeTab.path != startupPath) {
@@ -61,7 +61,7 @@ export const usePathStore = defineStore("path", () => {
       itemStore.path = newPath;
       tabsStore.updateActiveTab({ path: newPath });
       tabsStore.switchTab(tabsStore.activeTab);
-      isStartup = false;
+      IS_STARTUP = false;
     },
     { immediate: true },
   );

@@ -16,7 +16,7 @@ import { useShortDialogStore } from "../short-dialog";
 import { useItemStorageStore } from "./firebase/storage";
 import treeStores from "./tree-manager";
 
-export function createItemStore(this: { id: ItemStoreId }) {
+export function createItemStore(this: ItemStoreParams) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
   const { api: firestoreApi } = useItemsFirestoreStore();
@@ -29,9 +29,7 @@ export function createItemStore(this: { id: ItemStoreId }) {
   const newFolderName = ref("");
   const isFocused = ref(false);
   const isOpen = ref(false);
-  const path = ref(
-    this.id.startsWith("tree-items-") ? this.id.replace("tree-items-", "") : "",
-  );
+  const path = ref(this.path ?? "");
 
   const itemsPending = computed(() => !!dbItems.value?.pending);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
@@ -189,11 +187,12 @@ export const itemStoreIds = ["items", "search-items", "navbar-items"] as const;
 
 // https://stackoverflow.com/questions/74467392/autocomplete-in-typescript-of-literal-type-and-string
 type ItemStoreId = (typeof itemStoreIds)[number] | (string & {}); // nosonar
+type ItemStoreParams = { id: ItemStoreId; path?: string };
 
-export const defineItemStore = (id: ItemStoreId) =>
-  defineStore(id, createItemStore.bind({ id }));
+export const defineItemStore = ({ id, path }: ItemStoreParams) =>
+  defineStore(id, createItemStore.bind({ id, path }));
 
-export const stores = itemStoreIds.map(defineItemStore);
+export const stores = itemStoreIds.map((id) => defineItemStore({ id }));
 export const useItemStore = stores[0];
 export const useSearchItemStore = stores[1];
 export const useNavbarItemStore = stores[2];
