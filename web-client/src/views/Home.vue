@@ -4,14 +4,20 @@ import ExplorerTabs from "@/components/explorer/ExplorerTabs.vue";
 import Header from "@/components/header/Header.vue";
 import { useContextMenuStore } from "@/stores/context-menu";
 import {
+  focusedItemStore,
   useItemStore,
   useNavbarItemStore,
   useSearchItemStore,
 } from "@/stores/items";
+import treeStores from "@/stores/items/tree-manager";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { computed, onBeforeMount, onBeforeUnmount } from "vue";
+
+setTimeout(() => {
+  console.log(treeStores);
+}, 100);
 
 const itemStore = useItemStore();
 const searchItemStore = useSearchItemStore();
@@ -20,13 +26,11 @@ const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
-const focusedItemStore = computed(
-  () =>
-    [searchItemStore, navbarItemStore].find((s) => s.isFocused) ?? itemStore,
-);
-const openItemStore = computed(
-  () => [searchItemStore, navbarItemStore].find((s) => s.isOpen) ?? itemStore,
-);
+
+const openItemStore = computed(() => {
+  console.log("openItemStore");
+  return [searchItemStore, navbarItemStore].find((s) => s.isOpen) ?? itemStore;
+});
 
 onBeforeMount(() => {
   document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
@@ -48,15 +52,15 @@ const handleLeftMouseUp = (e: MouseEvent) => {
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key == "Escape") {
     openItemStore.value.isOpen = openItemStore.value.isFocused = false;
-    focusedItemStore.value.deselectAll();
-  } else if (e.key == "Delete" && focusedItemStore.value.selectedItems.length) {
-    focusedItemStore.value.deleteItems();
+    focusedItemStore.deselectAll();
+  } else if (e.key == "Delete" && focusedItemStore.selectedItems.length) {
+    focusedItemStore.deleteItems();
   } else if (
     e.key == "F2" &&
-    focusedItemStore.value.selectedItems.length == 1
+    focusedItemStore.selectedItems.length == 1
   ) {
     e.preventDefault();
-    focusedItemStore.value.selectedItems[0].isRenaming = true;
+    focusedItemStore.selectedItems[0].isRenaming = true;
   } else if (e.ctrlKey && e.key == "a") {
     const inEditable =
       document.activeElement?.tagName == "INPUT" ||
@@ -65,7 +69,7 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (inEditable) return;
     e.preventDefault();
     document.body.style.userSelect = "none";
-    focusedItemStore.value.selectAll();
+    focusedItemStore.selectAll();
     document.body.style.userSelect = "";
   }
 };
@@ -83,13 +87,13 @@ const handleClickLeft = (e: MouseEvent) => {
     return;
   }
   if (e.ctrlKey || e.shiftKey) return;
-  focusedItemStore.value.deselectAll();
+  focusedItemStore.deselectAll();
 };
 const handleMouseDownCapture = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   if (!target.closest("#rename-container"))
-    focusedItemStore.value.stopRenaming();
-  focusedItemStore.value.isFocused = false;
+    focusedItemStore.stopRenaming();
+  focusedItemStore.isFocused = false;
   if (!searchItemStore.items.length && !target.closest("#search"))
     searchItemStore.isOpen = false;
   contextMenuStore.hide();

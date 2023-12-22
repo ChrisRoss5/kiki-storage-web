@@ -1,12 +1,12 @@
 import { defineItemStore } from ".";
 
-const stores: Record<string, ReturnType<typeof defineItemStore>> = {};
+const storeDefs: Record<string, ReturnType<typeof defineItemStore>> = {};
 
 export const getTreeStore = (path: string) => {
-  if (path in stores) return stores[path];
+  if (path in storeDefs) return storeDefs[path];
   const newStore = defineItemStore({ id: `tree-items-${path}`, path });
-  stores[path] = newStore;
+  storeDefs[path] = newStore;
   return newStore;
 };
 
-export default stores;
+export default storeDefs;

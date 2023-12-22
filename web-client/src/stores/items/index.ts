@@ -1,6 +1,6 @@
 import { useItemsFirestoreStore } from "@/stores/items/firebase/firestore";
 import {
-  _createFolder,
+  createFolder as _createFolder,
   checkItem,
   convertFilesToItems,
   getFullPath,
@@ -29,7 +29,7 @@ export function createItemStore(this: ItemStoreParams) {
   const newFolderName = ref("");
   const isFocused = ref(false);
   const isOpen = ref(false);
-  const path = ref(this.path ?? "");
+  const path = ref(this.path ?? ""); // Search & NavbarExplorer
 
   const itemsPending = computed(() => !!dbItems.value?.pending);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
@@ -51,12 +51,8 @@ export function createItemStore(this: ItemStoreParams) {
   const setItems = () => {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
-    const _stores = Object.values(treeStores)
-      .concat(stores)
-      .map((s) => s());
-
+    const _stores = getAllItemStores();
     console.log("totalStores: ", _stores.length, "setItems", this.id); //todo: remove
-
     items.value = newDbItems
       // Unsupported firestore query filters
       .filter((newDbItem) => {
@@ -136,10 +132,9 @@ export function createItemStore(this: ItemStoreParams) {
   const deleteItems = async () => {
     const permanent = root.value == "bin";
     const _items = selectedItems.value;
-    const toDelete = _items.length > 1 ? `${_items.length} items` : "one item";
-    const message = `Are you sure you want to delete ${toDelete}${
-      permanent ? " permanently" : ""
-    }?`;
+    const s1 = _items.length > 1 ? `${_items.length} items` : "one item";
+    const s2 = `${s1}${permanent ? " permanently" : ""}`;
+    const message = `Are you sure you want to delete ${s2}?`;
     if (!(await dialogStore.confirm(message))) return;
     if (!permanent) handleMove(_items, "bin" satisfies RootKey);
     else firestoreApi.deleteItemsPermanently(_items);
@@ -192,9 +187,16 @@ type ItemStoreParams = { id: ItemStoreId; path?: string };
 export const defineItemStore = ({ id, path }: ItemStoreParams) =>
   defineStore(id, createItemStore.bind({ id, path }));
 
-export const stores = itemStoreIds.map((id) => defineItemStore({ id }));
-export const useItemStore = stores[0];
-export const useSearchItemStore = stores[1];
-export const useNavbarItemStore = stores[2];
-
 export type ItemStore = ReturnType<ReturnType<typeof defineItemStore>>;
+
+export const storeDefs = itemStoreIds.map((id) => defineItemStore({ id }));
+export const useItemStore = storeDefs[0];
+export const useSearchItemStore = storeDefs[1];
+export const useNavbarItemStore = storeDefs[2];
+
+export const focusedItemStore = useItemStore();
+
+const getAllItemStores = () =>
+  Object.values(treeStores)
+    .concat(storeDefs)
+    .map((s) => s());
