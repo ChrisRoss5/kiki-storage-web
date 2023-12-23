@@ -37,7 +37,7 @@ watch(user, async (currentUser) => {
     >
       <component
         :is="Component"
-        class="duration-500 absolute bottom-0 left-0 right-0 top-0 transition-[transform,opacity]"
+        class="duration-500 z-10 absolute bottom-0 left-0 right-0 top-0 transition-[transform,opacity]"
       />
     </Transition>
   </RouterView>

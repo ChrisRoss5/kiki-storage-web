@@ -31,7 +31,7 @@ const tabsStore = useTabsStore();
         : 'auto',
     }"
   >
-    <TransitionGroup name="rows">
+    <TransitionGroup name="items">
       <template v-for="(rootValue, rootKey) in roots" :key="rootKey">
         <a
           :href="`/${rootKey}`"

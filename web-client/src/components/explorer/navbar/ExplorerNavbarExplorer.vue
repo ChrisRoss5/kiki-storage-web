@@ -14,7 +14,7 @@ provide("isThemeLight", true);
 <template>
   <div
     id="navbar-explorer"
-    class="absolute left-0 top-full z-10 origin-top-left scale-75 cursor-default rounded-box bg-base-100 px-4 shadow-lg transition-shadow"
+    class="absolute left-0 top-full z-10 origin-top-left scale-75 cursor-default rounded-box bg-base-100 px-4"
     :class="{ 'focused-store': itemStore.isFocused }"
     @mousedown="itemStore.isFocused = itemStore.isOpen = true"
   >

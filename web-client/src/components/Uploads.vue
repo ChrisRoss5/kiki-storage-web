@@ -36,7 +36,7 @@ const totalUploaded = computed(() =>
       <div
         class="max-h-0 overflow-y-scroll p-3 py-0 transition-[max-height,padding] group-hover:max-h-[25rem] group-hover:py-3"
       >
-        <TransitionGroup name="rows">
+        <TransitionGroup name="items">
           <div
             v-for="item in items"
             :key="item.id"

@@ -19,12 +19,16 @@ const handleLineClick = () => {
 <template>
   <div
     class="relative flex rounded-box"
-    :class="{ 'border-accent/50 border-[0.25rem] border-l-0': itemsStore.isFocused }"
+    :class="{
+      'focused-tree-store': itemsStore.isFocused,
+    }"
+    :style="{ 'clip-path': 'inset(0 0 0 0.62rem)' }"
     @mousedown.stop="itemsStore.isFocused = true"
   >
     <div
       class="w-6 cursor-pointer opacity-50 transition-opacity hover:opacity-100"
       @click.stop.prevent="handleLineClick"
+      @mousedown.capture.stop="null"
       @dragover.stop.prevent="null"
       @drop.stop.prevent="null"
     >

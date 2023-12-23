@@ -95,90 +95,96 @@ const handleDropOnBody = (e: DragEvent) => {
   )
     props.itemStore.handleDrop(e);
 };
-</script>
 
-<template>
-  <!-- Initially, CSS Grid was implemented for all views, including the fileTree.
+/* Initially, CSS Grid was implemented for all views, including the fileTree.
   However, nested subgrids in the fileTree, especially those several levels deep,
   cause significant CSS lag when switching tabs (like, crazy!) - commit e47faf0.
   Surprisingly, the lag is less pronounced when items are loaded for the first time
   (one by one). Generally, CSS Grid performance is still terrible in 2023,
   so Flex is used instead. This adjustment preserves the Grid's visual style,
-  but it introduces extra conditional classes that require attention. -->
-  <div
-    class="flex-1 overflow-x-auto"
-    :class="{
-      grid: !isFileTree,
-      'grid-rows-1': view == 'grid' && !isFileTree,
-      'grid-rows-[auto_1fr]': view == 'list' && !isFileTree,
-      '!overflow-hidden': isFileTree,
-    }"
-    :style="isFileTree ? undefined : gridStyle"
+  but it introduces extra conditional classes that require attention. */
+</script>
+
+<template>
+  <TransitionGroup
+    :name="!preventTransition ? 'items' : ''"
+    :css="!preventTransition"
   >
-    <LoaderIcon v-if="isFileTree" :loading="itemStore.itemsPending" />
-    <ExplorerGridHead
-      v-if="view == 'list' && !isFileTree"
-      :scroll-top="scrollTop"
-      :item-store="itemStore"
-    />
     <div
-      ref="explBodyDiv"
-      class="expl-body relative overflow-y-scroll rounded-box"
+      class="flex-1 overflow-x-auto"
       :class="{
-        'col-span-full grid auto-rows-min grid-cols-[subgrid]': !isFileTree,
-        'items-start gap-x-2 gap-y-1': view == 'grid' && !isFileTree,
+        grid: !isFileTree,
+        'grid-rows-1': view == 'grid' && !isFileTree,
+        'grid-rows-[auto_1fr]': view == 'list' && !isFileTree,
         '!overflow-hidden': isFileTree,
-        'view-changed': viewChanged,
       }"
-      :path="itemStore.path"
-      @drop.stop.prevent="handleDropOnBody"
-      @dragover.stop.prevent="setDragOverStyle"
-      @dragleave.stop.prevent="clearDragOverStyle"
-      @dragend.stop.prevent="clearDragOverStyle"
-      @mousedown.left="
-        selectionRectStore.handleLeftMouseDown(
-          explBodyDiv,
-          rectElDiv,
-          itemStore.items,
-          isFileTree,
-          $event,
-        )
-      "
-      @scroll="scrollTop = explBodyDiv?.scrollTop ?? 0"
-      @contextmenu.stop.prevent="
-        contextMenuStore.show('explorer', itemStore, $event)
-      "
+      :style="isFileTree ? undefined : gridStyle"
     >
-      <TransitionGroup
-        :name="!preventTransition ? 'rows' : ''"
-        :css="!preventTransition"
-      >
-        <template v-for="item in itemStore.items" :key="item.id">
-          <ExplorerGridItem
-            :item="item"
-            :item-store="itemStore"
-            :view="view"
-            :column-order="columnOrder"
-            :handle-drop-on-body="handleDropOnBody"
-            v-model:last-selected-item-idx="lastSelectedItemIdx"
-          />
-          <FileTreeGrid
-            v-if="
-              isFileTree &&
-              item.isFolder &&
-              tabsStore.activeTab.expandedPaths?.includes(getFullPath(item))
-            "
-            :path="getFullPath(item)"
-            :key="`${item.id}-filetree`"
-          />
-        </template>
-      </TransitionGroup>
+      <LoaderIcon v-if="isFileTree" :loading="itemStore.itemsPending" />
+      <ExplorerGridHead
+        v-if="view == 'list' && !isFileTree"
+        :scroll-top="scrollTop"
+        :item-store="itemStore"
+      />
       <div
-        ref="rectElDiv"
-        class="pointer-events-none absolute z-10 border border-primary bg-primary/20"
-      ></div>
+        ref="explBodyDiv"
+        class="expl-body relative overflow-y-scroll rounded-box"
+        :class="{
+          'col-span-full grid auto-rows-min grid-cols-[subgrid]': !isFileTree,
+          'items-start gap-x-2 gap-y-1': view == 'grid' && !isFileTree,
+          '!overflow-hidden': isFileTree,
+          'view-changed': viewChanged,
+        }"
+        :path="itemStore.path"
+        @drop.stop.prevent="handleDropOnBody"
+        @dragover.stop.prevent="setDragOverStyle"
+        @dragleave.stop.prevent="clearDragOverStyle"
+        @dragend.stop.prevent="clearDragOverStyle"
+        @mousedown.left="
+          selectionRectStore.handleLeftMouseDown(
+            explBodyDiv,
+            rectElDiv,
+            itemStore.items,
+            isFileTree,
+            $event,
+          )
+        "
+        @scroll="scrollTop = explBodyDiv?.scrollTop ?? 0"
+        @contextmenu.stop.prevent="
+          contextMenuStore.show('explorer', itemStore, $event)
+        "
+      >
+        <TransitionGroup
+          :name="!preventTransition ? 'items' : ''"
+          :css="!preventTransition"
+        >
+          <template v-for="item in itemStore.items" :key="item.id">
+            <ExplorerGridItem
+              :item="item"
+              :item-store="itemStore"
+              :view="view"
+              :column-order="columnOrder"
+              :handle-drop-on-body="handleDropOnBody"
+              v-model:last-selected-item-idx="lastSelectedItemIdx"
+            />
+            <FileTreeGrid
+              v-if="
+                isFileTree &&
+                item.isFolder &&
+                tabsStore.activeTab.expandedPaths?.includes(getFullPath(item))
+              "
+              :path="getFullPath(item)"
+              :key="`${item.id}-filetree`"
+            />
+          </template>
+        </TransitionGroup>
+        <div
+          ref="rectElDiv"
+          class="pointer-events-none absolute z-10 border border-primary bg-primary/20"
+        ></div>
+      </div>
     </div>
-  </div>
+  </TransitionGroup>
 </template>
 
 <style>
