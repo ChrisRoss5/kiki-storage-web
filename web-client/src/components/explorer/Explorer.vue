@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemStore } from "@/stores/items";
+import { useItemStore } from "@/stores/items/manager";
 import { useSettingsStore } from "@/stores/settings";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { computed, provide, ref } from "vue";

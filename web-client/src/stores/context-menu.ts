@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { ItemStore } from "./items";
+import { ItemStore } from "./items/manager";
 
 type ContextMenu = "item" | "column" | "explorer";
 

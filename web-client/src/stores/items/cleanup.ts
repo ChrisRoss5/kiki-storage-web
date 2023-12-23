@@ -1,7 +1,7 @@
 import { getFullPath } from "@/utils/item";
 import { useSettingsStore } from "../settings";
 import { useTabsStore } from "../tabs";
-import treeStores from "./tree-manager";
+import { treeStoreDefs } from "./manager";
 
 export function useCleanup() {
   const tabsStore = useTabsStore();
@@ -44,9 +44,9 @@ export function useCleanup() {
   };
 
   const deleteStores = (folderFullPaths: string[]) => {
-    for (const path in treeStores)
+    for (const path in treeStoreDefs)
       if (folderFullPaths.some((p) => path.startsWith(p)))
-        delete treeStores[path];
+        delete treeStoreDefs[path];
   };
 
   return { onMoveComplete, onDeleteComplete };

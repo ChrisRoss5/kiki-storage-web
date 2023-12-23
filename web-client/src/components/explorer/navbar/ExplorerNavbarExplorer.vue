@@ -3,7 +3,7 @@ import CloseExplorer from "@/components/explorer/CloseExplorer.vue";
 import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
 import LoaderIcon from "@/components/explorer/LoaderIcon.vue";
-import { ItemStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items/manager";
 import { provide } from "vue";
 
 defineProps<{ itemStore: ItemStore }>();
@@ -15,8 +15,8 @@ provide("isThemeLight", true);
   <div
     id="navbar-explorer"
     class="absolute left-0 top-full z-10 origin-top-left scale-75 cursor-default rounded-box bg-base-100 px-4 shadow-lg transition-shadow"
-    :class="{ 'shadow-base-content/50': itemStore.isFocused }"
-    @mousedown.capture="itemStore.isFocused = itemStore.isOpen = true"
+    :class="{ 'focused-store': itemStore.isFocused }"
+    @mousedown="itemStore.isFocused = itemStore.isOpen = true"
   >
     <LoaderIcon :loading="itemStore.itemsPending" />
     <CloseExplorer @click="itemStore.isOpen = false" />

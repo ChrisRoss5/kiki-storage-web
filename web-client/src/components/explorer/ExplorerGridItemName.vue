@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { fileIconVectors } from "@/main";
-import { ItemStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items/manager";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { computed, inject, nextTick, ref, watch } from "vue";
 

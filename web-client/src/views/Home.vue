@@ -4,33 +4,21 @@ import ExplorerTabs from "@/components/explorer/ExplorerTabs.vue";
 import Header from "@/components/header/Header.vue";
 import { useContextMenuStore } from "@/stores/context-menu";
 import {
-  focusedItemStore,
-  useItemStore,
-  useNavbarItemStore,
-  useSearchItemStore,
-} from "@/stores/items";
-import treeStores from "@/stores/items/tree-manager";
+getFocusedItemStore,
+getTopmostOpenItemStore,
+treeStoreDefs,
+useSearchItemStore,
+} from "@/stores/items/manager";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
-import { computed, onBeforeMount, onBeforeUnmount } from "vue";
+import { onBeforeMount, onBeforeUnmount } from "vue";
 
-setTimeout(() => {
-  console.log(treeStores);
-}, 100);
-
-const itemStore = useItemStore();
 const searchItemStore = useSearchItemStore();
-const navbarItemStore = useNavbarItemStore();
 const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
-
-const openItemStore = computed(() => {
-  console.log("openItemStore");
-  return [searchItemStore, navbarItemStore].find((s) => s.isOpen) ?? itemStore;
-});
 
 onBeforeMount(() => {
   document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
@@ -50,15 +38,14 @@ const handleLeftMouseUp = (e: MouseEvent) => {
   selectionRectStore.handleLeftMouseUp();
 };
 const handleKeydown = (e: KeyboardEvent) => {
+  const focusedItemStore = getFocusedItemStore();
   if (e.key == "Escape") {
-    openItemStore.value.isOpen = openItemStore.value.isFocused = false;
+    const openItemStore = getTopmostOpenItemStore();
+    if (openItemStore) openItemStore.isOpen = openItemStore.isFocused = false;
     focusedItemStore.deselectAll();
   } else if (e.key == "Delete" && focusedItemStore.selectedItems.length) {
     focusedItemStore.deleteItems();
-  } else if (
-    e.key == "F2" &&
-    focusedItemStore.selectedItems.length == 1
-  ) {
+  } else if (e.key == "F2" && focusedItemStore.selectedItems.length == 1) {
     e.preventDefault();
     focusedItemStore.selectedItems[0].isRenaming = true;
   } else if (e.ctrlKey && e.key == "a") {
@@ -87,12 +74,19 @@ const handleClickLeft = (e: MouseEvent) => {
     return;
   }
   if (e.ctrlKey || e.shiftKey) return;
+  const target = e.target as HTMLElement;
+  const isInFileTree = !!target.closest("#filetree");
+  if (isInFileTree)
+    for (const treeStoreDef of Object.values(treeStoreDefs))
+      treeStoreDef().deselectAll();
+  const focusedItemStore = getFocusedItemStore();
   focusedItemStore.deselectAll();
 };
 const handleMouseDownCapture = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
-  if (!target.closest("#rename-container"))
-    focusedItemStore.stopRenaming();
+  const focusedItemStore = getFocusedItemStore();
+  const isInRenameContainer = !!target.closest("#rename-container");
+  if (!isInRenameContainer) focusedItemStore.stopRenaming();
   focusedItemStore.isFocused = false;
   if (!searchItemStore.items.length && !target.closest("#search"))
     searchItemStore.isOpen = false;
@@ -104,7 +98,7 @@ const handleMouseDownCapture = (e: MouseEvent) => {
   <div
     v-if="settingsStore.dbSettingsReady"
     class="flex flex-col"
-    @click.left="handleClickLeft"
+    @click.left.capture="handleClickLeft"
     @mousedown.capture="handleMouseDownCapture"
     @contextmenu="contextMenuStore.hide()"
   >

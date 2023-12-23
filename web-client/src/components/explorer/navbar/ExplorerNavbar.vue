@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemStore, useNavbarItemStore } from "@/stores/items";
+import { useItemStore, useNavbarItemStore } from "@/stores/items/manager";
 import { getPathName, usePathStore } from "@/stores/path";
 import { RootKey, roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";

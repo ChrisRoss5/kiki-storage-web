@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items/manager";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useTabsStore } from "@/stores/tabs";
@@ -135,7 +135,7 @@ const handleDropOnBody = (e: DragEvent) => {
       @dragover.stop.prevent="setDragOverStyle"
       @dragleave.stop.prevent="clearDragOverStyle"
       @dragend.stop.prevent="clearDragOverStyle"
-      @mousedown.left.stop="
+      @mousedown.left="
         selectionRectStore.handleLeftMouseDown(
           explBodyDiv,
           rectElDiv,

@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useItemStore } from "./items";
 import { useItemsFirestoreStore } from "./items/firebase/firestore";
+import { useItemStore } from "./items/manager";
 import { useSettingsStore } from "./settings";
 import { RootKey, defaultRoot, roots } from "./settings/default";
 import { useShortDialogStore } from "./short-dialog";

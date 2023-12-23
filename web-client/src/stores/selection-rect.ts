@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { treeStoreDefs } from "./items/manager";
 
 export const useSelectionRectStore = defineStore("selection-rect", () => {
   const isLeftMouseDown = ref<boolean>(false);
@@ -32,6 +33,9 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     rectEl!.style.transition = "";
     rectEl!.style.opacity = "1";
     rectEl!.style.pointerEvents = "";
+    if (isFileTree && !isCtrlOrShiftDown)
+      for (const treeStoreDef of Object.values(treeStoreDefs))
+        treeStoreDef().deselectAll();
   };
   const deactivate = () => {
     if (!isActive.value) return;

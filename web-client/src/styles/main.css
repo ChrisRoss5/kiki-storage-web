@@ -58,6 +58,9 @@ a {
       pointer-events: none;
     }
   }
+  .focused-store {
+    @apply shadow-base-content/50;
+  }
 }
 
 /* daisyui */

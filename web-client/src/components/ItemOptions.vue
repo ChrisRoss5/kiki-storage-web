@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemStore } from "@/stores/items";
 import { useItemStorageStore } from "@/stores/items/firebase/storage";
+import { ItemStore } from "@/stores/items/manager";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { useTabsStore } from "@/stores/tabs";

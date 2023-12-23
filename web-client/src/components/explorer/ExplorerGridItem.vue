@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items/manager";
 import { usePathStore } from "@/stores/path";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useShortDialogStore } from "@/stores/short-dialog";

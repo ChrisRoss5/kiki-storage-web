@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ItemStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items/manager";
 import { formatSize } from "@/utils/format";
 import { computed, inject } from "vue";
 import ItemOptions from "../ItemOptions.vue";

@@ -6,7 +6,6 @@ import {
   getFullPath,
 } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
-import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { _RefFirestore } from "vuefire";
 import { usePathStore } from "../path";
@@ -14,9 +13,11 @@ import { useSearchStore } from "../search";
 import { RootKey } from "../settings/default";
 import { useShortDialogStore } from "../short-dialog";
 import { useItemStorageStore } from "./firebase/storage";
-import treeStores from "./tree-manager";
+import { ItemStoreId, getAllItemStores } from "./manager";
 
-export function createItemStore(this: ItemStoreParams) {
+export type ItemStoreBindings = { id: ItemStoreId; path?: string };
+
+export function createItemStore(this: ItemStoreBindings) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
   const { api: firestoreApi } = useItemsFirestoreStore();
@@ -107,7 +108,7 @@ export function createItemStore(this: ItemStoreParams) {
     if ((_path as RootKey) != "bin" && (await areItemsInvalid(items, _path)))
       return;
     const folders = items.filter((i) => i.isFolder);
-    const msg = "You can't move a folder into its own subfolder.";
+    const msg = "You can't move a folder into itself or its own subfolder.";
     if (folders.some((f) => _path.startsWith(getFullPath(f))))
       return dialogStore.showError(msg);
     items = items.filter(
@@ -177,26 +178,3 @@ export function createItemStore(this: ItemStoreParams) {
     $reset,
   };
 }
-
-export const itemStoreIds = ["items", "search-items", "navbar-items"] as const;
-
-// https://stackoverflow.com/questions/74467392/autocomplete-in-typescript-of-literal-type-and-string
-type ItemStoreId = (typeof itemStoreIds)[number] | (string & {}); // nosonar
-type ItemStoreParams = { id: ItemStoreId; path?: string };
-
-export const defineItemStore = ({ id, path }: ItemStoreParams) =>
-  defineStore(id, createItemStore.bind({ id, path }));
-
-export type ItemStore = ReturnType<ReturnType<typeof defineItemStore>>;
-
-export const storeDefs = itemStoreIds.map((id) => defineItemStore({ id }));
-export const useItemStore = storeDefs[0];
-export const useSearchItemStore = storeDefs[1];
-export const useNavbarItemStore = storeDefs[2];
-
-export const focusedItemStore = useItemStore();
-
-const getAllItemStores = () =>
-  Object.values(treeStores)
-    .concat(storeDefs)
-    .map((s) => s());

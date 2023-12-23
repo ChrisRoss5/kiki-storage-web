@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemStore } from "@/stores/items";
+import { useItemStore } from "@/stores/items/manager";
 
 const itemStore = useItemStore();
 

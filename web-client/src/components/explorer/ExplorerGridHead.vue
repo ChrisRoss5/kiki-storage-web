@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useContextMenuStore } from "@/stores/context-menu";
-import { ItemStore } from "@/stores/items";
+import { ItemStore } from "@/stores/items/manager";
 import { useSettingsStore } from "@/stores/settings";
 import { columnNames } from "@/stores/settings/default";
 import { computed, inject, ref } from "vue";
