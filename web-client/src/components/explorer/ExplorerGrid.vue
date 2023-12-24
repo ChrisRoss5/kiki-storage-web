@@ -102,7 +102,12 @@ const handleDropOnBody = (e: DragEvent) => {
   Surprisingly, the lag is less pronounced when items are loaded for the first time
   (one by one). Generally, CSS Grid performance is still terrible in 2023,
   so Flex is used instead. This adjustment preserves the Grid's visual style,
-  but it introduces extra conditional classes that require attention. */
+  but it introduces extra conditional classes that require attention.
+
+  Extraneous non-props attributes cannot be passed to this component because they
+  cannot be automatically inherited because component renders fragment root nodes.
+  Despite TransitionGroup containing a single fixed child, it remains a fragment,
+  adhering to the specified rendering behavior. Therefore, a wrapper is used. */
 </script>
 
 <template>
@@ -119,6 +124,7 @@ const handleDropOnBody = (e: DragEvent) => {
         '!overflow-hidden': isFileTree,
       }"
       :style="isFileTree ? undefined : gridStyle"
+      :key="0"
     >
       <LoaderIcon v-if="isFileTree" :loading="itemStore.itemsPending" />
       <ExplorerGridHead

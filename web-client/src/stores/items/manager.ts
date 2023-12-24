@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ItemStoreBindings, createItemStore } from ".";
+import { Ref, ref } from "vue";
 
 const defineItemStore = ({ id, path }: ItemStoreBindings) =>
   defineStore(id, createItemStore.bind({ id, path }));
@@ -24,16 +25,15 @@ export const getTreeStore = (path: string) => {
   return newStore;
 };
 
+export const focusedItemStoreId = ref<ItemStoreId>("");
+
 export const getAllItemStores = () =>
   Object.values(treeStoreDefs)
     .concat(storeDefs)
     .map((s) => s());
 
 export const getFocusedItemStore = () =>
-  getAllItemStores().find((s) => s.isFocused) ?? useItemStore();
-
-export const removeFocusFromAllItemStores = () =>
-  getAllItemStores().forEach((s) => (s.isFocused = false));
+  getAllItemStores().find((s) => s.$id == focusedItemStoreId.value) ?? useItemStore();
 
 export const getTopmostOpenItemStore = () =>
   [useSearchItemStore(), useNavbarItemStore()].find((s) => s.isOpen);

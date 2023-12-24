@@ -3,7 +3,7 @@ import CloseExplorer from "@/components/explorer/CloseExplorer.vue";
 import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
 import LoaderIcon from "@/components/explorer/LoaderIcon.vue";
-import { ItemStore } from "@/stores/items/manager";
+import { ItemStore, focusedItemStoreId } from "@/stores/items/manager";
 import { provide } from "vue";
 
 defineProps<{ itemStore: ItemStore }>();
@@ -14,13 +14,13 @@ provide("isThemeLight", true);
 <template>
   <div
     id="navbar-explorer"
-    class="absolute left-0 top-full z-10 origin-top-left scale-75 cursor-default rounded-box bg-base-100 px-4"
-    :class="{ 'focused-store': itemStore.isFocused }"
-    @mousedown="itemStore.isFocused = itemStore.isOpen = true"
+    class="absolute left-0 top-full z-10 max-h-[50vh] max-w-[70vw] origin-top-left scale-75 cursor-default overflow-auto rounded-box bg-base-100 px-4 shadow-lg transition-shadow"
+    :class="{ 'focused-store': focusedItemStoreId == itemStore.$id }"
+    @mousedown.stop="focusedItemStoreId = itemStore.$id"
   >
     <LoaderIcon :loading="itemStore.itemsPending" />
     <CloseExplorer @click="itemStore.isOpen = false" />
-    <ExplorerGrid :item-store="itemStore" class="max-h-[50vh] max-w-[70vw]" />
+    <ExplorerGrid :item-store="itemStore" />
     <ExplorerFooter :item-store="itemStore" class="mt-3" />
   </div>
 </template>

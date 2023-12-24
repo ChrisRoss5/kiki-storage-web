@@ -114,7 +114,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     @click.stop.prevent="handleItemSelect(item, $event)"
     @dblclick.stop.prevent="handleItemOpen(item)"
     @keydown.space.stop.prevent="handleItemSelect(item, $event)"
-    @keydown.enter.stop.prevent="handleItemOpen(item)"
+    @keyup.enter.stop.prevent="handleItemOpen(item)"
     @contextmenu.stop.prevent="handleItemContextMenu(item, $event)"
   >
     <ExpandButton

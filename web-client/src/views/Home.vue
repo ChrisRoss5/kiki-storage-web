@@ -4,10 +4,11 @@ import ExplorerTabs from "@/components/explorer/ExplorerTabs.vue";
 import Header from "@/components/header/Header.vue";
 import { useContextMenuStore } from "@/stores/context-menu";
 import {
-getFocusedItemStore,
-getTopmostOpenItemStore,
-treeStoreDefs,
-useSearchItemStore,
+  focusedItemStoreId,
+  getFocusedItemStore,
+  getTopmostOpenItemStore,
+  treeStoreDefs,
+  useSearchItemStore,
 } from "@/stores/items/manager";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
@@ -41,7 +42,10 @@ const handleKeydown = (e: KeyboardEvent) => {
   const focusedItemStore = getFocusedItemStore();
   if (e.key == "Escape") {
     const openItemStore = getTopmostOpenItemStore();
-    if (openItemStore) openItemStore.isOpen = openItemStore.isFocused = false;
+    if (openItemStore) {
+      openItemStore.isOpen = false;
+      focusedItemStoreId.value = getTopmostOpenItemStore()?.$id ?? "";
+    }
     focusedItemStore.deselectAll();
   } else if (e.key == "Delete" && focusedItemStore.selectedItems.length) {
     focusedItemStore.deleteItems();
@@ -82,12 +86,14 @@ const handleClickLeft = (e: MouseEvent) => {
   const focusedItemStore = getFocusedItemStore();
   focusedItemStore.deselectAll();
 };
+const handleMouseDown = () => {
+  focusedItemStoreId.value = "items";
+};
 const handleMouseDownCapture = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   const focusedItemStore = getFocusedItemStore();
   const isInRenameContainer = !!target.closest("#rename-container");
   if (!isInRenameContainer) focusedItemStore.stopRenaming();
-  focusedItemStore.isFocused = false;
   if (!searchItemStore.items.length && !target.closest("#search"))
     searchItemStore.isOpen = false;
   contextMenuStore.hide();
@@ -99,6 +105,7 @@ const handleMouseDownCapture = (e: MouseEvent) => {
     v-if="settingsStore.dbSettingsReady"
     class="flex flex-col"
     @click.left.capture="handleClickLeft"
+    @mousedown="handleMouseDown"
     @mousedown.capture="handleMouseDownCapture"
     @contextmenu="contextMenuStore.hide()"
   >

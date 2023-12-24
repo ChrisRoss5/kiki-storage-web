@@ -7,6 +7,20 @@ export function useCleanup() {
   const tabsStore = useTabsStore();
   const settingsStore = useSettingsStore();
 
+  const onRenameComplete = (oldFullPath: string, newFullPath: string) => {
+    for (const tab of tabsStore.tabs) {
+      if (tab.path.startsWith(oldFullPath))
+        tab.path = tab.path.replace(oldFullPath, newFullPath);
+      tab.expandedPaths =
+        tab.expandedPaths?.map((p) => {
+          return p.startsWith(oldFullPath) ? p.replace(oldFullPath, newFullPath) : p;
+        }) ?? [];
+    }
+
+    deleteStores([oldFullPath]);
+    settingsStore.setSetting("tabs", tabsStore.tabs);
+  }
+
   const onMoveComplete = (items: Item[], newPath: string) => {
     const folders = items.filter((i) => i.isFolder);
 
@@ -14,12 +28,12 @@ export function useCleanup() {
       for (const folder of folders) {
         const fullPath = getFullPath(folder);
         const newFullPath = `${newPath ? `${newPath}/` : ""}${folder.name}`;
-        const regexp = new RegExp(`^${fullPath}`);
+
         if (tab.path.startsWith(fullPath))
-          tab.path = tab.path.replace(regexp, newFullPath);
+          tab.path = tab.path.replace(fullPath, newFullPath);
         tab.expandedPaths =
           tab.expandedPaths?.map((p) => {
-            return p.startsWith(fullPath) ? p.replace(regexp, newFullPath) : p;
+            return p.startsWith(fullPath) ? p.replace(fullPath, newFullPath) : p;
           }) ?? [];
       }
     }
@@ -49,5 +63,5 @@ export function useCleanup() {
         delete treeStoreDefs[path];
   };
 
-  return { onMoveComplete, onDeleteComplete };
+  return { onRenameComplete, onMoveComplete, onDeleteComplete };
 }

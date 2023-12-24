@@ -130,6 +130,20 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         collection(db, dbPath.value).withConverter(firestoreItemConverter),
       );
     },
+
+    renameItem(item: Item) {
+      /* Todo: move to backend */
+      const promises: Promise<void>[] = [];
+      const oldFullPath = getFullPath(item);
+      const newFullPath = `${item.path ? `${item.path}/` : ""}${item.newName}`;
+      const updateData = { name: item.newName };
+      promises.push(updateDoc(doc(db, dbPath.value, item.id!), updateData));
+      if (item.isFolder) promises.push(updatePaths(oldFullPath, newFullPath));
+      updateParentDateModified(item);
+      Promise.allSettled(promises).then(() => {
+        cleanup.onRenameComplete(oldFullPath, newFullPath);
+      });
+    },
     moveItems(items: Item[], newPath: string) {
       /* Todo: move to backend */
       const promises: Promise<void>[] = [];
@@ -144,19 +158,6 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateParentDateModified(...items);
       Promise.allSettled(promises).then(() => {
         cleanup.onMoveComplete(items, newPath);
-      });
-    },
-    renameItem(item: Item) {
-      /* Todo: move to backend */
-      const promises: Promise<void>[] = [];
-      const newFullPath = `${item.path ? `${item.path}/` : ""}${item.newName}`;
-      const updateData = { name: item.newName };
-      promises.push(updateDoc(doc(db, dbPath.value, item.id!), updateData));
-      if (item.isFolder)
-        promises.push(updatePaths(getFullPath(item), newFullPath));
-      updateParentDateModified(item);
-      Promise.allSettled(promises).then(() => {
-        cleanup.onMoveComplete([item], newFullPath);
       });
     },
     deleteItemsPermanently(items: Item[]) {
@@ -196,14 +197,12 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
     const items = await api.getItems(oldPath, true, { once: true }).promise
       .value;
     const promises: Promise<void>[] = [];
-    for (const nestedItem of items) {
-      const regexp = new RegExp(`^${oldPath}`);
+    for (const nestedItem of items)
       promises.push(
         updateDoc(doc(db, dbPath.value, nestedItem.id!), {
-          path: nestedItem.path.replace(regexp, newPath),
+          path: nestedItem.path.replace(oldPath, newPath),
         }),
       );
-    }
     await Promise.allSettled(promises);
   }
 

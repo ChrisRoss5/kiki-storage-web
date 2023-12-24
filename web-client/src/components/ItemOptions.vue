@@ -103,4 +103,3 @@ const handleClick = (onClickHandler: () => void) => {
     </div>
   </Transition>
 </template>
-@/stores/items/firebase/storage

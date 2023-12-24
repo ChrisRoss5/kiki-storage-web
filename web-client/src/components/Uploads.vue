@@ -172,4 +172,3 @@ const totalUploaded = computed(() =>
   transform: translate(-50%, 0.5rem);
 }
 </style>
-@/stores/items/firebase/storage

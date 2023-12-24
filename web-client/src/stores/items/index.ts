@@ -28,9 +28,8 @@ export function createItemStore(this: ItemStoreBindings) {
   const items = ref<Item[]>([]);
 
   const newFolderName = ref("");
-  const isFocused = ref(false);
-  const isOpen = ref(false);
-  const path = ref(this.path ?? ""); // Search & NavbarExplorer
+  const isOpen = ref(false); // Search & NavbarExplorer
+  const path = ref(this.path ?? "");
 
   const itemsPending = computed(() => !!dbItems.value?.pending);
   const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
@@ -163,7 +162,6 @@ export function createItemStore(this: ItemStoreBindings) {
     itemsPending,
     selectedItems,
     newFolderName,
-    isFocused,
     isOpen,
     path,
     root,

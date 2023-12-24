@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { useItemStore, useNavbarItemStore } from "@/stores/items/manager";
+import {
+  focusedItemStoreId,
+  useItemStore,
+  useNavbarItemStore,
+} from "@/stores/items/manager";
 import { getPathName, usePathStore } from "@/stores/path";
 import { RootKey, roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
@@ -46,7 +50,8 @@ const openNavbarExplorer = (path: string, keepOpen?: boolean) => {
     return;
   }
   explorerPath.value = path;
-  navbarItemStore.isOpen = navbarItemStore.isFocused = true;
+  navbarItemStore.isOpen = true;
+  focusedItemStoreId.value = navbarItemStore.$id;
   if (!navbarItemStore.isOpen) return;
   navbarItemStore.path = path;
 };

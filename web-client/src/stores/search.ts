@@ -38,7 +38,10 @@ export const useSearchStore = defineStore("search", () => {
   );
 
   watch(filters, queryItems);
-  watch(() => pathStore.currentRoot, queryItems);
+  watch(
+    () => pathStore.currentRoot,
+    () => searchItemStore.isOpen && queryItems(),
+  );
 
   async function queryItems() {
     searchItemStore.isOpen = areFiltersActive.value;
