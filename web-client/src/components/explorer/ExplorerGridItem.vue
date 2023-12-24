@@ -7,6 +7,7 @@ import { useShortDialogStore } from "@/stores/short-dialog";
 import { formatDate, formatSize } from "@/utils/format";
 import { getFullPath } from "@/utils/item";
 import { Ref, inject } from "vue";
+import { useCurrentUser } from "vuefire";
 import ExplorerGridItemName from "./ExplorerGridItemName.vue";
 import ExpandButton from "./filetree/ExpandButton.vue";
 import FolderOptions from "./filetree/FolderOptions.vue";
@@ -33,6 +34,7 @@ const pathStore = usePathStore();
 const contextMenuStore = useContextMenuStore();
 const dialogStore = useShortDialogStore();
 const selectionRectStore = useSelectionRectStore();
+const user = useCurrentUser();
 
 const handleItemContextMenu = (item: Item, e: MouseEvent) => {
   if (!item.isSelected) handleItemSelect(item, e);
@@ -71,13 +73,13 @@ const handleDragStart = (item: Item, e: DragEvent) => {
   if (selectionRectStore.isActive || item.isRenaming || !item.isSelected)
     return e.preventDefault();
   else selectionRectStore.isLeftMouseDown = false;
-  const count = props.itemStore.selectedItems.length;
-  const dragData = JSON.stringify(props.itemStore.selectedItems);
-  if (count > 1) {
-    ghostDragDiv.value!.textContent = `moving ${count} items`;
+  const { selectedItems: items } = props.itemStore;
+  const dragData: ItemsDragData = { items, uid: user.value?.uid };
+  if (items.length > 1) {
+    ghostDragDiv.value!.textContent = `moving ${items.length} items`;
     e.dataTransfer?.setDragImage(ghostDragDiv.value!, 0, 0);
   }
-  e.dataTransfer?.setData("items", dragData);
+  e.dataTransfer?.setData("ItemsDragData", JSON.stringify(dragData));
   if (!isSearch) document.body.setAttribute("dragging-items", props.item.path);
 };
 const handleDragStop = () => {

@@ -1,14 +1,6 @@
 import { getActivePinia } from "pinia";
 import { treeStoreDefs } from "./items/manager";
 
-setTimeout(() => {
-  console.log("reset.ts", treeStoreDefs);
-  for (const path in treeStoreDefs) {
-    console.log("reset.ts", path, treeStoreDefs[path]().$state);
-
-  }
-}, 3000);
-
 export default () => {
   // https://pinia.vuejs.org/api/interfaces/pinia._StoreWithState.html#-reset
   // https://github.com/vuejs/pinia/discussions/1859

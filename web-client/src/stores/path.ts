@@ -62,8 +62,6 @@ export const usePathStore = defineStore("path", () => {
       tabsStore.updateActiveTab({ path: newPath });
       tabsStore.switchTab(tabsStore.activeTab);
       IS_STARTUP = false;
-      console.log("path store: path changed to", newPath);
-      
     },
     { immediate: true },
   );

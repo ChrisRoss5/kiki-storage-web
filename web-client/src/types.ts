@@ -14,6 +14,10 @@ interface Item extends ItemCore {
   newName?: string;
   storageFile?: any; // No type for ReturnType<typeof useStorageFile>
 }
+interface ItemsDragData {
+  items: Item[];
+  uid?: string;
+}
 interface SearchFilters {
   query: string;
   minSize: number;

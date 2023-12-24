@@ -36,10 +36,11 @@ provide("isThemeLight", isThemeLight);
       <FileTreeResizer :file-tree-el="fileTreeComp?.fileTreeDiv ?? null" />
       <div class="relative ml-3 mt-3 flex min-w-0 flex-1 flex-col">
         <LoaderIcon :loading="itemStore.itemsPending" />
-        <template v-if="itemStore.items.length">
+        <!-- cannot use <template> wrapper because of <TransitionGroup> root  -->
+        <div class="flex flex-1 flex-col" v-if="itemStore.items.length">
           <ExplorerGrid :item-store="itemStore" />
           <ExplorerFooter :item-store="itemStore" />
-        </template>
+        </div>
         <div
           v-else-if="!itemStore.itemsPending"
           class="flex-center expl-body mb-3 flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content"

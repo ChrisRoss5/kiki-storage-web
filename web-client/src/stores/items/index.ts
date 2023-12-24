@@ -7,7 +7,7 @@ import {
 } from "@/utils/item";
 import { clearDragOverStyle } from "@/utils/style";
 import { computed, ref, watch } from "vue";
-import { _RefFirestore } from "vuefire";
+import { _RefFirestore, useCurrentUser } from "vuefire";
 import { usePathStore } from "../path";
 import { useSearchStore } from "../search";
 import { RootKey } from "../settings/default";
@@ -23,6 +23,7 @@ export function createItemStore(this: ItemStoreBindings) {
   const { api: firestoreApi } = useItemsFirestoreStore();
   const { api: storageApi } = useItemStorageStore();
   const searchStore = useSearchStore();
+  const user = useCurrentUser();
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
@@ -39,11 +40,7 @@ export function createItemStore(this: ItemStoreBindings) {
     items.value = [];
     newFolderName.value = "";
     isOpen.value = false;
-    path.value = "";
-    /* w1();
-    w2();
-    w3(); */
-    console.log("itemStore reset", this.id, this.path); //todo: remove
+    path.value = this.path ?? "";
   };
 
   const setDbItems = (newItems: _RefFirestore<ItemCore[]>) => {
@@ -51,8 +48,6 @@ export function createItemStore(this: ItemStoreBindings) {
     // depending on the usage (dbItems.value?.stop();)
     // https://cloud.google.com/firestore/pricing
     // https://firebase.google.com/docs/firestore/quotas#writes_and_transactions
-    console.log("setDbItems", this.id, newItems); //todo: remove
-
     dbItems.value = newItems;
   };
   const setItems = () => {
@@ -75,24 +70,21 @@ export function createItemStore(this: ItemStoreBindings) {
       .map((newDbItem) => {
         let prevItem: Item | undefined;
         for (const store of _stores) {
-          prevItem = store.items.find((item) => item.id == newDbItem.id);
+          prevItem = store.items.find((i) => i.id == newDbItem.id);
           if (prevItem) break;
         }
         return Object.assign(prevItem ?? { ...newDbItem }, newDbItem);
       });
   };
 
-  console.log("createItemStore", this.id, this.path); //todo: remove
-
-
   // VUEFIRE BUG: pending is false when it should be true!
-  const w1 = watch(itemsPending, setItems); // BUGFIX!
-  const w2 = watch(() => dbItems.value?.data, setItems, { deep: true });
-  const w3= watch(
-      path,
-      (newPath) => newPath && setDbItems(firestoreApi.getItems(newPath)), // warn: onServerPrefetch
-      { immediate: true },
-    );
+  watch(itemsPending, setItems); // BUGFIX!
+  watch(() => dbItems.value?.data, setItems, { deep: true });
+  watch(
+    path,
+    (newPath) => newPath && setDbItems(firestoreApi.getItems(newPath)), // warn: onServerPrefetch
+    { immediate: true },
+  );
 
   const areItemsInvalid = async (newItems: Item[], _path: string) => {
     const scopedItems =
@@ -109,9 +101,17 @@ export function createItemStore(this: ItemStoreBindings) {
   const handleDrop = (e: DragEvent, _path?: string) => {
     _path ??= path.value;
     clearDragOverStyle(e);
-    const itemsData = e.dataTransfer?.getData("items");
-    if (itemsData) handleMove(JSON.parse(itemsData), _path);
-    else if (e.dataTransfer) createFiles(e.dataTransfer.files, _path);
+    const itemsDragDataStr = e.dataTransfer?.getData("ItemsDragData");
+    if (itemsDragDataStr) {
+      try {
+        const { items, uid } = JSON.parse(itemsDragDataStr) as ItemsDragData;
+        if (uid != user.value?.uid)
+          return dialogStore.showError("You can't move someone else's items.");
+        handleMove(items, _path);
+      } catch {
+        location.reload(); // Can only happen if user is unauthorized after too long
+      }
+    } else if (e.dataTransfer) createFiles(e.dataTransfer.files, _path);
   };
   const handleMove = async (items: Item[], _path: string) => {
     if ((_path as RootKey) != "bin" && (await areItemsInvalid(items, _path)))
