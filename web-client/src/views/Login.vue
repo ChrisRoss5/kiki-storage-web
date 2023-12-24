@@ -45,28 +45,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="login" class="flex h-screen flex-col justify-center">
-    <Logo :is-login="true" class="mb-5 flex-col gap-3 text-black" />
-    <div id="firebaseui-auth-container" class="overflow-auto"></div>
+  <div id="login" class="grid items-center overflow-auto">
+    <div class="backdrop-blur-sm border-y-2 border-base-300 py-5">
+      <Logo :is-login="true" class="flex-col gap-3 text-black" />
+      <div id="firebaseui-auth-container" class="pt-5"></div>
+    </div>
   </div>
 </template>
-
-<style>
-#login {
-  background:
-    radial-gradient(#fff 20%, transparent),
-    conic-gradient(
-        #fff,
-        #8f9cac,
-        #02bd7e,
-        #db4437,
-        #720e9e,
-        #2f2f2f,
-        #333333,
-        #3b5998,
-        #55acee,
-        #fff
-      )
-      no-repeat;
-}
-</style>

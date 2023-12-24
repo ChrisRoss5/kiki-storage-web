@@ -26,7 +26,6 @@ export function createItemStore(this: ItemStoreBindings) {
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
-
   const newFolderName = ref("");
   const isOpen = ref(false); // Search & NavbarExplorer
   const path = ref(this.path ?? "");
@@ -38,14 +37,22 @@ export function createItemStore(this: ItemStoreBindings) {
   const $reset = () => {
     dbItems.value = undefined;
     items.value = [];
+    newFolderName.value = "";
+    isOpen.value = false;
+    path.value = "";
+    /* w1();
+    w2();
+    w3(); */
+    console.log("itemStore reset", this.id, this.path); //todo: remove
   };
 
-  const stopDbItems = () => dbItems.value?.stop(); // unused
   const setDbItems = (newItems: _RefFirestore<ItemCore[]>) => {
     // All paths are being watched, but in the future it may be necessary to stop watchers
     // depending on the usage (dbItems.value?.stop();)
     // https://cloud.google.com/firestore/pricing
     // https://firebase.google.com/docs/firestore/quotas#writes_and_transactions
+    console.log("setDbItems", this.id, newItems); //todo: remove
+
     dbItems.value = newItems;
   };
   const setItems = () => {
@@ -75,14 +82,17 @@ export function createItemStore(this: ItemStoreBindings) {
       });
   };
 
+  console.log("createItemStore", this.id, this.path); //todo: remove
+
+
   // VUEFIRE BUG: pending is false when it should be true!
-  watch(itemsPending, setItems); // BUGFIX!
-  watch(() => dbItems.value?.data, setItems, { deep: true });
-  watch(
-    path,
-    (newPath) => newPath && setDbItems(firestoreApi.getItems(newPath)), // warn: onServerPrefetch
-    { immediate: true },
-  );
+  const w1 = watch(itemsPending, setItems); // BUGFIX!
+  const w2 = watch(() => dbItems.value?.data, setItems, { deep: true });
+  const w3= watch(
+      path,
+      (newPath) => newPath && setDbItems(firestoreApi.getItems(newPath)), // warn: onServerPrefetch
+      { immediate: true },
+    );
 
   const areItemsInvalid = async (newItems: Item[], _path: string) => {
     const scopedItems =
@@ -155,9 +165,7 @@ export function createItemStore(this: ItemStoreBindings) {
   const deselectAll = () => items.value.forEach((i) => (i.isSelected = false));
 
   return {
-    dbItems,
     setDbItems,
-    stopDbItems,
     items,
     itemsPending,
     selectedItems,

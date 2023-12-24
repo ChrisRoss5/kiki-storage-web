@@ -55,6 +55,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       PATH_ITEM_COLLECTIONS[path].stop();
       delete PATH_ITEM_COLLECTIONS[path];
     }
+    console.log("items-firestore reset", PATH_ITEM_COLLECTIONS);
   };
 
   const api = {
@@ -86,6 +87,8 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       nestedOnly?: boolean,
       options?: UseCollectionOptions,
     ) {
+      console.log("getItems", path, nestedOnly, options);
+      
       if (path in PATH_ITEM_COLLECTIONS && !nestedOnly)
         return PATH_ITEM_COLLECTIONS[path];
       const coll = useCollection(

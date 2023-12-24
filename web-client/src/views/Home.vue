@@ -102,27 +102,40 @@ const handleMouseDownCapture = (e: MouseEvent) => {
 
 <template>
   <div
-    v-if="settingsStore.dbSettingsReady"
+    id="home"
     class="flex flex-col"
+    :class="{ 'not-ready': !settingsStore.dbSettingsReady }"
     @click.left.capture="handleClickLeft"
     @mousedown="handleMouseDown"
     @mousedown.capture="handleMouseDownCapture"
     @contextmenu="contextMenuStore.hide()"
   >
-    <Header />
-    <ExplorerTabs />
-    <Explorer />
-    <!--     <div class="flex flex-col min-h-0">
+    <Header id="header" />
+    <div id="window" class="flex min-h-0 flex-1 flex-col">
       <ExplorerTabs />
       <Explorer />
     </div>
-    <div class="flex flex-col min-h-0">
-      <ExplorerTabs />
-      <Explorer />
-    </div>
-    <div class="flex flex-col min-h-0">
-      <ExplorerTabs />
-      <Explorer />
-    </div> -->
   </div>
 </template>
+
+<style>
+#home {
+  perspective: 80vw;
+  &.not-ready {
+    & > #header {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    & > #window {
+      box-shadow: 0 0 50vw -5rem oklch(var(--bc));
+      transform: rotate3d(0, 1, 0, 30deg) scale(0.7) translate(10vw, -5rem);
+      filter: grayscale(1);
+    }
+  }
+}
+#header,
+#window {
+  transition-property: transform, opacity, filter;
+  transition-duration: 1s;
+}
+</style>

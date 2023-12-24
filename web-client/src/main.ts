@@ -10,7 +10,6 @@ import App from "./App.vue";
 import { firebaseApp } from "./firebase";
 import router from "./router";
 
-const pinia = createPinia();
 const app = createApp(App);
 
 export const fileIconVectors = import.meta.glob(
@@ -23,7 +22,7 @@ app
     firebaseApp,
     modules: [VueFireAuth()],
   })
-  .use(pinia)
+  .use(createPinia())
   .use(router)
   .use(VWave, {})
   .use(Slicksort)

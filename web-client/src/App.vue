@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted, provide, ref, watch } from "vue";
+import { provide, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useCurrentUser } from "vuefire";
 import ContextMenu from "./components/ContextMenu.vue";
-import ShortDialog from "./components/ShortDialog.vue";
 import Notification from "./components/Notification.vue";
+import ShortDialog from "./components/ShortDialog.vue";
 import resetStores from "./stores/reset";
+import Home from "./views/Home.vue";
+import Login from "./views/Login.vue";
 
 const ghostDragDiv = ref<HTMLDivElement | null>();
 provide("ghostDragDiv", ghostDragDiv);
@@ -13,11 +15,6 @@ provide("ghostDragDiv", ghostDragDiv);
 const user = useCurrentUser();
 const router = useRouter();
 const route = useRoute();
-
-const startupTranstion = ref(false);
-
-// I hate to do this, but there's no easy alternative
-onMounted(() => setTimeout(() => (startupTranstion.value = true), 1000));
 
 watch(user, async (currentUser) => {
   if (!currentUser) {
@@ -31,17 +28,13 @@ watch(user, async (currentUser) => {
 </script>
 
 <template>
-  <RouterView v-slot="{ Component, route }">
-    <Transition
-      :name="startupTranstion ? route.meta.transition : ''"
-      :css="startupTranstion"
-    >
-      <component
-        :is="Component"
-        class="duration-500 z-10 absolute bottom-0 left-0 right-0 top-0 transition-[transform,opacity]"
-      />
-    </Transition>
-  </RouterView>
+  <Home class="h-full" />
+  <Transition name="fade">
+    <Login
+      v-if="$route.name == 'login'"
+      class="absolute inset-0 z-10"
+    />
+  </Transition>
   <ShortDialog />
   <ContextMenu />
   <Notification />
@@ -53,20 +46,7 @@ watch(user, async (currentUser) => {
 
 <style>
 #app {
+  height: 100vh;
   overflow: hidden;
-}
-.scale-out-enter-from,
-.scale-out-leave-to,
-.scale-in-enter-from,
-.scale-in-leave-to {
-  opacity: 0;
-}
-.scale-out-enter-from,
-.scale-in-leave-to {
-  transform: scale(1.1);
-}
-.scale-out-leave-to,
-.scale-in-enter-from {
-  transform: scale(0.9);
 }
 </style>

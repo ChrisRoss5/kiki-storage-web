@@ -8,17 +8,18 @@ const routes = [
   {
     path: "/login",
     component: Login,
-    meta: { transition: "scale-out", requiresAuth: false },
+    meta: {  requiresAuth: false },
+    name: "login",
   },
   {
     path: "/",
     redirect: `/${defaultRoot}`,
-    meta: { transition: "scale-in", requiresAuth: true },
+    meta: {  requiresAuth: true },
   },
   {
     path: "/:pathMatch(.*)*",
     component: Home,
-    meta: { transition: "scale-in", requiresAuth: true },
+    meta: {  requiresAuth: true },
   },
 ];
 
