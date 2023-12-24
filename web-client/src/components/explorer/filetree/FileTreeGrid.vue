@@ -29,7 +29,7 @@ const handleLineClick = () => {
       @drop.stop.prevent="null"
     >
       <div
-        class="mx-auto rounded-box transition-[width,background-color]"
+        class="mx-auto rounded-box"
         :class="{
           'bg-accent w-1': focusedItemStoreId != itemStore.$id,
           'bg-secondary w-2': focusedItemStoreId == itemStore.$id,

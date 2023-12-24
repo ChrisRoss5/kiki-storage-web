@@ -31,7 +31,7 @@ const totalUploaded = computed(() =>
     <div
       id="uploads"
       v-if="items.length"
-      class="group absolute bottom-20 left-1/2 z-10 flex w-full -translate-x-1/2 flex-col rounded-box bg-base-100 shadow-lg sm:w-[40rem]"
+      class="group absolute bottom-20 left-1/2 z-20 flex w-full -translate-x-1/2 flex-col rounded-box bg-base-100 shadow-lg sm:w-[40rem]"
     >
       <div
         class="max-h-0 overflow-y-scroll p-3 py-0 transition-[max-height,padding] group-hover:max-h-[25rem] group-hover:py-3"

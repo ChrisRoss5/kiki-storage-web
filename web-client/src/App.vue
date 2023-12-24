@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useCurrentUser } from "vuefire";
 import ContextMenu from "./components/ContextMenu.vue";
 import ShortDialog from "./components/ShortDialog.vue";
+import Notification from "./components/Notification.vue";
 import resetStores from "./stores/reset";
 
 const ghostDragDiv = ref<HTMLDivElement | null>();
@@ -43,6 +44,7 @@ watch(user, async (currentUser) => {
   </RouterView>
   <ShortDialog />
   <ContextMenu />
+  <Notification />
   <div
     ref="ghostDragDiv"
     class="absolute -top-full rounded-box bg-base-300 p-3 pl-7"

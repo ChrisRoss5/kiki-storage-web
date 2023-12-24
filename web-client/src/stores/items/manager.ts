@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
+import { ref } from "vue";
 import { ItemStoreBindings, createItemStore } from ".";
-import { Ref, ref } from "vue";
 
 const defineItemStore = ({ id, path }: ItemStoreBindings) =>
   defineStore(id, createItemStore.bind({ id, path }));
@@ -33,7 +33,8 @@ export const getAllItemStores = () =>
     .map((s) => s());
 
 export const getFocusedItemStore = () =>
-  getAllItemStores().find((s) => s.$id == focusedItemStoreId.value) ?? useItemStore();
+  getAllItemStores().find((s) => s.$id == focusedItemStoreId.value) ??
+  useItemStore();
 
 export const getTopmostOpenItemStore = () =>
   [useSearchItemStore(), useNavbarItemStore()].find((s) => s.isOpen);

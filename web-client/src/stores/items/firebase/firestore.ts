@@ -26,6 +26,7 @@ import {
 } from "vuefire";
 import { useCleanup } from "../cleanup";
 import { useItemStorageStore } from "./storage";
+import { useNotificationStore } from "@/stores/notification";
 
 export interface DbItem {
   id?: string;
@@ -43,9 +44,10 @@ export interface DbItem {
 export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const user = useCurrentUser();
   const db = useFirestore();
+  const dbPath = computed(() => `app/drive/${user.value?.uid}`);
   const cleanup = useCleanup();
   const { api: storageApi } = useItemStorageStore();
-  const dbPath = computed(() => `app/drive/${user.value?.uid}`);
+  const notificationStore = useNotificationStore();
   const PATH_ITEM_COLLECTIONS: Record<string, _RefFirestore<ItemCore[]>> = {};
 
   const $reset = () => {
@@ -130,9 +132,9 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
         collection(db, dbPath.value).withConverter(firestoreItemConverter),
       );
     },
-
     renameItem(item: Item) {
       /* Todo: move to backend */
+      notificationStore.message = "Renaming item(s)...";
       const promises: Promise<void>[] = [];
       const oldFullPath = getFullPath(item);
       const newFullPath = `${item.path ? `${item.path}/` : ""}${item.newName}`;
@@ -142,10 +144,12 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateParentDateModified(item);
       Promise.allSettled(promises).then(() => {
         cleanup.onRenameComplete(oldFullPath, newFullPath);
+        notificationStore.message = "";
       });
     },
     moveItems(items: Item[], newPath: string) {
       /* Todo: move to backend */
+      notificationStore.message = "Moving item(s)...";
       const promises: Promise<void>[] = [];
       for (const item of items) {
         promises.push(
@@ -158,10 +162,12 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateParentDateModified(...items);
       Promise.allSettled(promises).then(() => {
         cleanup.onMoveComplete(items, newPath);
+        notificationStore.message = "";
       });
     },
     deleteItemsPermanently(items: Item[]) {
       /* Todo: move to backend */
+      notificationStore.message = "Deleting item(s)...";
       const promises: Promise<void>[] = [];
       for (const item of items) {
         promises.push(this.deleteItemPermanently(item));
@@ -177,6 +183,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateParentDateModified(...items);
       Promise.allSettled(promises).then(() => {
         cleanup.onDeleteComplete(items);
+        notificationStore.message = "";
       });
     },
     async deleteItemPermanently(item: Item) {
