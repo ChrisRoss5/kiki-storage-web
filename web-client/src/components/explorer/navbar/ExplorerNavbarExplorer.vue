@@ -14,7 +14,7 @@ provide("isThemeLight", true);
 <template>
   <div
     id="navbar-explorer"
-    class="absolute left-0 top-full z-10 max-h-[50vh] max-w-[70vw] origin-top-left scale-75 cursor-default overflow-auto rounded-box bg-base-100 px-4 shadow-lg transition-shadow"
+    class="absolute left-0 top-full z-10 flex max-h-[50vh] max-w-[80vw] origin-top-left scale-75 cursor-default flex-col overflow-auto rounded-box bg-base-100 px-4 shadow-lg transition-shadow"
     :class="{ 'focused-store': focusedItemStoreId == itemStore.$id }"
     @mousedown.stop="focusedItemStoreId = itemStore.$id"
   >

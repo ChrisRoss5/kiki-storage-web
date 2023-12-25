@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { v4 as uuidv4 } from "uuid";
 import { computed } from "vue";
 import { useSettingsStore } from "./settings";
 import { defaultRoot } from "./settings/default";
@@ -20,7 +21,7 @@ export const useTabsStore = defineStore("tabs", () => {
     lastSelectedTabIdBeforeCreate = activeTab.value.id;
     const newTab: Tab = {
       path: path ?? defaultRoot,
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       expandedPaths: [],
     };
     settingsStore.updateSettings({

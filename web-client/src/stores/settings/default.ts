@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export const roots = {
   drive: { name: "Drive", icon: "cloud" },
   shared: { name: "Shared", icon: "group" },
@@ -8,7 +10,7 @@ export type RootKey = keyof typeof roots;
 
 export const defaultRoot: RootKey = "drive";
 
-const defaultActiveTab: Tab = { path: defaultRoot, id: crypto.randomUUID() };
+const defaultActiveTab: Tab = { path: defaultRoot, id: uuidv4() };
 
 export default (): Settings => ({
   theme: "light",

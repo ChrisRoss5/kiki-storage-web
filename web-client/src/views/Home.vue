@@ -111,7 +111,7 @@ const handleMouseDownCapture = (e: MouseEvent) => {
     @contextmenu="contextMenuStore.hide()"
   >
     <Header id="header" />
-    <div id="window" class="flex min-h-0 flex-1 flex-col">
+    <div id="window" class="flex min-h-0 flex-1 flex-col overflow-hidden">
       <ExplorerTabs />
       <Explorer />
     </div>
@@ -128,8 +128,11 @@ const handleMouseDownCapture = (e: MouseEvent) => {
     }
     & > #window {
       box-shadow: 0 0 50vw -5rem oklch(var(--bc));
-      transform: rotate3d(0, 1, 0, 30deg) scale(0.7) translate(10vw, -5rem);
+      transform: rotate3d(0, 1, 0, 30deg) scale(0.9) translate(10vw, -5vh);
       filter: grayscale(1);
+      @screen lg {
+        transform: rotate3d(0, 1, 0, 30deg) scale(0.7) translate(10vw, -5vh);
+      }
     }
   }
 }

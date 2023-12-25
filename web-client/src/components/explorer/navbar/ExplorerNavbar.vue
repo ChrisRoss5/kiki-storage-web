@@ -58,7 +58,13 @@ const openNavbarExplorer = (path: string, keepOpen?: boolean) => {
 </script>
 
 <template>
-  <div class="z-20 flex flex-wrap gap-3">
+  <div
+    class="z-20 flex flex-wrap gap-3 border-b-8 lg:border-0 rounded-box"
+    :class="{
+      'border-b-base-200': isThemeLight,
+      'border-b-base-100/25': !isThemeLight,
+    }"
+  >
     <div
       class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-btn text-xl"
       :class="{

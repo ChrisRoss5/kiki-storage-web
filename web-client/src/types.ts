@@ -39,7 +39,7 @@ interface Tab {
   expandedPaths?: string[];
   fileTreeWidth?: number;
 }
-type TabId = ReturnType<typeof crypto.randomUUID>;
+type TabId = string; // ReturnType<typeof crypto.randomUUID>; Unusable because of Electron
 type ExplorerView = "list" | "grid";
 interface ColumnSettings {
   order: Partial<keyof ItemCore>[];

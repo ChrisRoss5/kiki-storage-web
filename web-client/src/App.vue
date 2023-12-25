@@ -43,10 +43,3 @@ watch(user, async (currentUser) => {
     class="absolute -top-full rounded-box bg-base-300 p-3 pl-7"
   ></div>
 </template>
-
-<style>
-#app {
-  height: 100vh;
-  overflow: hidden;
-}
-</style>

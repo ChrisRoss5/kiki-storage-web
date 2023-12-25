@@ -50,9 +50,9 @@ const handleDblClick = () => {
     id="filetree-resizer"
     class="rounded-outward relative z-10 w-3 cursor-ew-resize bg-gradient-to-b"
     :class="{
+      'from-base-200 to-base-300': isThemeLight,
       'from-base-100/25 to-base-100/50 shadow-[0_0_50px_0_oklch(var(--p)/30%)]':
         !isThemeLight,
-      'from-base-200 to-base-300': isThemeLight,
     }"
     :style="{
       '--rounded-bg': isThemeLight

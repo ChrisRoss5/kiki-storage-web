@@ -5,16 +5,19 @@ import { RootKey, roots } from "@/stores/settings/default";
 import { useTabsStore } from "@/stores/tabs";
 import { computed } from "vue";
 import { SlickItem, SlickList } from "vue-slicksort";
+import { isTouchDevice as _isTouchDevice } from "@/utils";
+
 
 const tabsStore = useTabsStore();
 const settingsStore = useSettingsStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
+const isTouchDevice = _isTouchDevice();
 </script>
 
 <template>
   <SlickList
-    class="flex -translate-x-2 select-none px-5 pt-3"
+    class="flex -translate-x-2 select-none px-5 pt-3 hidden-scrollbar"
     :class="{
       'mb-2 border-b-[0.25rem] border-base-300': isThemeLight,
     }"
@@ -22,16 +25,17 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
     axis="x"
     lockAxis="x"
     helperClass="slick-tab-dragging"
-    :distance="5"
+    :distance="isTouchDevice ? 0 : 5"
+    :pressDelay="isTouchDevice ? 500 : 0"
   >
     <TransitionGroup name="expl-tab">
       <SlickItem
         v-for="(tab, i) in tabsStore.tabs"
-        tag="a"
+        :tag="isTouchDevice ? 'div' : 'a'"
         :href="tab.path"
         :key="tab.id"
         :index="i"
-        class="relative mb-2 ml-2 min-w-0 max-w-[20vw] flex-grow basis-0 cursor-pointer whitespace-nowrap rounded-box bg-base-200 py-1 text-lg hover:bg-base-300"
+        class="relative mb-2 ml-2 min-w-[30vw] md:min-w-0 md:max-w-[20vw] flex-grow basis-0 cursor-pointer whitespace-nowrap rounded-box bg-base-200 py-1 text-lg hover:bg-base-300"
         :class="{
           'tab-active rounded-outward !mb-0 cursor-default rounded-b-none pb-3':
             tab.id == tabsStore.activeTab.id,

@@ -37,12 +37,12 @@ provide("isThemeLight", isThemeLight);
       <div class="relative ml-3 mt-3 flex min-w-0 flex-1 flex-col">
         <LoaderIcon :loading="itemStore.itemsPending" />
         <!-- cannot use <template> wrapper because of <TransitionGroup> root  -->
-        <div class="flex flex-1 flex-col" v-if="itemStore.items.length">
+        <div class="flex min-h-0 flex-1 flex-col" v-if="itemStore.items.length">
           <ExplorerGrid :item-store="itemStore" />
           <ExplorerFooter :item-store="itemStore" />
         </div>
         <div
-          v-else-if="!itemStore.itemsPending"
+          v-else-if="!itemStore.itemsPending && settingsStore.dbSettingsReady"
           class="flex-center expl-body mb-3 flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content"
           @drop.stop.prevent="itemStore.handleDrop"
           @dragover.stop.prevent="setDragOverStyle"

@@ -46,7 +46,7 @@ const pathStore = usePathStore();
         <LoaderIcon :loading="searchItemStore.itemsPending" />
         <template v-if="searchItemStore.items.length">
           <CloseExplorer @click="searchItemStore.isOpen = false" class="pt-0" />
-          <div class="max-h-[70vh]">
+          <div class="max-h-[70vh] flex">
             <ExplorerGrid :item-store="searchItemStore" />
           </div>
           <ExplorerFooter :item-store="searchItemStore" class="mt-3" />
