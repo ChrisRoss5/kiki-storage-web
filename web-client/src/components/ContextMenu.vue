@@ -3,7 +3,7 @@ import { useContextMenuStore } from "@/stores/context-menu";
 import { useSettingsStore } from "@/stores/settings";
 import getDefaultSettings, { columnNames } from "@/stores/settings/default";
 import { computed, ref, watchPostEffect } from "vue";
-import ItemOptions from "./ItemOptions.vue";
+import ItemOptions from "@/components/explorer/ItemOptions.vue"
 
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();

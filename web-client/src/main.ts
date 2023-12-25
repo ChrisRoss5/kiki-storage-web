@@ -1,9 +1,10 @@
 import "./styles/main.css"; // do not reorder (keep blank line)!
 
 // https://stackoverflow.com/questions/76247444/why-should-pinia-vuex-be-preferred-over-classic-approach-with-service-classes/76247596#76247596
+import { useMediaQuery } from "@vueuse/core";
 import { createPinia } from "pinia";
 import VWave from "v-wave";
-import { createApp } from "vue";
+import { createApp, reactive } from "vue";
 import { plugin as Slicksort } from "vue-slicksort";
 import { VueFire, VueFireAuth } from "vuefire";
 import App from "./App.vue";
@@ -12,10 +13,11 @@ import router from "./router";
 
 const app = createApp(App);
 
-export const fileIconVectors = import.meta.glob(
-  "/node_modules/file-icon-vectors/dist/icons/vivid/*.svg",
-  { eager: true, as: "url" },
-);
+const breakpoints = reactive({
+  mdAndUp: useMediaQuery("(min-width: 768px)"),
+});
+
+app.config.globalProperties.$breakpoints = breakpoints;
 
 app
   .use(VueFire, {
@@ -27,3 +29,14 @@ app
   .use(VWave, {})
   .use(Slicksort)
   .mount("#app");
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    $breakpoints: typeof breakpoints;
+  }
+}
+
+export const fileIconVectors = import.meta.glob(
+  "/node_modules/file-icon-vectors/dist/icons/vivid/*.svg",
+  { eager: true, as: "url" },
+);

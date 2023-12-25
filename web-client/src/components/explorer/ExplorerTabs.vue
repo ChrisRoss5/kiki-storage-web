@@ -3,19 +3,45 @@ import { getPathName } from "@/stores/path";
 import { useSettingsStore } from "@/stores/settings";
 import { RootKey, roots } from "@/stores/settings/default";
 import { useTabsStore } from "@/stores/tabs";
-import { useMediaQuery } from "@vueuse/core";
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { SlickItem, SlickList } from "vue-slicksort";
 
 const tabsStore = useTabsStore();
 const settingsStore = useSettingsStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
-const isMd = useMediaQuery("(min-width: 768px)");
+
+const addTabDiv = ref<HTMLDivElement | null>(null);
+
+const scrollingToEnd = ref(false);
+const handleCreateTab = () => {
+  tabsStore.createTab();
+  scrollingToEnd.value = true;
+  scrollToEnd();
+};
+
+const scrollToEnd = () => {
+  const slickListContainer = addTabDiv.value!.parentElement!;
+  slickListContainer.scrollTo({ left: slickListContainer.scrollWidth });
+  if (scrollingToEnd.value) window.requestAnimationFrame(scrollToEnd);
+};
+
+watch(
+  () => tabsStore.activeTab.id,
+  () => {
+    const slickListContainer = addTabDiv.value!.parentElement!;
+    const activeTab = slickListContainer.children[
+      tabsStore.tabs.indexOf(tabsStore.activeTab)
+    ] as HTMLDivElement;
+    activeTab.scrollIntoView({ behavior: "smooth", inline: "center" });
+  },
+  { flush: "post" },
+);
 </script>
 
 <template>
   <SlickList
+    ref="slickListComp"
     class="hidden-scrollbar flex -translate-x-2 select-none px-5 pt-3"
     :class="{
       'mb-2 border-b-[0.25rem] border-base-300': isThemeLight,
@@ -24,13 +50,13 @@ const isMd = useMediaQuery("(min-width: 768px)");
     axis="x"
     lockAxis="x"
     helperClass="slick-tab-dragging"
-    :distance="isMd ? 0 : 5"
-    :pressDelay="isMd ? 500 : 0"
+    :distance="$breakpoints.mdAndUp ? 5 : 0"
+    :pressDelay="$breakpoints.mdAndUp ? 0 : 400"
   >
-    <TransitionGroup name="expl-tab">
+    <TransitionGroup name="tabs" @after-enter="scrollingToEnd = false">
       <SlickItem
         v-for="(tab, i) in tabsStore.tabs"
-        :tag="isMd ? 'div' : 'a'"
+        :tag="$breakpoints.mdAndUp ? 'a' : 'div'"
         :href="tab.path"
         :key="tab.id"
         :index="i"
@@ -82,10 +108,10 @@ const isMd = useMediaQuery("(min-width: 768px)");
         </div>
       </SlickItem>
     </TransitionGroup>
-    <div class="flex-center mb-2 ml-4">
+    <div class="flex-center mb-2 ml-4" ref="addTabDiv">
       <div
         class="material-symbols-outlined flex-center aspect-square h-full cursor-pointer rounded-badge bg-base-200 !text-xl hover:bg-base-300"
-        @click="tabsStore.createTab()"
+        @click="handleCreateTab"
         v-wave
       >
         add
@@ -95,23 +121,25 @@ const isMd = useMediaQuery("(min-width: 768px)");
 </template>
 
 <style>
-.expl-tab-enter-active,
-.expl-tab-leave-active {
-  transition: flex 300ms;
+.tabs-enter-active,
+.tabs-leave-active {
+  transition-property: flex, max-width, min-width;
+  transition-duration: 300ms;
 }
-.expl-tab-enter-active > div,
-.expl-tab-leave-active > div {
+.tabs-enter-active > div,
+.tabs-leave-active > div {
   transition: padding 300ms;
 }
-.expl-tab-leave-active {
-  transition-delay: -100ms; /* Todo: Figure out why there's a delay */
-}
-.expl-tab-enter-from,
-.expl-tab-leave-to {
+.tabs-enter-from,
+.tabs-leave-to {
   flex: 0;
+  min-width: 0;
+  @screen md {
+    max-width: 0;
+  }
 }
-.expl-tab-enter-from > div,
-.expl-tab-leave-to > div {
+.tabs-enter-from > div,
+.tabs-leave-to > div {
   padding: 0;
 }
 .slick-tab-dragging {

@@ -30,7 +30,7 @@ const sendPasswordResetEmail = async () => {
 <template>
   <Dialog :show="props.show" :closeOutside="true" @close="emit('close')">
     <template #header>
-      <div class="flex items-center gap-3">Account</div>
+      Account
     </template>
     <template #content>
       <div>Signed in as: {{ user?.displayName || user?.email }}</div>

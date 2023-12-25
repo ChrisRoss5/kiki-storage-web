@@ -33,9 +33,7 @@ const options = computed<Option[]>(() =>
     {
       icon: "open_in_new",
       label: "Open in new tab",
-      onClick: () => {
-        tabsStore.createTab(getFullPath(firstItem.value));
-      },
+      onClick: () => tabsStore.createTab(getFullPath(firstItem.value)),
       showCondition: () =>
         props.itemStore.selectedItems.length == 1 && firstItem.value.isFolder,
     },
@@ -55,16 +53,12 @@ const options = computed<Option[]>(() =>
     {
       icon: "share",
       label: "Share",
-      onClick: () => {
-        dialogStore.showError("Sharing is not supported yet.");
-      },
+      onClick: () => dialogStore.showError("Sharing is not supported yet."),
     },
     {
       icon: "edit",
       label: "Rename",
-      onClick: () => {
-        firstItem.value.isRenaming = true;
-      },
+      onClick: () => (firstItem.value.isRenaming = true),
       showCondition: () => props.itemStore.selectedItems.length == 1,
     },
     {

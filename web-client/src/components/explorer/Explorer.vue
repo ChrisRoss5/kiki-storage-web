@@ -3,10 +3,10 @@ import { useItemStore } from "@/stores/items/manager";
 import { useSettingsStore } from "@/stores/settings";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
 import { computed, provide, ref } from "vue";
-import Uploads from "../Uploads.vue";
 import ExplorerFooter from "./ExplorerFooter.vue";
 import ExplorerGrid from "./ExplorerGrid.vue";
 import LoaderIcon from "./LoaderIcon.vue";
+import Uploads from "./Uploads.vue";
 import FileTree from "./filetree/FileTree.vue";
 import FileTreeResizer from "./filetree/FileTreeResizer.vue";
 import ExplorerNavbar from "./navbar/ExplorerNavbar.vue";
@@ -34,7 +34,7 @@ provide("isThemeLight", isThemeLight);
     <div class="flex min-h-0 flex-1 overflow-hidden">
       <FileTree ref="fileTreeComp" />
       <FileTreeResizer :file-tree-el="fileTreeComp?.fileTreeDiv ?? null" />
-      <div class="relative ml-3 mt-3 flex min-w-0 flex-1 flex-col">
+      <div class="relative mt-3 flex min-w-0 flex-1 flex-col">
         <LoaderIcon :loading="itemStore.itemsPending" />
         <!-- cannot use <template> wrapper because of <TransitionGroup> root  -->
         <div class="flex min-h-0 flex-1 flex-col" v-if="itemStore.items.length">
