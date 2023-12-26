@@ -45,7 +45,7 @@ const handleClear = () => {
             v-model="sizeFilter.min"
             min="0"
             type="number"
-            class="dsy-join-item w-full text-right p-1 pr-0"
+            class="dsy-join-item w-full text-right p-1 pr-4 md:pr-0"
           />
           <select
             v-model="sizeFilter.minSuffix"
@@ -65,11 +65,11 @@ const handleClear = () => {
               v-model="sizeFilter.max"
               min="0"
               type="number"
-              class="w-full dsy-join-item text-right p-1 pr-0"
+              class="w-full dsy-join-item text-right p-1 pr-4 md:pr-0"
             />
             <div
               v-if="!sizeFilter.max"
-              class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none bg-[field] w-4 text-xl"
+              class="absolute inset-0 pointer-events-none bg-[field] text-xl text-right w-full pr-3"
             >
               ∞
             </div>

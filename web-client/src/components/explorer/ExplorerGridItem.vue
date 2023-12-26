@@ -109,9 +109,9 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
       '!bg-base-100/50': !isThemeLight && item.isSelected,
     }"
     tabindex="0"
-    :draggable="item.isSelected"
-    @dragstart="handleDragStart(item, $event)"
-    @dragend="handleDragStop"
+    :draggable="!$isTouchDevice && item.isSelected"
+    @dragstart="!$isTouchDevice && handleDragStart(item, $event)"
+    @dragend="!$isTouchDevice && handleDragStop()"
     @drop.stop.prevent="handleDropOnItem(item, $event)"
     @click.stop.prevent="handleItemSelect(item, $event)"
     @dblclick.stop.prevent="handleItemOpen(item)"

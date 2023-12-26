@@ -12,7 +12,9 @@ export const useTabsStore = defineStore("tabs", () => {
     set: (tabs) => settingsStore.updateSettings({ tabs }),
   });
   const activeTab = computed(
-    () => tabs.value.find((t) => t.id == settingsStore.settings.activeTabId)!,
+    () =>
+      tabs.value.find((t) => t.id == settingsStore.settings.activeTabId) ??
+      tabs.value[0],
   );
 
   let lastSelectedTabIdBeforeCreate: TabId | null = null;

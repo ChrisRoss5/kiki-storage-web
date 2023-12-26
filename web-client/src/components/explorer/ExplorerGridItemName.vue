@@ -20,12 +20,8 @@ const showFullText = computed(
     !selectionRectStore.isActive,
 );
 const imgSrc = computed(() => {
-  let path = "/node_modules/file-icon-vectors/dist/icons/vivid/";
-  if (props.item.isFolder) path += "folder.svg";
-  else if (!(path + `${props.item.type}.svg` in fileIconVectors))
-    path += "blank.svg";
-  else path += `${props.item.type}.svg`;
-  return fileIconVectors[path];
+  if (props.item.isFolder) return fileIconVectors["folder"];
+  return fileIconVectors[props.item.type] ?? fileIconVectors["blank"];
 });
 
 watch(

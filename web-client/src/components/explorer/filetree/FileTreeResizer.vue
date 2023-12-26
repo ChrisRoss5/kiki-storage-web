@@ -17,6 +17,7 @@ onMounted(() => {
   document.addEventListener("mouseup", handleMouseUp);
   document.addEventListener("mousemove", handleMouseMove);
   document.addEventListener("touchend", handleMouseUp);
+  document.addEventListener("touchcancel", handleMouseUp);
   document.addEventListener("touchmove", handleMouseMove);
 });
 
@@ -29,12 +30,14 @@ const handleMouseDown = (e: MouseEvent | TouchEvent) => {
   isMouseDown.value = true;
   startX.value = "pageX" in e ? e.pageX : e.touches[0].pageX;
   newWidth.value = startWidth.value = props.fileTreeEl!.offsetWidth;
+  document.body.style.overflow = "hidden"; // for mobile
 };
 const handleMouseUp = () => {
   if (!isMouseDown.value) return;
   isMouseDown.value = false;
   if (newWidth.value != startWidth.value)
     tabsStore.updateActiveTab({ fileTreeWidth: newWidth.value });
+  document.body.style.overflow = ""; // for mobile
 };
 const handleMouseMove = (e: MouseEvent | TouchEvent) => {
   if (!isMouseDown.value) return;
@@ -52,11 +55,11 @@ const handleDblClick = () => {
     id="filetree-resizer"
     class="pr-3"
     @touchstart="handleMouseDown"
-    @dblclick="!$breakpoints.mdAndUp && handleDblClick()"
+    @dblclick="!$breakpoints.lgAndUp && handleDblClick()"
   >
     <div
       id="filetree-resizer-inner"
-      class="rounded-outward relative flex h-full w-6 cursor-ew-resize bg-gradient-to-b md:w-3"
+      class="rounded-outward relative flex h-full w-6 cursor-ew-resize bg-gradient-to-b lg:w-3"
       :class="{
         'from-base-200 to-base-300': isThemeLight,
         'from-base-100/25 to-base-100/50 shadow-[0_0_50px_0_oklch(var(--p)/30%)]':
@@ -69,9 +72,9 @@ const handleDblClick = () => {
       }"
       @mousedown="handleMouseDown"
       @dblclick="handleDblClick"
-      v-wave="!$breakpoints.mdAndUp"
+      v-wave="!$breakpoints.lgAndUp"
     >
-      <span class="material-symbols-outlined self-center md:hidden">
+      <span class="material-symbols-outlined self-center lg:hidden">
         drag_indicator
       </span>
     </div>

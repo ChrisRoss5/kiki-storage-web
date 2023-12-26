@@ -15,9 +15,12 @@ const app = createApp(App);
 
 const breakpoints = reactive({
   mdAndUp: useMediaQuery("(min-width: 768px)"),
+  lgAndUp: useMediaQuery("(min-width: 1024px)"),
 });
 
 app.config.globalProperties.$breakpoints = breakpoints;
+app.config.globalProperties.$isTouchDevice =
+  "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
 app
   .use(VueFire, {
@@ -33,10 +36,15 @@ app
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
     $breakpoints: typeof breakpoints;
+    $isTouchDevice: boolean;
   }
 }
 
-export const fileIconVectors = import.meta.glob(
-  "/node_modules/file-icon-vectors/dist/icons/vivid/*.svg",
-  { eager: true, as: "url" },
+export const fileIconVectors = Object.fromEntries(
+  Object.entries(
+    import.meta.glob("/node_modules/file-icon-vectors/dist/icons/vivid/*.svg", {
+      eager: true,
+      as: "url",
+    }),
+  ).map(([k, v]) => [k.slice(k.lastIndexOf("/") + 1).replace(".svg", ""), v]),
 );

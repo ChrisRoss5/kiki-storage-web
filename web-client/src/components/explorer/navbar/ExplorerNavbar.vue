@@ -82,7 +82,7 @@ const openNavbarExplorer = (path: string, keepOpen?: boolean) => {
       >
         <div
           v-if="!isRoot"
-          class="md:relative flex items-center rounded-btn py-2"
+          class="lg:relative flex items-center rounded-btn py-2"
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,

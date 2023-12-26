@@ -104,7 +104,7 @@ const handleMouseDownCapture = (e: MouseEvent) => {
 <template>
   <div
     id="home"
-    class="flex flex-col"
+    class="flex flex-col overflow-clip"
     :class="{ 'not-ready': !settingsStore.dbSettingsReady }"
     @click.left.capture="handleClickLeft"
     @mousedown="handleMouseDown"
@@ -112,7 +112,7 @@ const handleMouseDownCapture = (e: MouseEvent) => {
     @contextmenu="contextMenuStore.hide()"
   >
     <Header id="header" />
-    <div id="window" class="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div id="window" class="flex min-h-0 flex-1 flex-col">
       <ExplorerTabs />
       <Explorer />
     </div>

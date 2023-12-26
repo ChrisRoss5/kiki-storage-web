@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { fileIconVectors } from "@/main";
 import { getPathName } from "@/stores/path";
 import { useSettingsStore } from "@/stores/settings";
 import { RootKey, roots } from "@/stores/settings/default";
@@ -33,19 +34,26 @@ watch(
     const activeTab = slickListContainer.children[
       tabsStore.tabs.indexOf(tabsStore.activeTab)
     ] as HTMLDivElement;
+
+    // https://stackoverflow.com/questions/11039885/scrollintoview-causing-the-whole-page-to-move
+    // Solution: overflow-clip on <Home> component
     activeTab.scrollIntoView({ behavior: "smooth", inline: "center" });
   },
   { flush: "post" },
 );
+
+/* Using -translate-x-2 and width: calc(100% + 0.5rem) because SlickList
+doesn't transition the margin nor gap.  */
 </script>
 
 <template>
   <SlickList
     ref="slickListComp"
-    class="hidden-scrollbar overflow-x-auto flex -translate-x-2 select-none px-5 pt-3"
+    class="hidden-scrollbar flex -translate-x-2 select-none overflow-x-auto px-5 pt-3"
     :class="{
       'mb-2 border-b-[0.25rem] border-base-300': isThemeLight,
     }"
+    style="width: calc(100% + 0.5rem)"
     v-model:list="tabsStore.tabs"
     axis="x"
     lockAxis="x"
@@ -82,10 +90,12 @@ watch(
           >
             {{ roots[tab.path as RootKey]?.icon }}
           </div>
-          <div
+          <img
             v-else
-            class="fiv-viv fiv-icon-folder z-10 flex-shrink-0 text-xl"
-          ></div>
+            :src="fileIconVectors['folder']"
+            class="w-4 flex-shrink-0 text-xl"
+            alt="Icon"
+          />
           <div class="tab-mask flex-1 overflow-hidden">
             {{ getPathName(tab.path) }}
           </div>

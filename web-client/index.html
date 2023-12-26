@@ -14,8 +14,10 @@
         localStorage.getItem("theme") ?? "light";
     </script>
   </head>
-  <body class="m-0 portrait:md:overflow-hidden overflow-x-hidden hidden-scrollbar">
-    <div id="app" class="h-screen landscape:h-[150vh] lg:!h-screen"></div>
+  <body
+    class="hidden-scrollbar m-0 overflow-x-hidden portrait:md:overflow-hidden"
+  >
+    <div id="app" class="h-screen lg:!h-screen landscape:h-[150vh]"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

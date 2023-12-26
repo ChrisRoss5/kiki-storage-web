@@ -20,10 +20,6 @@ export function mergeDeep(target: any, ...sources: any) {
   return mergeDeep(target, ...sources);
 }
 
-/* export function isTouchDevice() {
-  return "ontouchstart" in window || navigator.maxTouchPoints > 0;
-} */
-
 // Created because of slicksort's v-model
 /* type Getter<T> = () => T;
 type Setter<T> = (value: T) => Promise<void>;
