@@ -45,8 +45,9 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (openItemStore) {
       openItemStore.isOpen = false;
       focusedItemStoreId.value = getTopmostOpenItemStore()?.$id ?? "";
-    }
-    focusedItemStore.deselectAll();
+    } else if (focusedItemStore.selectedItems.length)
+      focusedItemStore.deselectAll(); // File tree
+    else focusedItemStoreId.value = "items"; // Primary Explorer
   } else if (e.key == "Delete" && focusedItemStore.selectedItems.length) {
     focusedItemStore.deleteItems();
   } else if (e.key == "F2" && focusedItemStore.selectedItems.length == 1) {

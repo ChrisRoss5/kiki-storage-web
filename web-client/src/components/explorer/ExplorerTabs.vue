@@ -42,7 +42,7 @@ watch(
 <template>
   <SlickList
     ref="slickListComp"
-    class="hidden-scrollbar flex -translate-x-2 select-none px-5 pt-3"
+    class="hidden-scrollbar overflow-x-auto flex -translate-x-2 select-none px-5 pt-3"
     :class="{
       'mb-2 border-b-[0.25rem] border-base-300': isThemeLight,
     }"

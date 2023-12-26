@@ -4,17 +4,32 @@ import ExplorerFooter from "@/components/explorer/ExplorerFooter.vue";
 import ExplorerGrid from "@/components/explorer/ExplorerGrid.vue";
 import LoaderIcon from "@/components/explorer/LoaderIcon.vue";
 import { ItemStore, focusedItemStoreId } from "@/stores/items/manager";
-import { provide } from "vue";
+import { onMounted, provide, ref } from "vue";
 
 defineProps<{ itemStore: ItemStore }>();
 
 provide("isThemeLight", true);
+
+const navbarExplorerDiv = ref<HTMLDivElement | null>(null);
+
+onMounted(() => {
+  // check if overflowing client screen width
+  const navbarExplorerDivWidth = navbarExplorerDiv.value!.offsetWidth;
+  const navbarExplorerDivLeft = navbarExplorerDiv.value!.getBoundingClientRect()
+    .left;
+  const navbarExplorerDivRight = navbarExplorerDivLeft + navbarExplorerDivWidth;
+  const clientWidth = document.documentElement.clientWidth;
+  if (navbarExplorerDivRight > clientWidth) {
+    navbarExplorerDiv.value!.style.left = `${clientWidth - navbarExplorerDivWidth}px`;
+  }
+});
 </script>
 
 <template>
   <div
     id="navbar-explorer"
-    class="absolute left-0 top-full z-10 flex max-h-[50vh] max-w-[80vw] origin-top-left scale-75 cursor-default flex-col overflow-auto rounded-box bg-base-100 px-4 shadow-lg transition-shadow"
+    ref="navbarExplorerDiv"
+    class="absolute left-0 top-full z-10 flex max-h-[70vh] w-screen md:w-auto origin-top-left scale-75 cursor-default flex-col overflow-auto rounded-box bg-base-100 px-4 shadow-lg transition-shadow"
     :class="{ 'focused-store': focusedItemStoreId == itemStore.$id }"
     @mousedown.stop="focusedItemStoreId = itemStore.$id"
   >

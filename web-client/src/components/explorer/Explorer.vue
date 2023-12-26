@@ -26,7 +26,7 @@ provide("isThemeLight", isThemeLight);
 <template>
   <div
     id="explorer"
-    class="flex min-h-0 flex-1 select-none flex-col px-5"
+    class="flex min-h-0 flex-1 select-none flex-col px-2 md:px-5"
     :class="{ 'pt-3': !isThemeLight }"
   >
     <Uploads />

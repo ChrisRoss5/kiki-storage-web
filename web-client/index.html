@@ -14,8 +14,8 @@
         localStorage.getItem("theme") ?? "light";
     </script>
   </head>
-  <body class="m-0 overflow-hidden">
-    <div id="app" class="h-screen w-screen overflow-hidden"></div>
+  <body class="m-0 portrait:md:overflow-hidden overflow-x-hidden hidden-scrollbar">
+    <div id="app" class="h-screen landscape:h-[150vh] lg:!h-screen"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
