@@ -21,6 +21,11 @@ const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 provide("isSearch", false);
 provide("isFileTree", false);
 provide("isThemeLight", isThemeLight);
+
+const handleFileUpload = (e: Event) => {
+  const { files } = e.target as HTMLInputElement;
+  if (files) itemStore.createFiles(files);
+};
 </script>
 
 <template>
@@ -41,9 +46,9 @@ provide("isThemeLight", isThemeLight);
           <ExplorerGrid :item-store="itemStore" />
           <ExplorerFooter :item-store="itemStore" />
         </div>
-        <div
+        <label
           v-else-if="!itemStore.itemsPending && settingsStore.dbSettingsReady"
-          class="flex-center expl-body mb-3 flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content"
+          class="flex-center expl-body mb-3 flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content p-5 text-center overflow-hidden"
           @drop.stop.prevent="itemStore.handleDrop"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
@@ -53,9 +58,20 @@ provide("isThemeLight", isThemeLight);
             draft
           </span>
           <div class="pointer-events-none text-2xl">
-            Drop files or create a new folder
+            {{
+              $isTouchDevice
+                ? "Tap to upload files"
+                : "Drop files or create a new folder"
+            }}
           </div>
-        </div>
+          <input
+            type="file"
+            class="hidden"
+            multiple
+            @change="handleFileUpload"
+          />
+        </label>
+        <LoaderIcon v-else-if="settingsStore.dbSettingsReady" :loading="true" />
       </div>
     </div>
   </div>

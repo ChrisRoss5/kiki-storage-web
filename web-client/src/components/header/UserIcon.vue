@@ -40,27 +40,32 @@ const items: MenuItem[] = [
     onClick: () => auth?.signOut(),
   },
 ];
+
+const handleLabelTouchEnd = (e: TouchEvent) => {
+  if (e.target == document.activeElement)
+    setTimeout(blurDropdown, 10);
+};
+const blurDropdown = () => (document.activeElement as HTMLElement).blur();
 </script>
 
 <template>
-  <div class="dsy-dropdown dsy-dropdown-hover">
-    <label tabindex="0" class="cursor-pointer">
+  <div class="dsy-dropdown dsy-dropdown-hover" @mouseleave="blurDropdown">
+    <label tabindex="0" class="cursor-pointer" @touchend="handleLabelTouchEnd">
       <img
         alt="Profile picture"
-        class="h-16 rounded-full"
+        class="h-16 rounded-full pointer-events-none"
         :src="user?.photoURL || defaultPfp"
         @error="($event.target as HTMLImageElement).src = defaultPfp"
       />
     </label>
     <ul
-      tabindex="0"
-      class="dsy-menu dsy-dropdown-content right-0 z-10 w-max rounded-box bg-base-100 p-2 text-right shadow-md"
+      class="dsy-menu dsy-dropdown-content right-0 z-10 !origin-top-right !scale-150 rounded-box bg-base-100 p-2 text-right shadow-md lg:!scale-100"
     >
       <li v-for="item in items" :key="item.name">
-        <div @click="item.onClick" v-wave class="text-right">
+        <button @click="item.onClick" v-wave class="text-right">
           {{ item.name }}
           <span class="material-symbols-outlined"> {{ item.icon }} </span>
-        </div>
+        </button>
       </li>
     </ul>
     <AccountDialog

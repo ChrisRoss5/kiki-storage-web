@@ -36,7 +36,7 @@ watch(
     ] as HTMLDivElement;
 
     // https://stackoverflow.com/questions/11039885/scrollintoview-causing-the-whole-page-to-move
-    // Solution: overflow-clip on <Home> component
+    // Solution: overflow-clip on #window (SlickList's parent)
     activeTab.scrollIntoView({ behavior: "smooth", inline: "center" });
   },
   { flush: "post" },
