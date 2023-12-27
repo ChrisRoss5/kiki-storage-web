@@ -48,7 +48,7 @@ const handleFileUpload = (e: Event) => {
         </div>
         <label
           v-else-if="!itemStore.itemsPending && settingsStore.dbSettingsReady"
-          class="flex-center expl-body mb-3 flex-1 flex-col gap-3 rounded-badge border-2 border-dashed border-base-content p-5 text-center overflow-hidden"
+          class="flex-center expl-body mb-3 flex-1 flex-col gap-3 overflow-hidden rounded-badge border-2 border-dashed border-base-content p-5 text-center"
           @drop.stop.prevent="itemStore.handleDrop"
           @dragover.stop.prevent="setDragOverStyle"
           @dragleave.stop.prevent="clearDragOverStyle"
@@ -65,6 +65,7 @@ const handleFileUpload = (e: Event) => {
             }}
           </div>
           <input
+            v-if="$isTouchDevice"
             type="file"
             class="hidden"
             multiple

@@ -32,7 +32,11 @@ const handleCollapseAll = () => {
     <Transition name="fade">
       <div
         v-if="expandedSubPaths?.length"
-        class="material-symbols-outlined flex h-full w-6 cursor-pointer items-center opacity-0 transition-opacity hover:bg-base-300 group-hover:opacity-100"
+        class="material-symbols-outlined flex h-full w-6 cursor-pointer items-center transition-opacity hover:bg-base-300 group-hover:opacity-100"
+        :class="{
+          'opacity-0': !$isTouchDevice,
+          'opacity-100': $isTouchDevice,
+        }"
         @click.stop.prevent="handleCollapseAll"
         @dblclick.stop="null"
         v-wave

@@ -18,7 +18,7 @@ const emit = defineEmits<(e: "close") => void>();
       <p class="mb-2">
         All keyboard shortcuts apply to the currently focused explorer. A
         focused explorer is indicated by a stronger shadow in floating
-        explorers, or a differently colored line in a File Tree explorer. If no
+        windows, or a differently colored line in a File Tree. If no
         explorer is focused, shortcuts apply to the primary explorer.
       </p>
       <ul>
@@ -33,7 +33,7 @@ const emit = defineEmits<(e: "close") => void>();
       <strong class="mt-4 block">Touch gestures</strong>
       <ul class="list-inside list-disc">
         <li>Touch and hold a tab for 0.5s to start dragging it.</li>
-        <li>Swipe down/up a file tree folder to expand/collapse it.</li>
+        <li>Swipe right on a folder in a File Tree to open it.</li>
       </ul>
     </template>
   </Dialog>

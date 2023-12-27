@@ -25,6 +25,9 @@ interface SearchFilters {
   type: string;
 }
 interface Settings {
+  hideFilesInTree: boolean;
+  desktopZoom: number;
+  mobileZoom: number;
   theme: Theme;
   columns: ColumnSettings;
   searchColumns: ColumnSettings;
@@ -39,7 +42,7 @@ interface Tab {
   expandedPaths?: string[];
   fileTreeWidth?: number;
 }
-type TabId = string; // ReturnType<typeof crypto.randomUUID>; Unusable because of Electron
+type TabId = string; // ReturnType<typeof crypto.randomUUID>; // Ditched because it only works with SSL
 type ExplorerView = "list" | "grid";
 interface ColumnSettings {
   order: Partial<keyof ItemCore>[];

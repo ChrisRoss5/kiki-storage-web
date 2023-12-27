@@ -13,12 +13,12 @@ import router from "./router";
 
 const app = createApp(App);
 
-const breakpoints = reactive({
+export const $breakpoints = reactive({
   mdAndUp: useMediaQuery("(min-width: 768px)"),
   lgAndUp: useMediaQuery("(min-width: 1024px)"),
 });
 
-app.config.globalProperties.$breakpoints = breakpoints;
+app.config.globalProperties.$breakpoints = $breakpoints;
 app.config.globalProperties.$isTouchDevice =
   "ontouchstart" in window || navigator.maxTouchPoints > 0;
 

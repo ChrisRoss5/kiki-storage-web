@@ -13,6 +13,9 @@ export const defaultRoot: RootKey = "drive";
 const defaultActiveTab: Tab = { path: defaultRoot, id: uuidv4() };
 
 export default (): Settings => ({
+  hideFilesInTree: false,
+  desktopZoom: 1,
+  mobileZoom: 1,
   theme: "light",
   columns: {
     order: ["name", "size", "type", "dateAdded", "dateModified"],

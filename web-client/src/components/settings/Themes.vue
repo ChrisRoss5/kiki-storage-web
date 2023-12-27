@@ -48,16 +48,16 @@ const themes: Theme[] = [
     class="grid grid-cols-2 gap-4 rounded-box sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
     :class="{ '!grid-cols-1': onlyActiveTheme }"
   >
-    <div
+    <button
       v-for="theme in onlyActiveTheme ? [activeTheme] : themes"
       :key="theme"
       @click="!onlyActiveTheme && settingsStore.setSetting('theme', theme)"
-      class="overflow-hidden rounded-btn border border-base-content/20 outline outline-2 outline-offset-2 outline-transparent hover:border-base-content/40"
+      class="overflow-hidden rounded-btn border border-base-content/20 hover:border-base-content/40"
       :class="{
-        'outline-2': theme == activeTheme && !onlyActiveTheme,
-        'outline-offset-2': theme == activeTheme && !onlyActiveTheme,
-        'outline-primary': theme == activeTheme && !onlyActiveTheme,
+        'outline outline-2 outline-offset-2 outline-primary':
+          theme == activeTheme && !onlyActiveTheme,
       }"
+      :tabindex="onlyActiveTheme ? -1 : 0"
       v-wave
     >
       <div
@@ -96,6 +96,6 @@ const themes: Theme[] = [
           </div>
         </div>
       </div>
-    </div>
+    </button>
   </div>
 </template>

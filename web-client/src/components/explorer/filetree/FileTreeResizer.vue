@@ -30,14 +30,14 @@ const handleMouseDown = (e: MouseEvent | TouchEvent) => {
   isMouseDown.value = true;
   startX.value = "pageX" in e ? e.pageX : e.touches[0].pageX;
   newWidth.value = startWidth.value = props.fileTreeEl!.offsetWidth;
-  document.body.style.overflow = "hidden"; // for mobile
+  document.documentElement.style.overflow = "hidden"; // for mobile
 };
 const handleMouseUp = () => {
   if (!isMouseDown.value) return;
   isMouseDown.value = false;
   if (newWidth.value != startWidth.value)
     tabsStore.updateActiveTab({ fileTreeWidth: newWidth.value });
-  document.body.style.overflow = ""; // for mobile
+  document.documentElement.style.overflow = ""; // for mobile
 };
 const handleMouseMove = (e: MouseEvent | TouchEvent) => {
   if (!isMouseDown.value) return;

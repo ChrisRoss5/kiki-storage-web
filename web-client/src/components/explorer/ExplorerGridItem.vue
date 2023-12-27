@@ -6,7 +6,8 @@ import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { formatDate, formatSize } from "@/utils/format";
 import { getFullPath } from "@/utils/item";
-import { Ref, inject } from "vue";
+import { useSwipe } from "@vueuse/core";
+import { Ref, inject, ref, watch } from "vue";
 import { useCurrentUser } from "vuefire";
 import ExplorerGridItemName from "./ExplorerGridItemName.vue";
 import ExpandButton from "./filetree/ExpandButton.vue";
@@ -35,6 +36,16 @@ const contextMenuStore = useContextMenuStore();
 const dialogStore = useShortDialogStore();
 const selectionRectStore = useSelectionRectStore();
 const user = useCurrentUser();
+
+const itemAnchor = ref<HTMLAnchorElement | null>(null);
+if (props.item.isFolder) {
+  const { isSwiping, direction } = useSwipe(itemAnchor);
+  watch(isSwiping, (isSwiping) => {
+    if (isSwiping && direction.value == "right") {
+      handleItemOpen(props.item);
+    }
+  });
+}
 
 const handleItemContextMenu = (item: Item, e: MouseEvent) => {
   if (!item.isSelected) handleItemSelect(item, e);
@@ -96,6 +107,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
   <a
     :id="item.id"
     :href="item.isFolder ? `/${getFullPath(item)}` : undefined"
+    ref="itemAnchor"
     class="expl-item"
     :class="{
       ['is-' + view]: true,
@@ -113,7 +125,15 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     @dragstart="!$isTouchDevice && handleDragStart(item, $event)"
     @dragend="!$isTouchDevice && handleDragStop()"
     @drop.stop.prevent="handleDropOnItem(item, $event)"
-    @click.stop.prevent="handleItemSelect(item, $event)"
+    @click.stop.prevent="
+      $isTouchDevice
+        ? isFileTree && item.isFolder
+          ? (
+              ($event.target as HTMLElement).firstElementChild as HTMLElement
+            ).click()
+          : handleItemOpen(item)
+        : handleItemSelect(item, $event)
+    "
     @dblclick.stop.prevent="handleItemOpen(item)"
     @keydown.space.stop.prevent="handleItemSelect(item, $event)"
     @keyup.enter.stop.prevent="handleItemOpen(item)"

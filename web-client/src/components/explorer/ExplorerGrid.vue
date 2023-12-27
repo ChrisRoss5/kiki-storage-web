@@ -164,7 +164,12 @@ const handleDropOnBody = (e: DragEvent) => {
           :name="!preventTransition ? 'items' : ''"
           :css="!preventTransition"
         >
-          <template v-for="item in itemStore.items" :key="item.id">
+          <template
+            v-for="item in isFileTree && settingsStore.settings.hideFilesInTree
+              ? itemStore.items.filter((i) => i.isFolder)
+              : itemStore.items"
+            :key="item.id"
+          >
             <ExplorerGridItem
               :item="item"
               :item-store="itemStore"
