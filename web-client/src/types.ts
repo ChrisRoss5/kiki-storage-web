@@ -5,7 +5,8 @@ interface ItemCore {
   dateAdded: Date;
   dateModified: Date;
   path: string;
-  isFolder: boolean;
+  isFolder?: boolean;
+  isFavorite?: boolean;
   size?: number;
 }
 interface Item extends ItemCore {
@@ -79,3 +80,8 @@ type Theme =
   | "night"
   | "coffee"
   | "winter";
+
+
+/* HELPERS */
+
+type Overwrite<T, U> = Pick<T, Exclude<keyof T, keyof U>> & U;

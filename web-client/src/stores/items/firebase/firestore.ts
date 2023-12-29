@@ -28,16 +28,10 @@ import { useCleanup } from "../cleanup";
 import { useItemStorageStore } from "./storage";
 import { useNotificationStore } from "@/stores/notification";
 
-export interface DbItem {
-  id?: string;
-  name: string;
-  type: string;
+export type DbItem = Overwrite<ItemCore, {
   dateAdded: Timestamp;
   dateModified: Timestamp;
-  path: string;
-  isFolder: boolean;
-  size?: number;
-}
+}>
 
 // Vuefire Issue #1315 - SSR console warning
 

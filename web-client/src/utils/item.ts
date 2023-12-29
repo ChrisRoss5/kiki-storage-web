@@ -23,7 +23,6 @@ export function convertFilesToItems(files: FileList, path: string): ItemCore[] {
       dateAdded: new Date(),
       dateModified: new Date(file.lastModified),
       path,
-      isFolder: false,
       size: file.size,
     });
   }
@@ -65,15 +64,17 @@ export const firestoreItemConverter: FirestoreDataConverter<ItemCore, DbItem> =
         dateModified: data.dateModified.toDate(),
       };
     },
-    toFirestore: (i: Item): DbItem => {
-      return {
+    toFirestore: (i: Item) => {
+      const dbItem: DbItem = {
         name: i.name,
         type: i.type,
         dateAdded: Timestamp.fromDate(i.dateAdded),
         dateModified: Timestamp.fromDate(i.dateModified),
         path: i.path,
-        isFolder: i.isFolder,
-        ...(i.size ? { size: i.size } : {}),
       };
+      if (i.isFolder) dbItem.isFolder = true;
+      if (i.isFavorite) dbItem.isFavorite = true;
+      if (i.size) dbItem.size = i.size;
+      return dbItem;
     },
   };

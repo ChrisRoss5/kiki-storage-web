@@ -16,15 +16,15 @@ const emit = defineEmits<(e: "close") => void>();
     <template #content>
       <strong class="m-0 block">Keyboard shortcuts</strong>
       <p class="mb-2">
-        All keyboard shortcuts apply to the currently focused explorer. A
-        focused explorer is indicated by a stronger shadow in floating
+        All keyboard shortcuts apply to the currently focused folder. A
+        focused folder is indicated by a stronger shadow in floating
         windows, or a differently colored line in a File Tree. If no
-        explorer is focused, shortcuts apply to the primary explorer.
+        folder is focused, shortcuts apply to the currently open folder.
       </p>
       <ul>
         <li>
-          <kbd>Esc</kbd> - Close a floating explorer / Deselect all items /
-          Unfocus a File Tree explorer
+          <kbd>Esc</kbd> - Close a floating folder / Deselect all items /
+          Unfocus a folder in File Tree
         </li>
         <li><kbd>Del</kbd> - Delete selected items</li>
         <li><kbd>F2</kbd> - Rename selected item</li>

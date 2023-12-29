@@ -35,7 +35,7 @@ app
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
-    $breakpoints: typeof breakpoints;
+    $breakpoints: typeof $breakpoints;
     $isTouchDevice: boolean;
   }
 }

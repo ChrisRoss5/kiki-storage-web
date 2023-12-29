@@ -35,7 +35,7 @@ const options = computed<Option[]>(() =>
       label: "Open in new tab",
       onClick: () => tabsStore.createTab(getFullPath(firstItem.value)),
       showCondition: () =>
-        props.itemStore.selectedItems.length == 1 && firstItem.value.isFolder,
+        props.itemStore.selectedItems.length == 1 && !!firstItem.value.isFolder,
     },
     {
       icon: "download",
