@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const roots = {
   drive: { name: "Drive", icon: "cloud" },
+  starred: { name: "Starred", icon: "star" },
   shared: { name: "Shared", icon: "group" },
   bin: { name: "Bin", icon: "delete" },
 };

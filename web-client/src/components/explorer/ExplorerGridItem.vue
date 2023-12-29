@@ -41,9 +41,8 @@ const itemAnchor = ref<HTMLAnchorElement | null>(null);
 if (isFileTree && props.item.isFolder) {
   const { isSwiping, direction } = useSwipe(itemAnchor);
   watch(isSwiping, (isSwiping) => {
-    if (isSwiping && direction.value == "right") {
+    if (isSwiping && direction.value == "right")
       handleItemOpen(props.item);
-    }
   });
 }
 

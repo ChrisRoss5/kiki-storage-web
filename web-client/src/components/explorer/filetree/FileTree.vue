@@ -24,12 +24,10 @@ const itemRootAnchors = ref<HTMLAnchorElement[]>([]);
 
 onMounted(() => {
   for (const anchor of itemRootAnchors.value) {
-    console.log(anchor);
     const { isSwiping, direction } = useSwipe(anchor);
     watch(isSwiping, (isSwiping) => {
-      if (isSwiping && direction.value == "right") {
-       pathStore.pushOnTab(`/${anchor.id}`);
-      }
+      if (isSwiping && direction.value == "right")
+        pathStore.pushOnTab(`/${anchor.id}`);
     });
   }
 });
