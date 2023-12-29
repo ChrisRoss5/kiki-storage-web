@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="text-[12px] lg:text-[16px] transition-[font-size]">
+<html lang="en" class="text-[12px] transition-[font-size] lg:text-[16px]">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
@@ -10,14 +10,13 @@
     />
     <title>Dropbox Clone</title>
     <script>
+      /* Just to prevent a potential flicker */
       document.documentElement.dataset.theme =
         localStorage.getItem("theme") ?? "light";
     </script>
   </head>
-  <body
-    class="hidden-scrollbar m-0 overflow-x-hidden portrait:md:overflow-hidden"
-  >
-    <div id="app" class="h-screen lg:!h-screen landscape:h-[150vh]"></div>
+  <body class="m-0">
+    <div id="app" class="h-screen lg:!h-screen landscape:h-[155vh]"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

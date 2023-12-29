@@ -54,7 +54,6 @@ export function createItemStore(this: ItemStoreBindings) {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
     const _stores = getAllItemStores();
-    console.log("totalStores: ", _stores.length, "setItems", this.id); //todo: remove
     items.value = newDbItems
       // Unsupported firestore query filters
       .filter((newDbItem) => {

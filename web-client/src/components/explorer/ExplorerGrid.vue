@@ -95,6 +95,15 @@ const handleDropOnBody = (e: DragEvent) => {
   )
     props.itemStore.handleDrop(e);
 };
+const handleMouseDown = (e: MouseEvent | TouchEvent) => {
+  selectionRectStore.handleMouseDown(
+    explBodyDiv.value,
+    rectElDiv.value,
+    props.itemStore.items,
+    isFileTree,
+    e,
+  );
+};
 
 /* Initially, CSS Grid was implemented for all views, including the fileTree.
   However, nested subgrids in the fileTree, especially those several levels deep,
@@ -146,15 +155,8 @@ const handleDropOnBody = (e: DragEvent) => {
         @dragover.stop.prevent="setDragOverStyle"
         @dragleave.stop.prevent="clearDragOverStyle"
         @dragend.stop.prevent="clearDragOverStyle"
-        @mousedown="
-          selectionRectStore.handleMouseDown(
-            explBodyDiv,
-            rectElDiv,
-            itemStore.items,
-            isFileTree,
-            $event,
-          )
-        "
+        @mousedown="handleMouseDown"
+        @touchstart="handleMouseDown"
         @scroll="scrollTop = explBodyDiv?.scrollTop ?? 0"
         @contextmenu.stop.prevent="
           contextMenuStore.show('explorer', itemStore, $event)

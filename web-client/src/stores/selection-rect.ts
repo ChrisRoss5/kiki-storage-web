@@ -1,8 +1,10 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { useContextMenuStore } from "./context-menu";
 import { treeStoreDefs } from "./items/manager";
 
 export const useSelectionRectStore = defineStore("selection-rect", () => {
+  const contextMenuStore = useContextMenuStore();
   const isMouseDown = ref<boolean>(false);
   const isActive = ref<boolean>(false);
   const wasActive = ref<boolean>(false); // To prevent left-click event after selection end
@@ -16,7 +18,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
   let startCoords = { x: 0, y: 0 };
   let left = 0; // left and width must be global because they are used in the interval
   let width = 0;
-  let scale = 0; // scale is needed in case the explEl is transformed with scale
+  let scale = 0; // scale is needed in case the explEl is transformed with css scale
   let startScrollTop = 0;
   let startMaxScrollTop = 0; // to prevent auto-scrolling down to infinity in the interval
   let isCtrlOrShiftDown = false;
@@ -27,9 +29,17 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
   let isFileTree = false;
   let fileTreeOffsetTopTotal = 0;
 
+  watch(
+    () => contextMenuStore.activeContextMenu,
+    (val) => {
+      if (val && isMouseDown.value) addEventSideEffects();
+      else removeEventSideEffects();
+    },
+  );
+
   const activate = () => {
+    addEventSideEffects();
     isActive.value = true;
-    document.body.style.userSelect = "none";
     rectEl!.style.transition = "";
     rectEl!.style.opacity = "1";
     rectEl!.style.pointerEvents = "";
@@ -38,9 +48,10 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
         treeStoreDef().deselectAll();
   };
   const deactivate = () => {
+    isMouseDown.value = false;
     if (!isActive.value) return;
+    removeEventSideEffects();
     isActive.value = false;
-    document.body.style.userSelect = "";
     lastScrollDirection = null;
     rectEl!.style.transition = "opacity 300ms";
     rectEl!.style.opacity = "0";
@@ -57,18 +68,14 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     _rectEl: HTMLElement | null,
     _items: Item[],
     _isFileTree: boolean,
-    e: MouseEvent,
+    e: MouseEvent | TouchEvent,
   ) => {
     if (!_explEl || !_rectEl) return;
     isCtrlOrShiftDown = e.ctrlKey || e.shiftKey;
+    const children = [..._explEl.children] as HTMLAnchorElement[];
     items = _items
       .filter((i) => !(isCtrlOrShiftDown && i.isSelected))
-      .map((i) => ({
-        item: i,
-        el: [..._explEl.children].find(
-          (_i) => _i.id == i.id,
-        ) as HTMLAnchorElement,
-      }));
+      .map((i) => ({ item: i, el: children.find((_i) => _i.id == i.id)! }));
     rectEl = _rectEl;
     explEl = _explEl;
     isFileTree = _isFileTree;
@@ -89,34 +96,34 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     startMaxScrollTop = isFileTree
       ? explEl.offsetHeight - scrollEl.offsetHeight + fileTreeOffsetTopTotal
       : scrollEl.scrollHeight - scrollEl.offsetHeight;
-    startCoords = {
-      x: (e.clientX - explElRect.left) / scale,
-      y: (e.clientY - scrollElRect.top) / scale + startScrollTop,
-    };
+    const { x, y } = getEventCoords(e);
+    startCoords = { x, y: y + startScrollTop };
     isMouseDown.value = true;
   };
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = (e: MouseEvent | TouchEvent) => {
     if (!isMouseDown.value) return;
+    if (e instanceof TouchEvent && !contextMenuStore.activeContextMenu)
+      return deactivate();
     let scrolledDown = scrollEl!.scrollTop;
     if (isFileTree) scrolledDown -= fileTreeOffsetTopTotal;
-    const newCoords = {
-      x: (e.clientX - explElRect!.left) / scale,
-      y: (e.clientY - scrollElRect!.top) / scale + scrolledDown,
-    };
-    const x = newCoords.x - startCoords.x;
-    const y = newCoords.y - startCoords.y;
-    width = Math.abs(x);
-    let height = Math.abs(y);
+    const { clientY, x, y } = getEventCoords(e);
+    const xDist = x - startCoords.x;
+    const yDist = y - startCoords.y + scrolledDown;
+    width = Math.abs(xDist);
+    let height = Math.abs(yDist);
     if (!isActive.value) {
       if (width < 10 && height < 10) return;
       activate();
     }
-    left = x < 0 ? startCoords.x - width : startCoords.x;
-    let top = y < 0 ? startCoords.y - height : startCoords.y;
+    left = xDist < 0 ? startCoords.x - width : startCoords.x;
+    let top = yDist < 0 ? startCoords.y - height : startCoords.y;
     rectEl!.style.top = `${top}px`;
     rectEl!.style.left = `${left}px`;
     rectEl!.style.width = `${width}px`;
     rectEl!.style.height = `${height}px`;
+    if (isThrottled) return;
+    isThrottled = true;
+    setTimeout(() => (isThrottled = false), 10);
     const checkOverlap = () => {
       for (const { item, el } of items)
         item.isSelected = !(
@@ -126,14 +133,16 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
           el.offsetTop >= top + height
         );
     };
+    let { top: scrollElTop, bottom: scrollElBottom } = scrollElRect!;
+    if (isFileTree) scrollElBottom -= 50;
     let scrollDirection = null as "up" | "down" | null;
-    if (e.clientY < scrollElRect!.top) {
+    if (clientY < scrollElTop) {
       scrollDirection = "up";
-      scrollStrength = scrollElRect!.top - e.clientY;
+      scrollStrength = scrollElTop - clientY;
     }
-    if (e.clientY > scrollElRect!.bottom) {
+    if (clientY > scrollElBottom) {
       scrollDirection = "down";
-      scrollStrength = e.clientY - scrollElRect!.bottom;
+      scrollStrength = clientY - scrollElBottom;
     }
     if (scrollDirection != lastScrollDirection) {
       lastScrollDirection = scrollDirection;
@@ -162,19 +171,31 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
         checkOverlap();
       }, 10);
     }
-    if (isThrottled) return;
-    isThrottled = true;
-    setTimeout(() => (isThrottled = false), 10);
     checkOverlap();
   };
-  const handleMouseUp = (e: MouseEvent) => {
-    if (isActive.value && e.button === 0) wasActive.value = true;
-    isMouseDown.value = false;
+  const handleMouseUp = (e: MouseEvent | TouchEvent) => {
+    if (isActive.value && e instanceof MouseEvent && e.button === 0)
+      wasActive.value = true;
     deactivate();
+  };
+  const getEventCoords = (e: MouseEvent | TouchEvent) => {
+    const { clientX } = e instanceof MouseEvent ? e : e.touches[0];
+    const { clientY } = e instanceof MouseEvent ? e : e.touches[0];
+    const x = (clientX - explElRect!.left) / scale;
+    const y = (clientY - scrollElRect!.top) / scale;
+    return { clientX, clientY, x, y };
+  };
+  const addEventSideEffects = () => {
+    document.documentElement.style.userSelect = "none"; // Desktop
+    document.documentElement.style.overflow = "hidden"; // Mobile
+  };
+  const removeEventSideEffects = () => {
+    document.documentElement.style.userSelect = "";
+    document.documentElement.style.overflow = "";
   };
 
   return {
-    isMouseDown,
+    deactivate,
     isActive,
     wasActive,
     handleMouseMove,

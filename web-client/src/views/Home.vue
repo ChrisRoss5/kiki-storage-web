@@ -24,6 +24,9 @@ const settingsStore = useSettingsStore();
 onMounted(() => {
   document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
   document.addEventListener("mouseup", selectionRectStore.handleMouseUp);
+  document.addEventListener("touchmove", selectionRectStore.handleMouseMove);
+  document.addEventListener("touchend", selectionRectStore.handleMouseUp);
+  document.addEventListener("touchcancel", selectionRectStore.handleMouseUp);
   document.addEventListener("keydown", handleKeydown);
   document.addEventListener("keyup", handleKeyUp);
 });
@@ -62,7 +65,7 @@ const handleKeyUp = (e: KeyboardEvent) => {
     dialogStore.close();
   }
 };
-const handleClickLeft = (e: MouseEvent) => {
+const handleClickCapture = (e: MouseEvent) => {
   if (selectionRectStore.wasActive) {
     selectionRectStore.wasActive = false;
     return;
@@ -79,7 +82,7 @@ const handleClickLeft = (e: MouseEvent) => {
 const handleMouseDown = () => {
   focusedItemStoreId.value = "items";
 };
-const handleMouseDownCapture = (e: MouseEvent) => {
+const handleMouseDownCapture = (e: MouseEvent | TouchEvent) => {
   const target = e.target as HTMLElement;
   const focusedItemStore = getFocusedItemStore();
   const isInRenameContainer = !!target.closest("#rename-container");
@@ -95,9 +98,11 @@ const handleMouseDownCapture = (e: MouseEvent) => {
     id="home"
     class="flex flex-col"
     :class="{ 'not-ready': !settingsStore.dbSettingsReady }"
-    @click.left.capture="handleClickLeft"
+    @click.capture="handleClickCapture"
     @mousedown="handleMouseDown"
     @mousedown.capture="handleMouseDownCapture"
+    @touchstart="handleMouseDown"
+    @touchstart.capture="handleMouseDownCapture"
     @contextmenu="contextMenuStore.hide()"
   >
     <Header id="header" />

@@ -19,11 +19,13 @@ const handleLineClick = () => {
 <template>
   <div
     class="relative flex rounded-box transition-shadow"
+    @touchstart.stop="focusedItemStoreId = itemStore.$id"
     @mousedown.stop="focusedItemStoreId = itemStore.$id"
   >
     <div
       class="w-6 cursor-pointer opacity-50 transition-opacity hover:opacity-100"
       @click.stop.prevent="handleLineClick"
+      @touchstart.capture.stop="null"
       @mousedown.capture.stop="null"
       @dragover.stop.prevent="null"
       @drop.stop.prevent="null"

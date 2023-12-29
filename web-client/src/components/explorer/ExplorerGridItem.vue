@@ -41,8 +41,7 @@ const itemAnchor = ref<HTMLAnchorElement | null>(null);
 if (isFileTree && props.item.isFolder) {
   const { isSwiping, direction } = useSwipe(itemAnchor);
   watch(isSwiping, (isSwiping) => {
-    if (isSwiping && direction.value == "right")
-      handleItemOpen(props.item);
+    if (isSwiping && direction.value == "right") handleItemOpen(props.item);
   });
 }
 
@@ -82,7 +81,7 @@ const handleItemOpen = (item: Item) => {
 const handleDragStart = (item: Item, e: DragEvent) => {
   if (selectionRectStore.isActive || item.isRenaming || !item.isSelected)
     return e.preventDefault();
-  else selectionRectStore.isLeftMouseDown = false;
+  else selectionRectStore.deactivate();
   const { selectedItems: items } = props.itemStore;
   const dragData: ItemsDragData = { items, uid: user.value?.uid };
   if (items.length > 1) {

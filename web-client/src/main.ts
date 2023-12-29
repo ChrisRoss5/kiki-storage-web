@@ -18,9 +18,18 @@ export const $breakpoints = reactive({
   lgAndUp: useMediaQuery("(min-width: 1024px)"),
 });
 
-app.config.globalProperties.$breakpoints = $breakpoints;
-app.config.globalProperties.$isTouchDevice =
+export const $isTouchDevice =
   "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+app.config.globalProperties.$breakpoints = $breakpoints;
+app.config.globalProperties.$isTouchDevice = $isTouchDevice;
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    $breakpoints: typeof $breakpoints;
+    $isTouchDevice: boolean;
+  }
+}
 
 app
   .use(VueFire, {
@@ -32,13 +41,6 @@ app
   .use(VWave, {})
   .use(Slicksort)
   .mount("#app");
-
-declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
-    $breakpoints: typeof $breakpoints;
-    $isTouchDevice: boolean;
-  }
-}
 
 export const fileIconVectors = Object.fromEntries(
   Object.entries(
