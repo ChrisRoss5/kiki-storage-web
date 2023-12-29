@@ -13,7 +13,7 @@ import {
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
-import { onBeforeMount, onBeforeUnmount } from "vue";
+import { onMounted } from "vue";
 
 const searchItemStore = useSearchItemStore();
 const selectionRectStore = useSelectionRectStore();
@@ -21,23 +21,13 @@ const dialogStore = useShortDialogStore();
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
 
-onBeforeMount(() => {
+onMounted(() => {
   document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
-  document.addEventListener("mouseup", handleLeftMouseUp);
+  document.addEventListener("mouseup", selectionRectStore.handleMouseUp);
   document.addEventListener("keydown", handleKeydown);
   document.addEventListener("keyup", handleKeyUp);
 });
-onBeforeUnmount(() => {
-  document.removeEventListener("mousemove", selectionRectStore.handleMouseMove);
-  document.removeEventListener("mouseup", handleLeftMouseUp);
-  document.removeEventListener("keydown", handleKeydown);
-  document.removeEventListener("keyup", handleKeyUp);
-});
 
-const handleLeftMouseUp = (e: MouseEvent) => {
-  if (e.button != 0) return;
-  selectionRectStore.handleLeftMouseUp();
-};
 const handleKeydown = (e: KeyboardEvent) => {
   const focusedItemStore = getFocusedItemStore();
   if (e.key == "Escape") {
@@ -74,7 +64,6 @@ const handleKeyUp = (e: KeyboardEvent) => {
 };
 const handleClickLeft = (e: MouseEvent) => {
   if (selectionRectStore.wasActive) {
-    // Necessary because mouseup is triggered before click
     selectionRectStore.wasActive = false;
     return;
   }

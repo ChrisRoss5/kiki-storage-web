@@ -3,9 +3,9 @@ import { ref } from "vue";
 import { treeStoreDefs } from "./items/manager";
 
 export const useSelectionRectStore = defineStore("selection-rect", () => {
-  const isLeftMouseDown = ref<boolean>(false);
+  const isMouseDown = ref<boolean>(false);
   const isActive = ref<boolean>(false);
-  const wasActive = ref<boolean>(false);
+  const wasActive = ref<boolean>(false); // To prevent left-click event after selection end
 
   let items: { item: Item; el: HTMLAnchorElement }[] = [];
   let rectEl = null as HTMLElement | null;
@@ -52,7 +52,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     }, 300);
     clearInterval(interval);
   };
-  const handleLeftMouseDown = (
+  const handleMouseDown = (
     _explEl: HTMLElement | null,
     _rectEl: HTMLElement | null,
     _items: Item[],
@@ -93,10 +93,10 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
       x: (e.clientX - explElRect.left) / scale,
       y: (e.clientY - scrollElRect.top) / scale + startScrollTop,
     };
-    isLeftMouseDown.value = true;
+    isMouseDown.value = true;
   };
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isLeftMouseDown.value) return;
+    if (!isMouseDown.value) return;
     let scrolledDown = scrollEl!.scrollTop;
     if (isFileTree) scrolledDown -= fileTreeOffsetTopTotal;
     const newCoords = {
@@ -167,18 +167,18 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     setTimeout(() => (isThrottled = false), 10);
     checkOverlap();
   };
-  const handleLeftMouseUp = () => {
-    if (isActive.value) wasActive.value = true;
-    isLeftMouseDown.value = false;
+  const handleMouseUp = (e: MouseEvent) => {
+    if (isActive.value && e.button === 0) wasActive.value = true;
+    isMouseDown.value = false;
     deactivate();
   };
 
   return {
-    isLeftMouseDown,
+    isMouseDown,
     isActive,
     wasActive,
     handleMouseMove,
-    handleLeftMouseDown,
-    handleLeftMouseUp,
+    handleMouseDown,
+    handleMouseUp,
   };
 });

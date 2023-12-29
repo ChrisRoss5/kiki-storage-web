@@ -146,8 +146,8 @@ const handleDropOnBody = (e: DragEvent) => {
         @dragover.stop.prevent="setDragOverStyle"
         @dragleave.stop.prevent="clearDragOverStyle"
         @dragend.stop.prevent="clearDragOverStyle"
-        @mousedown.left="
-          selectionRectStore.handleLeftMouseDown(
+        @mousedown="
+          selectionRectStore.handleMouseDown(
             explBodyDiv,
             rectElDiv,
             itemStore.items,

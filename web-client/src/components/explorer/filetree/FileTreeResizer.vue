@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useTabsStore } from "@/stores/tabs";
-import { inject, onMounted, onUnmounted, ref } from "vue";
+import { inject, onMounted, ref } from "vue";
 
 const isThemeLight = inject<boolean>("isThemeLight")!;
 
@@ -19,11 +19,6 @@ onMounted(() => {
   document.addEventListener("touchend", handleMouseUp);
   document.addEventListener("touchcancel", handleMouseUp);
   document.addEventListener("touchmove", handleMouseMove);
-});
-
-onUnmounted(() => {
-  document.removeEventListener("mouseup", handleMouseUp);
-  document.removeEventListener("mousemove", handleMouseMove);
 });
 
 const handleMouseDown = (e: MouseEvent | TouchEvent) => {
