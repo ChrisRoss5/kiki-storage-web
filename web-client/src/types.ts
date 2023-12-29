@@ -6,7 +6,7 @@ interface ItemCore {
   dateModified: Date;
   path: string;
   isFolder?: boolean;
-  isFavorite?: boolean;
+  isStarred?: boolean;
   size?: number;
 }
 interface Item extends ItemCore {
@@ -80,7 +80,6 @@ type Theme =
   | "night"
   | "coffee"
   | "winter";
-
 
 /* HELPERS */
 

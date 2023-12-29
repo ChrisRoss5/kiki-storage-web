@@ -38,7 +38,7 @@ const selectionRectStore = useSelectionRectStore();
 const user = useCurrentUser();
 
 const itemAnchor = ref<HTMLAnchorElement | null>(null);
-if (props.item.isFolder) {
+if (isFileTree && props.item.isFolder) {
   const { isSwiping, direction } = useSwipe(itemAnchor);
   watch(isSwiping, (isSwiping) => {
     if (isSwiping && direction.value == "right") {

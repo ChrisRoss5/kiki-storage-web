@@ -73,7 +73,7 @@ export const firestoreItemConverter: FirestoreDataConverter<ItemCore, DbItem> =
         path: i.path,
       };
       if (i.isFolder) dbItem.isFolder = true;
-      if (i.isFavorite) dbItem.isFavorite = true;
+      if (i.isStarred) dbItem.isStarred = true;
       if (i.size) dbItem.size = i.size;
       return dbItem;
     },
