@@ -26,6 +26,7 @@ interface SearchFilters {
   type: string;
 }
 interface Settings {
+  disableTransitions: false,
   hideFilesInTree: boolean;
   desktopZoom: number;
   mobileZoom: number;

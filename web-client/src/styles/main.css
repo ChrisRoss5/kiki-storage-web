@@ -5,6 +5,10 @@
 * {
   outline-color: oklch(var(--p));
 }
+.no-transitions,
+.no-transitions * {
+  transition: none !important;
+}
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

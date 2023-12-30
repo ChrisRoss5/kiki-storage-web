@@ -14,6 +14,15 @@ const showThemes = ref(false);
 const defaultFontSizeDesktop = "16px";
 const defaultFontSizeMobile = "12px";
 
+const disableTransitions = computed({
+  get: () => {
+    const { disableTransitions } = settingsStore.settings;
+    const method = disableTransitions ? "add" : "remove";
+    document.documentElement.classList[method]("no-transitions");
+    return disableTransitions;
+  },
+  set: (boolean) => settingsStore.setSetting("disableTransitions", boolean),
+});
 const hideFilesInFileTree = computed({
   get: () => settingsStore.settings.hideFilesInTree,
   set: (boolean) => settingsStore.setSetting("hideFilesInTree", boolean),
@@ -62,6 +71,14 @@ const mobileZoom = computed({
       <div class="py-1">
         <Themes v-if="showThemes" />
         <div class="flex flex-col gap-3" v-else>
+          <label class="cursor-pointer">
+            <input
+              type="checkbox"
+              v-model="disableTransitions"
+              class="dsy-checkbox align-text-bottom"
+            />
+            <span class="ml-2">Disable transitions</span>
+          </label>
           <label class="cursor-pointer">
             <input
               type="checkbox"
