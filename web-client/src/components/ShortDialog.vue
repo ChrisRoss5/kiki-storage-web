@@ -24,18 +24,16 @@ const { state } = storeToRefs(store);
         {{ state.message }}
       </div>
     </template>
-    <template #actions>
-      <template v-if="state.handleConfirmation">
-        <button
-          class="dsy-btn dsy-btn-primary"
-          @click="state.handleConfirmation(true)"
-        >
-          Confirm
-        </button>
-        <button class="dsy-btn" @click="state.handleConfirmation(false)">
-          Cancel
-        </button>
-      </template>
+    <template v-if="state.handleConfirmation" #actions>
+      <button
+        class="dsy-btn dsy-btn-primary"
+        @click="state.handleConfirmation(true)"
+      >
+        Confirm
+      </button>
+      <button class="dsy-btn" @click="state.handleConfirmation(false)">
+        Cancel
+      </button>
     </template>
   </Dialog>
 </template>

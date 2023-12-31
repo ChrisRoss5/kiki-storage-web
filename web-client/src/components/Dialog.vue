@@ -39,11 +39,14 @@ watch(
       </div>
       <div
         class="min-h-0 overflow-auto px-6 pb-1"
-        :class="{ 'pt-6': !$slots.header }"
+        :class="{ 'pt-6': !$slots.header, 'pb-6': !$slots.actions }"
       >
         <slot name="content"></slot>
       </div>
-      <div class="dsy-modal-action m-0 bg-base-100 px-6 pb-6 pt-3">
+      <div
+        v-if="$slots.actions"
+        class="dsy-modal-action m-0 bg-base-100 px-6 pb-6 pt-3"
+      >
         <form method="dialog">
           <slot name="actions"></slot>
         </form>
