@@ -64,8 +64,13 @@ const handleClickCapture = (e: MouseEvent) => {
     selectionRectStore.wasActive = false;
     return;
   }
-  if (e.ctrlKey || e.shiftKey) return;
   const target = e.target as HTMLElement;
+  if (
+    e.ctrlKey ||
+    e.shiftKey ||
+    target.closest("#item-options, #view-selector")
+  )
+    return;
   const isInFileTree = !!target.closest("#filetree");
   if (isInFileTree)
     for (const treeStoreDef of Object.values(treeStoreDefs))
@@ -83,7 +88,7 @@ const handleMouseDownCapture = (e: MouseEvent | TouchEvent) => {
   if (!isInRenameContainer) focusedItemStore.stopRenaming();
   if (!searchItemStore.items.length && !target.closest("#search"))
     searchItemStore.isOpen = false;
-  contextMenuStore.hide();
+  if (!target.closest("#context-menu")) contextMenuStore.hide();
 };
 const handleEscape = (focusedItemStore: ItemStore) => {
   if (focusedItemStore.selectedItems.length) {

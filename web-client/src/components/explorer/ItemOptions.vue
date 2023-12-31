@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useContextMenuStore } from "@/stores/context-menu";
+import { useClipboardStore } from "@/stores/items/clipboard";
 import { useItemStorageStore } from "@/stores/items/firebase/storage";
 import { ItemStore } from "@/stores/items/manager";
 import { useSettingsStore } from "@/stores/settings";
@@ -8,11 +8,11 @@ import { useTabsStore } from "@/stores/tabs";
 import { getFullPath } from "@/utils/item";
 import { computed } from "vue";
 
-const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
 const itemStorageStore = useItemStorageStore();
 const dialogStore = useShortDialogStore();
 const tabsStore = useTabsStore();
+const clipboardStore = useClipboardStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 const firstItem = computed(() => props.itemStore.selectedItems[0]);
@@ -62,22 +62,31 @@ const options = computed<Option[]>(() =>
       showCondition: () => props.itemStore.selectedItems.length == 1,
     },
     {
+      icon: "content_cut",
+      label: "Cut",
+      onClick: () => clipboardStore.cut(props.itemStore.selectedItems),
+    },
+    {
+      icon: "content_copy",
+      label: "Copy",
+      onClick: () => clipboardStore.copy(props.itemStore.selectedItems),
+    },
+    {
       icon: props.itemStore.root == "bin" ? "delete_forever" : "delete",
       label: props.itemStore.root == "bin" ? "Delete permanently" : "Delete",
       onClick: props.itemStore.deleteItems,
     },
   ].filter((option) => !option.showCondition || option.showCondition()),
 );
-
-const handleClick = (onClickHandler: () => void) => {
-  contextMenuStore.hide();
-  onClickHandler();
-};
 </script>
 
 <template>
   <Transition name="fade">
-    <div class="ml-auto flex" v-if="itemStore.selectedItems.length">
+    <div
+      id="item-options"
+      class="ml-auto flex"
+      v-if="itemStore.selectedItems.length"
+    >
       <div
         v-for="{ icon, label, onClick } in options"
         :key="label"
@@ -89,7 +98,7 @@ const handleClick = (onClickHandler: () => void) => {
           'rounded-box': inContextMenu,
         }"
         :data-tip="label"
-        @click.stop="handleClick(onClick)"
+        @click="onClick"
         v-wave
       >
         <span class="material-symbols-outlined leading-4"> {{ icon }} </span>
