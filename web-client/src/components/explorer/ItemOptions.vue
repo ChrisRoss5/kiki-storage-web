@@ -85,7 +85,9 @@ const options = computed<Option[]>(() =>
     <div
       id="item-options"
       class="ml-auto flex"
-      v-if="itemStore.selectedItems.length"
+      v-if="
+        itemStore.selectedItems.length && (!$isTouchDevice || inContextMenu)
+      "
     >
       <div
         v-for="{ icon, label, onClick } in options"
