@@ -104,6 +104,9 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     if (!isMouseDown.value) return;
     if (e instanceof TouchEvent && !contextMenuStore.activeContextMenu)
       return deactivate();
+    /* if (isThrottled) return;  // Todo: evaluate if this is needed
+    isThrottled = true;
+    setTimeout(() => (isThrottled = false), 10); */
     let scrolledDown = scrollEl!.scrollTop;
     if (isFileTree) scrolledDown -= fileTreeOffsetTopTotal;
     const { clientY, x, y } = getEventCoords(e);
@@ -121,9 +124,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
     rectEl!.style.left = `${left}px`;
     rectEl!.style.width = `${width}px`;
     rectEl!.style.height = `${height}px`;
-    if (isThrottled) return;
-    isThrottled = true;
-    setTimeout(() => (isThrottled = false), 10);
+
     const checkOverlap = () => {
       for (const { item, el } of items)
         item.isSelected = !(

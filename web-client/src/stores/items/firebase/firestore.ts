@@ -1,3 +1,4 @@
+import { useNotificationStore } from "@/stores/notification";
 import { roots } from "@/stores/settings/default";
 import { firestoreItemConverter, getFullPath } from "@/utils/item";
 import {
@@ -26,12 +27,14 @@ import {
 } from "vuefire";
 import { useCleanup } from "../cleanup";
 import { useItemStorageStore } from "./storage";
-import { useNotificationStore } from "@/stores/notification";
 
-export type DbItem = Overwrite<ItemCore, {
-  dateAdded: Timestamp;
-  dateModified: Timestamp;
-}>
+export type DbItem = Overwrite<
+  ItemCore,
+  {
+    dateAdded: Timestamp;
+    dateModified: Timestamp;
+  }
+>;
 
 // Vuefire Issue #1315 - SSR console warning
 
@@ -41,7 +44,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
   const dbPath = computed(() => `app/drive/${user.value?.uid}`);
   const cleanup = useCleanup();
   const { api: storageApi } = useItemStorageStore();
-  const notificationStore = useNotificationStore();
+  const notifStore = useNotificationStore();
   const PATH_ITEM_COLLECTIONS: Record<string, _RefFirestore<ItemCore[]>> = {};
 
   const $reset = () => {
@@ -128,7 +131,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
     },
     renameItem(item: Item) {
       /* Todo: move to backend */
-      notificationStore.message = "Renaming item(s)...";
+      const notif = notifStore.createLoading("Renaming item(s)...");
       const promises: Promise<void>[] = [];
       const oldFullPath = getFullPath(item);
       const newFullPath = `${item.path ? `${item.path}/` : ""}${item.newName}`;
@@ -138,12 +141,12 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateParentDateModified(item);
       Promise.allSettled(promises).then(() => {
         cleanup.onRenameComplete(oldFullPath, newFullPath);
-        notificationStore.message = "";
+        notifStore.remove(notif);
       });
     },
     moveItems(items: Item[], newPath: string) {
       /* Todo: move to backend */
-      notificationStore.message = "Moving item(s)...";
+      const notif = notifStore.createLoading("Moving item(s)...");
       const promises: Promise<void>[] = [];
       for (const item of items) {
         promises.push(
@@ -156,12 +159,12 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateParentDateModified(...items);
       Promise.allSettled(promises).then(() => {
         cleanup.onMoveComplete(items, newPath);
-        notificationStore.message = "";
+        notifStore.remove(notif);
       });
     },
     deleteItemsPermanently(items: Item[]) {
       /* Todo: move to backend */
-      notificationStore.message = "Deleting item(s)...";
+      const notif = notifStore.createLoading("Deleting item(s)...");
       const promises: Promise<void>[] = [];
       for (const item of items) {
         promises.push(this.deleteItemPermanently(item));
@@ -177,7 +180,7 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       updateParentDateModified(...items);
       Promise.allSettled(promises).then(() => {
         cleanup.onDeleteComplete(items);
-        notificationStore.message = "";
+        notifStore.remove(notif);
       });
     },
     async deleteItemPermanently(item: Item) {

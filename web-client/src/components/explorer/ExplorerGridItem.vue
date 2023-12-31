@@ -117,6 +117,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
       'hover:bg-base-100/25': !isThemeLight,
       '!bg-base-300': isThemeLight && item.isSelected,
       '!bg-base-100/50': !isThemeLight && item.isSelected,
+      'is-cut': item.isCut,
     }"
     tabindex="0"
     :draggable="!$isTouchDevice && item.isSelected"
@@ -176,3 +177,9 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     />
   </a>
 </template>
+
+<style>
+.is-cut {
+  filter: brightness(0.6);
+}
+</style>

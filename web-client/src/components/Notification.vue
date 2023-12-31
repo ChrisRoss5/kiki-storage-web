@@ -5,23 +5,44 @@ const store = useNotificationStore();
 </script>
 
 <template>
-  <Transition name="slide-down">
+  <Transition name="fade">
     <div
-      v-if="store.message"
-      class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-neutral text-neutral-content p-5 z-[999] rounded-box shadow-xl"
+      v-if="store.notifications.length"
+      class="pointer-events-none fixed left-1/2 top-1/2 z-[999] -translate-x-1/2 -translate-y-1/2 opacity-80"
     >
-      <span v-if="store.isLoading" class="dsy-loading dsy-loading-spinner w-4"></span>
-      {{ store.message }}
+      <TransitionGroup name="slide-up">
+        <div
+          v-for="notif in store.notifications"
+          class="mt-2 rounded-box bg-neutral p-5 text-neutral-content shadow-xl"
+          :key="notif.id"
+        >
+          <span
+            v-if="notif.isLoading"
+            class="dsy-loading dsy-loading-spinner w-4"
+          ></span>
+          {{ notif.message }}
+        </div>
+      </TransitionGroup>
     </div>
   </Transition>
 </template>
 
 <style scoped>
-.slide-down-enter-from,
-.slide-down-leave-to {
-  transform: translate(-50%, calc(-50% - 0.5rem));
+.slide-up-move {
+  transition: transform 300ms;
 }
-.slide-down-leave-to {
-  transform : translate(-50%, calc(-50% + 0.5rem));
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition:
+    transform 300ms,
+    opacity 300ms;
+}
+.slide-up-enter-from {
+  transform: translateY(100%);
+  opacity: 0;
+}
+.slide-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
 }
 </style>

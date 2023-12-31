@@ -81,7 +81,7 @@ watch(
   { flush: "pre" },
 );
 
-let viewTimeout: NodeJS.Timeout;
+let viewTimeout: NodeJS.Timeout | undefined;
 watch(view, () => {
   viewChanged.value = true;
   clearTimeout(viewTimeout);
@@ -143,7 +143,7 @@ const handleMouseDown = (e: MouseEvent | TouchEvent) => {
       />
       <div
         ref="explBodyDiv"
-        class="expl-body relative overflow-y-scroll rounded-box"
+        class="expl-body relative overflow-x-hidden overflow-y-scroll rounded-box"
         :class="{
           'col-span-full grid auto-rows-min grid-cols-[subgrid]': !isFileTree,
           'items-start gap-x-2 gap-y-1': view == 'grid' && !isFileTree,
@@ -199,25 +199,3 @@ const handleMouseDown = (e: MouseEvent | TouchEvent) => {
     </div>
   </TransitionGroup>
 </template>
-
-<style>
-.expl-item {
-  @apply relative cursor-pointer items-center whitespace-nowrap rounded-box;
-  & > * {
-    pointer-events: none;
-  }
-  &.is-list > * {
-    @apply p-3;
-  }
-  &.is-grid > * {
-    @apply px-1 py-2;
-  }
-}
-body[dragging-items] .expl-item,
-.expl-body.dragover .expl-item {
-  &:not(.folder) {
-    opacity: 0.25;
-    transition: opacity 300ms;
-  }
-}
-</style>

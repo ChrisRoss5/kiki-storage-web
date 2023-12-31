@@ -32,8 +32,7 @@ watch(
       y = innerHeight - offsetHeight - 20;
 
     // This will overlap the touch to disable scrolling for selection rect to work properly
-    if ($isTouchDevice)
-      [x, y] = [x - 10, y - 10]
+    if ($isTouchDevice) [x, y] = [x - 10, y - 10];
 
     el.style.top = `${y}px`;
     el.style.left = `${x}px`;
@@ -48,6 +47,7 @@ watch(
     el.style.clipPath = "circle(170% at 0 0)";
     el.style.transform = "translateY(0)";
   },
+  { flush: "post" },
 );
 
 const handleColumnChange = (key: keyof ItemCore) => {

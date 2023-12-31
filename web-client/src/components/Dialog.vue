@@ -15,7 +15,7 @@ watch(
   (show) => {
     if (show) dialogEl.value?.showModal();
     else dialogEl.value?.close();
-  }
+  },
 );
 </script>
 
@@ -31,19 +31,19 @@ watch(
   >
     <div
       ref="dialogBoxEl"
-      class="dsy-modal-box w-auto py-0 px-0 flex flex-col"
+      class="dsy-modal-box flex max-h-[80vh] w-auto flex-col px-0 py-0"
       :style="modalBoxStyle"
     >
-      <div v-if="$slots.header" class="bg-base-100 pt-6 pb-3 px-6 text-2xl">
+      <div v-if="$slots.header" class="bg-base-100 px-6 pb-3 pt-6 text-2xl">
         <slot name="header"></slot>
       </div>
       <div
-        class="pb-1 px-6 min-h-0 overflow-auto"
+        class="min-h-0 overflow-auto px-6 pb-1"
         :class="{ 'pt-6': !$slots.header }"
       >
         <slot name="content"></slot>
       </div>
-      <div class="dsy-modal-action bg-base-100 pt-3 pb-6 px-6 m-0">
+      <div class="dsy-modal-action m-0 bg-base-100 px-6 pb-6 pt-3">
         <form method="dialog">
           <slot name="actions"></slot>
         </form>

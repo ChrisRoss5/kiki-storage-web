@@ -29,6 +29,11 @@ export const usePathStore = defineStore("path", () => {
   );
   let IS_STARTUP = true;
 
+  const $reset = () => {
+    folderPaths.value = [];
+    currentPath.value = "";
+  };
+
   watch(
     () => tabsStore.activeTab,
     (activeTab) => {
@@ -104,5 +109,5 @@ export const usePathStore = defineStore("path", () => {
     router.replace({ path: `/${path}` });
   };
 
-  return { folderPaths, currentPath, currentRoot, pushOnTab };
+  return { folderPaths, currentPath, currentRoot, pushOnTab, $reset };
 });

@@ -20,6 +20,11 @@ export function mergeDeep(target: any, ...sources: any) {
   return mergeDeep(target, ...sources);
 }
 
+export const inEditable = () =>
+  document.activeElement?.tagName == "INPUT" ||
+  document.activeElement?.tagName == "TEXTAREA" ||
+  (document.activeElement as HTMLElement).isContentEditable;
+
 // Created because of slicksort's v-model
 /* type Getter<T> = () => T;
 type Setter<T> = (value: T) => Promise<void>;

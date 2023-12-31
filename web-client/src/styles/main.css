@@ -72,6 +72,26 @@ a {
       display: none; /* Chrome, Safari and Opera */
     }
   }
+  .expl-item {
+    @apply relative cursor-pointer items-center whitespace-nowrap rounded-box;
+    & > * {
+      pointer-events: none;
+    }
+    &.is-list > * {
+      @apply p-3;
+    }
+    &.is-grid > * {
+      @apply px-1 py-2;
+    }
+  }
+}
+
+body[dragging-items] .expl-item,
+.expl-body.dragover .expl-item {
+  &:not(.folder) {
+    opacity: 0.25;
+    transition: opacity 300ms;
+  }
 }
 
 /* daisyui */

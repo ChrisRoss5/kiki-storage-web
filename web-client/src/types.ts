@@ -12,6 +12,8 @@ interface ItemCore {
 interface Item extends ItemCore {
   isSelected?: boolean;
   isRenaming?: boolean;
+  isCopied?: boolean;
+  isCut?: boolean;
   newName?: string;
   storageFile?: any; // No type for ReturnType<typeof useStorageFile>
 }
@@ -26,7 +28,7 @@ interface SearchFilters {
   type: string;
 }
 interface Settings {
-  disableTransitions: false,
+  disableTransitions: false;
   hideFilesInTree: boolean;
   desktopZoom: number;
   mobileZoom: number;

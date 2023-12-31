@@ -51,7 +51,7 @@ const mobileZoom = computed({
   <Dialog
     :show="props.show"
     :closeOutside="true"
-    :modalBoxStyle="{ 'max-width': '80vw', 'max-height': '80vh' }"
+    :modalBoxStyle="{ 'max-width': '80vw' }"
     @close="emit('close')"
   >
     <template #header>

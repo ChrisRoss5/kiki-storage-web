@@ -3,7 +3,9 @@ import Explorer from "@/components/explorer/Explorer.vue";
 import ExplorerTabs from "@/components/explorer/ExplorerTabs.vue";
 import Header from "@/components/header/Header.vue";
 import { useContextMenuStore } from "@/stores/context-menu";
+import { useClipboardStore } from "@/stores/items/clipboard";
 import {
+  ItemStore,
   focusedItemStoreId,
   getFocusedItemStore,
   getTopmostOpenItemStore,
@@ -13,6 +15,7 @@ import {
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
+import { inEditable } from "@/utils";
 import { onMounted } from "vue";
 
 const searchItemStore = useSearchItemStore();
@@ -20,6 +23,7 @@ const selectionRectStore = useSelectionRectStore();
 const dialogStore = useShortDialogStore();
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
+const clipboardStore = useClipboardStore();
 
 onMounted(() => {
   document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
@@ -32,31 +36,14 @@ onMounted(() => {
 });
 
 const handleKeydown = (e: KeyboardEvent) => {
-  const focusedItemStore = getFocusedItemStore();
-  if (e.key == "Escape") {
-    const openItemStore = getTopmostOpenItemStore();
-    if (openItemStore) {
-      openItemStore.isOpen = false;
-      focusedItemStoreId.value = getTopmostOpenItemStore()?.$id ?? "";
-    } else if (focusedItemStore.selectedItems.length)
-      focusedItemStore.deselectAll(); // File tree
-    else focusedItemStoreId.value = "items"; // Primary Explorer
-  } else if (e.key == "Delete" && focusedItemStore.selectedItems.length) {
-    focusedItemStore.deleteItems();
-  } else if (e.key == "F2" && focusedItemStore.selectedItems.length == 1) {
-    e.preventDefault();
-    focusedItemStore.selectedItems[0].isRenaming = true;
-  } else if (e.ctrlKey && e.key == "a") {
-    const inEditable =
-      document.activeElement?.tagName == "INPUT" ||
-      document.activeElement?.tagName == "TEXTAREA" ||
-      (document.activeElement as HTMLElement).isContentEditable;
-    if (inEditable) return;
-    e.preventDefault();
-    document.body.style.userSelect = "none";
-    focusedItemStore.selectAll();
-    document.body.style.userSelect = "";
-  }
+  const s = getFocusedItemStore();
+  if (e.key == "Escape") handleEscape(s);
+  else if (e.key == "Delete") handleDel(s);
+  else if (e.key == "F2") handleF2(s, e);
+  else if (e.ctrlKey && e.key == "a") handleCtrlA(s, e);
+  else if (e.ctrlKey && e.key == "c") clipboardStore.copy(s.selectedItems);
+  else if (e.ctrlKey && e.key == "x") clipboardStore.cut(s.selectedItems);
+  else if (e.ctrlKey && e.key == "v") clipboardStore.paste(s);
 };
 const handleKeyUp = (e: KeyboardEvent) => {
   if (e.key == "Enter" && dialogStore.state.isOpen) {
@@ -90,6 +77,33 @@ const handleMouseDownCapture = (e: MouseEvent | TouchEvent) => {
   if (!searchItemStore.items.length && !target.closest("#search"))
     searchItemStore.isOpen = false;
   contextMenuStore.hide();
+};
+const handleEscape = (focusedItemStore: ItemStore) => {
+  if (focusedItemStore.selectedItems.length) {
+    clipboardStore.empty();
+    focusedItemStore.deselectAll();
+    return;
+  }
+  const openItemStore = getTopmostOpenItemStore();
+  if (openItemStore) {
+    openItemStore.isOpen = false;
+    focusedItemStoreId.value = getTopmostOpenItemStore()?.$id ?? "items";
+  } else focusedItemStoreId.value = "items";
+};
+const handleDel = (focusedItemStore: ItemStore) => {
+  if (focusedItemStore.selectedItems.length) focusedItemStore.deleteItems();
+};
+const handleF2 = (focusedItemStore: ItemStore, e: KeyboardEvent) => {
+  if (focusedItemStore.selectedItems.length != 1) return;
+  e.preventDefault();
+  focusedItemStore.selectedItems[0].isRenaming = true;
+};
+const handleCtrlA = (focusedItemStore: ItemStore, e: KeyboardEvent) => {
+  if (inEditable()) return;
+  e.preventDefault();
+  document.body.style.userSelect = "none";
+  focusedItemStore.selectAll();
+  document.body.style.userSelect = "";
 };
 </script>
 

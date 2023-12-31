@@ -42,8 +42,8 @@ const items: MenuItem[] = [
 ];
 
 const handleLabelTouchEnd = (e: TouchEvent) => {
-  if (e.target == document.activeElement)
-    setTimeout(blurDropdown, 10);
+  const dropdown = (e.target as HTMLElement).parentElement!;
+  if (dropdown.contains(document.activeElement)) setTimeout(blurDropdown, 10);
 };
 const blurDropdown = () => (document.activeElement as HTMLElement).blur();
 </script>
@@ -53,7 +53,7 @@ const blurDropdown = () => (document.activeElement as HTMLElement).blur();
     <label tabindex="0" class="cursor-pointer" @touchend="handleLabelTouchEnd">
       <img
         alt="Profile picture"
-        class="h-16 rounded-full pointer-events-none"
+        class="pointer-events-none h-16 rounded-full"
         :src="user?.photoURL || defaultPfp"
         @error="($event.target as HTMLImageElement).src = defaultPfp"
       />

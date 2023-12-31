@@ -16,19 +16,26 @@ const emit = defineEmits<(e: "close") => void>();
     <template #content>
       <strong class="m-0 block">Keyboard shortcuts</strong>
       <p class="mb-2">
-        All keyboard shortcuts apply to the currently focused folder. A
-        focused folder is indicated by a stronger shadow in floating
-        windows, or a differently colored line in a File Tree. If no
-        folder is focused, shortcuts apply to the currently open folder.
+        All keyboard shortcuts apply to the currently focused folder. A focused
+        folder is indicated by a stronger shadow in floating windows, or a
+        differently colored line in a File Tree. If no folder is focused,
+        shortcuts apply to the currently open folder.
       </p>
       <ul>
         <li>
-          <kbd>Esc</kbd> - Close a floating folder / Deselect all items /
-          Unfocus a folder in File Tree
+          <kbd>Esc</kbd>
+          <div class="inline-flex pl-1">
+            - Deselect all items & empty clipboard <br />
+            - Close a floating folder <br />
+            - Unfocus a folder in File Tree
+          </div>
         </li>
         <li><kbd>Del</kbd> - Delete selected items</li>
         <li><kbd>F2</kbd> - Rename selected item</li>
         <li><kbd>Ctrl</kbd> + <kbd>A</kbd> - Select all items</li>
+        <li><kbd>Ctrl</kbd> + <kbd>C</kbd> - Copy selected items</li>
+        <li><kbd>Ctrl</kbd> + <kbd>X</kbd> - Cut selected items</li>
+        <li><kbd>Ctrl</kbd> + <kbd>V</kbd> - Paste items from clipboard</li>
       </ul>
       <strong class="mt-4 block">Touch gestures</strong>
       <ul class="list-inside list-disc">
