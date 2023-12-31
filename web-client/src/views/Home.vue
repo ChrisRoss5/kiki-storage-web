@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import ContextMenu from "@/components/ContextMenu.vue";
+import Notification from "@/components/Notification.vue";
+import ShortDialog from "@/components/ShortDialog.vue";
 import Explorer from "@/components/explorer/Explorer.vue";
 import ExplorerTabs from "@/components/explorer/ExplorerTabs.vue";
 import Header from "@/components/header/Header.vue";
@@ -16,7 +19,7 @@ import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useSettingsStore } from "@/stores/settings";
 import { useShortDialogStore } from "@/stores/short-dialog";
 import { inEditable } from "@/utils";
-import { onMounted } from "vue";
+import { onMounted, provide, ref } from "vue";
 
 const searchItemStore = useSearchItemStore();
 const selectionRectStore = useSelectionRectStore();
@@ -24,6 +27,9 @@ const dialogStore = useShortDialogStore();
 const contextMenuStore = useContextMenuStore();
 const settingsStore = useSettingsStore();
 const clipboardStore = useClipboardStore();
+
+const ghostDragDiv = ref<HTMLDivElement | null>();
+provide("ghostDragDiv", ghostDragDiv);
 
 onMounted(() => {
   document.addEventListener("mousemove", selectionRectStore.handleMouseMove);
@@ -41,6 +47,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   else if (e.key == "Delete") handleDel(s);
   else if (e.key == "F2") handleF2(s, e);
   else if (e.ctrlKey && e.key == "a") handleCtrlA(s, e);
+  else if (e.ctrlKey && e.key == "i") s.invertSelection();
   else if (e.ctrlKey && e.key == "c") clipboardStore.copy(s.selectedItems);
   else if (e.ctrlKey && e.key == "x") clipboardStore.cut(s.selectedItems);
   else if (e.ctrlKey && e.key == "v") clipboardStore.paste(s);
@@ -120,9 +127,19 @@ const handleCtrlA = (focusedItemStore: ItemStore, e: KeyboardEvent) => {
     @contextmenu="contextMenuStore.hide()"
   >
     <Header id="header" />
-    <div id="window" class="flex min-h-0 flex-1 flex-col overflow-clip">
+    <div
+      id="window"
+      class="flex min-h-0 flex-1 flex-col overflow-clip bg-base-100"
+    >
       <ExplorerTabs />
       <Explorer />
+      <ShortDialog />
+      <ContextMenu />
+      <Notification />
+      <div
+        ref="ghostDragDiv"
+        class="fixed -top-full rounded-box bg-base-300 p-3 pl-7"
+      ></div>
     </div>
   </div>
 </template>

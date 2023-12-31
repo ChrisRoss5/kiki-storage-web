@@ -49,6 +49,7 @@ const columnOrder = computed({
     lockAxis="x"
     useDragHandle
     helperClass="slick-col-dragging"
+    appendTo="#window"
     @sort-start="isDraggingColumn = true"
     @sort-end="isDraggingColumn = false"
     @contextmenu.stop.prevent="

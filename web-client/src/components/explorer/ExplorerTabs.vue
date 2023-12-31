@@ -42,6 +42,11 @@ watch(
   { flush: "post" },
 );
 
+const handleTabDblClick = () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.querySelector("#window")?.requestFullscreen();
+};
+
 /* Using -translate-x-2 and width: calc(100% + 0.5rem) because SlickList
 doesn't transition the margin nor gap.  */
 </script>
@@ -58,6 +63,7 @@ doesn't transition the margin nor gap.  */
     axis="x"
     lockAxis="x"
     helperClass="slick-tab-dragging"
+    appendTo="#window"
     :distance="$breakpoints.mdAndUp ? 5 : 0"
     :pressDelay="$breakpoints.mdAndUp ? 0 : 400"
   >
@@ -82,6 +88,7 @@ doesn't transition the margin nor gap.  */
         @auxclick.middle.prevent="tabsStore.deleteTab(tab)"
         @click.prevent="tabsStore.switchTab(tab)"
         @dragover="tabsStore.switchTab(tab)"
+        @dblclick="handleTabDblClick"
       >
         <div class="relative flex gap-1 overflow-hidden pl-3 pr-7">
           <div

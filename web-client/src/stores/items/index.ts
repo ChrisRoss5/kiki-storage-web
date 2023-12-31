@@ -10,6 +10,7 @@ import { computed, ref, watch } from "vue";
 import { _RefFirestore, useCurrentUser } from "vuefire";
 import { usePathStore } from "../path";
 import { useSearchStore } from "../search";
+import { useSettingsStore } from "../settings";
 import { RootKey } from "../settings/default";
 import { useShortDialogStore } from "../short-dialog";
 import { useItemStorageStore } from "./firebase/storage";
@@ -24,6 +25,7 @@ export function createItemStore(this: ItemStoreBindings) {
   const { api: storageApi } = useItemStorageStore();
   const searchStore = useSearchStore();
   const user = useCurrentUser();
+  const settingsStore = useSettingsStore();
 
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
@@ -32,7 +34,12 @@ export function createItemStore(this: ItemStoreBindings) {
   const path = ref(this.path ?? "");
 
   const itemsPending = computed(() => !!dbItems.value?.pending);
-  const selectedItems = computed(() => items.value.filter((i) => i.isSelected));
+  const selectedItems = computed(() =>
+    items.value.filter(
+      (i) =>
+        i.isSelected && (!settingsStore.settings.hideFilesInTree || i.isFolder),
+    ),
+  );
   const root = computed(() => path.value.split("/")[0] as RootKey);
 
   const $reset = () => {
@@ -46,6 +53,7 @@ export function createItemStore(this: ItemStoreBindings) {
   const setDbItems = (newItems: _RefFirestore<ItemCore[]>) => {
     // All paths are being watched, but in the future it may be necessary to stop watchers
     // depending on the usage (dbItems.value?.stop();)
+    // Currently, watchers are super cheap and without a limit.
     // https://cloud.google.com/firestore/pricing
     // https://firebase.google.com/docs/firestore/quotas#writes_and_transactions
     dbItems.value = newItems;
@@ -125,6 +133,9 @@ export function createItemStore(this: ItemStoreBindings) {
     );
     firestoreApi.moveItems(items, _path);
   };
+  const handleCopy = async (items: Item[], _path?: string) => {
+    dialogStore.showError("Copying is not supported yet.");
+  };
   const createFolder = async () => {
     const item = _createFolder(newFolderName.value, path.value);
     if (isItemInvalid(item)) return;
@@ -163,6 +174,8 @@ export function createItemStore(this: ItemStoreBindings) {
   };
   const selectAll = () => items.value.forEach((i) => (i.isSelected = true));
   const deselectAll = () => items.value.forEach((i) => (i.isSelected = false));
+  const invertSelection = () =>
+    items.value.forEach((i) => (i.isSelected = !i.isSelected));
 
   return {
     setDbItems,
@@ -175,6 +188,7 @@ export function createItemStore(this: ItemStoreBindings) {
     root,
     handleDrop,
     handleMove,
+    handleCopy,
     createFolder,
     createFiles,
     deleteItems,
@@ -182,6 +196,7 @@ export function createItemStore(this: ItemStoreBindings) {
     stopRenaming,
     selectAll,
     deselectAll,
+    invertSelection,
     $reset,
   };
 }

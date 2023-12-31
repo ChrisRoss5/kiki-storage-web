@@ -1,16 +1,10 @@
 <script setup lang="ts">
-import { provide, ref, watch } from "vue";
+import { watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useCurrentUser } from "vuefire";
-import ContextMenu from "./components/ContextMenu.vue";
-import Notification from "./components/Notification.vue";
-import ShortDialog from "./components/ShortDialog.vue";
 import resetStores from "./stores/reset";
 import Home from "./views/Home.vue";
 import Login from "./views/Login.vue";
-
-const ghostDragDiv = ref<HTMLDivElement | null>();
-provide("ghostDragDiv", ghostDragDiv);
 
 const user = useCurrentUser();
 const router = useRouter();
@@ -30,16 +24,6 @@ watch(user, async (currentUser) => {
 <template>
   <Home class="h-full" />
   <Transition name="fade">
-    <Login
-      v-if="$route.name == 'login'"
-      class="absolute inset-0 z-10"
-    />
+    <Login v-if="$route.name == 'login'" class="absolute inset-0 z-10" />
   </Transition>
-  <ShortDialog />
-  <ContextMenu />
-  <Notification />
-  <div
-    ref="ghostDragDiv"
-    class="absolute -top-full rounded-box bg-base-300 p-3 pl-7"
-  ></div>
 </template>
