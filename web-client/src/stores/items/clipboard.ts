@@ -13,9 +13,9 @@ export const useClipboardStore = defineStore("clipboard", () => {
   const prop = ref<ItemProp>("isCut");
 
   const copy = (_items: Item[]) =>
-    load(_items, "isCopied", `Copied ${_items.length} items.`);
+    load(_items, "isCopied", `Copied ${_items.length} item(s).`);
   const cut = (_items: Item[]) =>
-    load(_items, "isCut", `Cut ${_items.length} items.`);
+    load(_items, "isCut", `Cut ${_items.length} item(s).`);
   const paste = (itemStore: ItemStore) => {
     if (!items.value.length || inEditable()) return;
     if (prop.value == "isCopied") itemStore.handleMove(items.value);

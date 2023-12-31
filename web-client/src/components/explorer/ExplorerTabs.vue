@@ -79,7 +79,7 @@ doesn't transition the margin nor gap.  */
             : 'oklch(var(--p) / 30%)',
         }"
         draggable="false"
-        @auxclick.prevent.middle="tabsStore.deleteTab(tab)"
+        @auxclick.middle.prevent="tabsStore.deleteTab(tab)"
         @click.prevent="tabsStore.switchTab(tab)"
         @dragover="tabsStore.switchTab(tab)"
       >

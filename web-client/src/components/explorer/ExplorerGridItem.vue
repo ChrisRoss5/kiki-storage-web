@@ -4,6 +4,7 @@ import { ItemStore } from "@/stores/items/manager";
 import { usePathStore } from "@/stores/path";
 import { useSelectionRectStore } from "@/stores/selection-rect";
 import { useShortDialogStore } from "@/stores/short-dialog";
+import { useTabsStore } from "@/stores/tabs";
 import { formatDate, formatSize } from "@/utils/format";
 import { getFullPath } from "@/utils/item";
 import { useSwipe } from "@vueuse/core";
@@ -36,6 +37,7 @@ const contextMenuStore = useContextMenuStore();
 const dialogStore = useShortDialogStore();
 const selectionRectStore = useSelectionRectStore();
 const user = useCurrentUser();
+const tabsStore = useTabsStore();
 
 const itemAnchor = ref<HTMLAnchorElement | null>(null);
 if (isFileTree && props.item.isFolder) {
@@ -134,6 +136,9 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
         : handleItemSelect(item, $event)
     "
     @dblclick.stop.prevent="handleItemOpen(item)"
+    @auxclick.middle.stop.prevent="
+      item.isFolder && tabsStore.createTab(getFullPath(item))
+    "
     @keydown.space.stop.prevent="handleItemSelect(item, $event)"
     @keyup.enter.stop.prevent="handleItemOpen(item)"
     @contextmenu.stop.prevent="handleItemContextMenu(item, $event)"
