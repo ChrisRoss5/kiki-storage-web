@@ -1,17 +1,22 @@
 // https://firebase.google.com/docs/storage/web/download-files
 // gsutil cors set storage-cors-config.json gs://dropbox-clone-716f7.appspot.com
 
-import { deleteObject, getBlob, ref as storageRef } from "firebase/storage";
+import {
+  deleteObject,
+  getBlob,
+  listAll,
+  ref as storageRef,
+} from "firebase/storage";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useCurrentUser, useFirebaseStorage, useStorageFile } from "vuefire";
 import { useShortDialogStore } from "../../short-dialog";
-import { useItemsFirestoreStore } from "./firestore";
+import { useItemFirestoreStore } from "./firestore";
 
-export const useItemStorageStore = defineStore("items-storage", () => {
+export const useItemStorageStore = defineStore("item-storage", () => {
   const user = useCurrentUser();
   const storage = useFirebaseStorage();
-  const itemsFirestoreStore = useItemsFirestoreStore();
+  const itemsFirestoreStore = useItemFirestoreStore();
   const dialogStore = useShortDialogStore();
   const storagePath = computed(() => `user/${user.value?.uid}/`);
 
@@ -71,6 +76,11 @@ export const useItemStorageStore = defineStore("items-storage", () => {
       a.download = `${item.name}${item.type ? `.${item.type}` : ""}`;
       a.click();
       URL.revokeObjectURL(url);
+    },
+    async deleteAll() {
+      const listRef = storageRef(storage, storagePath.value);
+      const { items } = await listAll(listRef);
+      return Promise.allSettled(items.map(deleteObject));
     },
   };
 

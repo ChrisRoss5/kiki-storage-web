@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useItemsFirestoreStore } from "./items/firebase/firestore";
+import { useItemFirestoreStore } from "./items/firebase/firestore";
 import { useItemStore } from "./items/manager";
 import { useSettingsStore } from "./settings";
 import { RootKey, defaultRoot, roots } from "./settings/default";
@@ -17,7 +17,7 @@ export const usePathStore = defineStore("path", () => {
   const route = useRoute();
   const router = useRouter();
   const itemStore = useItemStore();
-  const { api: firestoreApi } = useItemsFirestoreStore();
+  const { api: firestoreApi } = useItemFirestoreStore();
   const settingsStore = useSettingsStore();
   const tabsStore = useTabsStore();
   const dialogStore = useShortDialogStore();

@@ -20,6 +20,6 @@ export const firebaseAuth = firebase.auth();
 let ui: auth.AuthUI;
 
 export function useFirebaseUI() {
-  ui ??= new auth.AuthUI(firebase.auth());
+  ui ??= new auth.AuthUI(firebaseAuth);
   return ui;
 }

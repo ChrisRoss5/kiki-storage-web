@@ -47,8 +47,9 @@ export const useSettingsStore = defineStore("settings", () => {
       "Reset all settings to default? " +
       "This includes open tabs, views, column settings and other settings outside this window.";
     if (!(await dialogStore.confirm(msg))) return;
-    remove(dbRef(db, dbPath.value));
+    deleteAll();
   };
+  const deleteAll = () => remove(dbRef(db, dbPath.value));
   const updateColumnOrder = (key: keyof ItemCore, isSearch: boolean) => {
     const columnSettings =
       settings.value[isSearch ? "searchColumns" : "columns"];
@@ -71,6 +72,7 @@ export const useSettingsStore = defineStore("settings", () => {
     updateSetting,
     setSetting,
     reset,
+    deleteAll,
     updateColumnOrder,
   };
 });

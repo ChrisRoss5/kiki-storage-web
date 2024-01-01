@@ -10,6 +10,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocs,
   limit,
   query,
   setDoc,
@@ -38,7 +39,7 @@ export type DbItem = Overwrite<
 
 // Vuefire Issue #1315 - SSR console warning
 
-export const useItemsFirestoreStore = defineStore("items-firestore", () => {
+export const useItemFirestoreStore = defineStore("item-firestore", () => {
   const user = useCurrentUser();
   const db = useFirestore();
   const dbPath = computed(() => `app/drive/${user.value?.uid}`);
@@ -187,6 +188,11 @@ export const useItemsFirestoreStore = defineStore("items-firestore", () => {
       /* Todo: move to backend */
       if (!item.isFolder) await storageApi.deleteFile(item);
       await deleteDoc(doc(db, dbPath.value, item.id!));
+    },
+    async deleteAll() {
+      /* Todo: move to backend firestore.recursiveDelete */
+      const snap = await getDocs(query(collection(db, dbPath.value)));
+      return Promise.allSettled(snap.docs.map((doc) => deleteDoc(doc.ref)));
     },
   };
 

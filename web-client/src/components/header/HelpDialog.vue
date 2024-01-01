@@ -34,11 +34,11 @@ const emit = defineEmits<(e: "close") => void>();
                 - Deselect all items & empty app clipboard <br />
                 - Close a floating folder <br />
                 - Unfocus a folder in File Tree <br />
-                - Stop renaming an item
+                - Stop renaming an item / unfocus a field
               </div>
             </li>
             <li><kbd>Del</kbd> - Delete selected items</li>
-            <li><kbd>F2</kbd> - Rename selected item</li>
+            <li><kbd>F2</kbd> - Rename a selected item</li>
             <li><kbd>Ctrl</kbd> + <kbd>A</kbd> - Select all items</li>
             <li><kbd>Ctrl</kbd> + <kbd>I</kbd> - Invert selection</li>
             <li><kbd>Ctrl</kbd> + <kbd>C</kbd> - Copy selected items</li>
@@ -57,16 +57,17 @@ const emit = defineEmits<(e: "close") => void>();
               moving.
             </li>
           </ul>
-          <strong class="mt-4 block">Mouse controls</strong>
+          <strong class="mt-4 block">Click controls</strong>
           <ul>
             <li><kbd>Double-click</kbd> a tab to toggle window full-screen.</li>
             <li><kbd>Middle-click</kbd> a tab to close it.</li>
             <li><kbd>Middle-click</kbd> a folder to open it in a new tab.</li>
+            <li><kbd>Double-click</kbd> the File Tree resizer to autofit.</li>
           </ul>
         </div>
         <div>
           <strong class="block">Touch gestures</strong>
-          <ul class="ml-5 list-disc">
+          <ul>
             <li>
               <kbd>Swipe right</kbd> on a folder in a File Tree to navigate to
               it.

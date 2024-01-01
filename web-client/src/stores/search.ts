@@ -1,7 +1,7 @@
 import { toBytes, units } from "@/utils/format";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
-import { useItemsFirestoreStore } from "./items/firebase/firestore";
+import { useItemFirestoreStore } from "./items/firebase/firestore";
 import { useSearchItemStore } from "./items/manager";
 import { usePathStore } from "./path";
 
@@ -21,7 +21,7 @@ const initialSizeFilter: SizeFilter = {
 
 export const useSearchStore = defineStore("search", () => {
   const searchItemStore = useSearchItemStore();
-  const { api: firestoreApi } = useItemsFirestoreStore();
+  const { api: firestoreApi } = useItemFirestoreStore();
   const pathStore = usePathStore();
 
   const query = ref("");

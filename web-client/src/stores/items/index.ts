@@ -1,4 +1,4 @@
-import { useItemsFirestoreStore } from "@/stores/items/firebase/firestore";
+import { useItemFirestoreStore } from "@/stores/items/firebase/firestore";
 import {
   createFolder as _createFolder,
   checkItem,
@@ -21,7 +21,7 @@ export type ItemStoreBindings = { id: ItemStoreId; path?: string };
 export function createItemStore(this: ItemStoreBindings) {
   const dialogStore = useShortDialogStore();
   const pathStore = usePathStore();
-  const { api: firestoreApi } = useItemsFirestoreStore();
+  const { api: firestoreApi } = useItemFirestoreStore();
   const { api: storageApi } = useItemStorageStore();
   const searchStore = useSearchStore();
   const user = useCurrentUser();
@@ -114,7 +114,7 @@ export function createItemStore(this: ItemStoreBindings) {
         const { items, uid } = JSON.parse(itemsDragDataStr) as ItemsDragData;
         if (uid != user.value?.uid)
           return dialogStore.showError("You can't move someone else's items.");
-        handleMove(items, _path);
+        e.ctrlKey ? handleCopy(items, _path) : handleMove(items, _path);
       } catch {
         location.reload(); // Can only happen if user is unauthorized after too long
       }
