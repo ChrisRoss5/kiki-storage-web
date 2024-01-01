@@ -69,6 +69,10 @@ const emit = defineEmits<(e: "close") => void>();
           <strong class="block">Touch gestures</strong>
           <ul>
             <li>
+              <kbd>Swipe left</kbd> on a navigation bar path to navigate to
+              parent folder.
+            </li>
+            <li>
               <kbd>Swipe right</kbd> on a folder in a File Tree to navigate to
               it.
             </li>

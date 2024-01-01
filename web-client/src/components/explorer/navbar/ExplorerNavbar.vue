@@ -7,6 +7,7 @@ import {
 import { getPathName, usePathStore } from "@/stores/path";
 import { RootKey, roots } from "@/stores/settings/default";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
+import { useSwipe } from "@vueuse/core";
 import { computed, inject, ref, watch } from "vue";
 import Chevron from "../Chevron.vue";
 import CreateOrUpload from "./CreateOrUpload.vue";
@@ -20,6 +21,15 @@ const isThemeLight = inject<boolean>("isThemeLight")!;
 const itemStore = useItemStore();
 const navbarItemStore = useNavbarItemStore();
 const pathStore = usePathStore();
+
+const navbarPathDiv = ref<HTMLElement | null>(null);
+const { isSwiping, direction } = useSwipe(navbarPathDiv);
+watch(isSwiping, (isSwiping) => {
+  if (isSwiping && direction.value == "left") {
+    const parent = pathStore.folderPaths[pathStore.folderPaths.length - 2];
+    parent && pathStore.pushOnTab(parent);
+  }
+});
 
 const showPathInput = ref(false);
 const showRootsDropdown = ref(false);
@@ -59,13 +69,14 @@ const openNavbarExplorer = (path: string, keepOpen?: boolean) => {
 
 <template>
   <div
-    class="z-20 flex flex-wrap gap-3 border-b-8 lg:border-0 rounded-box"
+    class="z-20 flex flex-wrap gap-3 rounded-box border-b-8 lg:border-0"
     :class="{
       'border-b-base-200': isThemeLight,
       'border-b-base-100/25': !isThemeLight,
     }"
   >
     <div
+      ref="navbarPathDiv"
       class="relative flex flex-1 cursor-pointer flex-wrap items-center rounded-btn text-xl"
       :class="{
         'bg-base-200 hover:bg-base-300': isThemeLight,
@@ -82,7 +93,7 @@ const openNavbarExplorer = (path: string, keepOpen?: boolean) => {
       >
         <div
           v-if="!isRoot"
-          class="lg:relative flex items-center rounded-btn py-2"
+          class="flex items-center rounded-btn py-2 lg:relative"
           :class="{
             'hover:bg-base-100': isThemeLight,
             'hover:bg-base-300': !isThemeLight,

@@ -67,11 +67,8 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
     )
       props.itemStore.items[i].isSelected = true;
   } else {
-    if (!item.isSelected) {
-      props.itemStore.deselectAll();
-      emit("update:lastSelectedItemIdx", idx);
-    }
-    item.isSelected = !item.isSelected;
+    if (!item.isSelected) emit("update:lastSelectedItemIdx", idx);
+    item.isSelected = true;
   }
 };
 const handleItemOpen = (item: Item) => {
