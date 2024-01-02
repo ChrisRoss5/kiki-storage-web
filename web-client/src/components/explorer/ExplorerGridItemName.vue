@@ -37,6 +37,13 @@ watch(
 </script>
 
 <template>
+  <input
+    v-if="props.itemStore.selectedItems.length && $isTouchDevice"
+    type="checkbox"
+    v-model="item.isSelected"
+    class="cbx-select dsy-checkbox align-text-bottom"
+    @click.stop="null"
+  />
   <img
     :src="imgSrc"
     class="w-4 flex-shrink-0 text-xl"
@@ -93,3 +100,11 @@ watch(
     </div>
   </div>
 </template>
+
+<style>
+.cbx-select::after {
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+</style>

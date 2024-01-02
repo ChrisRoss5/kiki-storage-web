@@ -67,7 +67,10 @@ const handleItemSelect = (item: Item, e: MouseEvent | KeyboardEvent) => {
     )
       props.itemStore.items[i].isSelected = true;
   } else {
-    if (!item.isSelected) emit("update:lastSelectedItemIdx", idx);
+    if (!item.isSelected) {
+      emit("update:lastSelectedItemIdx", idx);
+      props.itemStore.deselectAll();
+    }
     item.isSelected = true;
   }
 };
@@ -132,7 +135,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
           : handleItemOpen(item)
         : handleItemSelect(item, $event)
     "
-    @dblclick.stop.prevent="handleItemOpen(item)"
+    @dblclick.stop.prevent="!$isTouchDevice && handleItemOpen(item)"
     @auxclick.middle.stop.prevent="
       item.isFolder && tabsStore.createTab(getFullPath(item))
     "
@@ -148,7 +151,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
       v-for="columnName in columnOrder"
       :key="columnName"
       :class="{
-        '!pointer-events-auto': item.isRenaming && columnName == 'name',
+        '!pointer-events-auto': item.isRenaming && columnName == 'name' || 1,
         'text-right': columnName == 'size',
         'flex min-w-0 items-center gap-3': columnName == 'name',
         'flex-col text-center': view == 'grid',

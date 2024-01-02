@@ -65,7 +65,7 @@ const handleClickCapture = (e: MouseEvent) => {
     return;
   }
   const target = e.target as HTMLElement;
-  const s = "#item-options, #view-selector";
+  const s = "#item-options, #view-selector, .cbx-select";
   if (e.ctrlKey || e.shiftKey || target.closest(s)) return;
   if (target.closest("#filetree"))
     for (const treeStoreDef of Object.values(treeStoreDefs))
