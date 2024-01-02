@@ -23,7 +23,7 @@ export const useSelectionRectStore = defineStore("selection-rect", () => {
   let startMaxScrollTop = 0; // to prevent auto-scrolling down to infinity in the interval
   let isCtrlOrShiftDown = false;
   let lastScrollDirection = null as "up" | "down" | null;
-  let isThrottled = false;
+  // let isThrottled = false; Todo
   let interval: NodeJS.Timeout | undefined;
   let scrollStrength = 0;
   let isFileTree = false;

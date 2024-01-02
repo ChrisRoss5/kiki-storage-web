@@ -134,6 +134,7 @@ export function createItemStore(this: ItemStoreBindings) {
     firestoreApi.moveItems(items, _path);
   };
   const handleCopy = async (items: Item[], _path?: string) => {
+    console.log(items, _path);  // Todo
     dialogStore.showError("Copying is not supported yet.");
   };
   const createFolder = async () => {
