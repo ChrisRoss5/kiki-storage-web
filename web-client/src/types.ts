@@ -4,6 +4,7 @@ interface ItemCore {
   type: string;
   dateAdded: Date;
   dateModified: Date;
+  dateDeleted?: Date;
   path: string;
   isFolder?: boolean;
   isStarred?: boolean;

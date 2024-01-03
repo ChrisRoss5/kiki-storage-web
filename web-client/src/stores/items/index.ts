@@ -62,16 +62,21 @@ export function createItemStore(this: ItemStoreBindings) {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
     const _stores = getAllItemStores();
+    console.log("setItems", this.id, newDbItems, path);
+
     items.value = newDbItems
       // Unsupported firestore query filters
       .filter((newDbItem) => {
+        if (path.value == "starred") return !newDbItem.dateDeleted;
         if (this.id != "search-items") return true;
         const name = newDbItem.name.toLowerCase();
         const sName = searchStore.filters.query.toLowerCase();
         return (
           name.startsWith(sName) &&
-          (pathStore.currentRoot != "starred" ||
-            newDbItem.path.startsWith(pathStore.currentRoot))
+          (newDbItem.path.startsWith(pathStore.currentRoot) ||
+            (pathStore.currentRoot == "starred" &&
+              newDbItem.isStarred &&
+              !newDbItem.dateDeleted))
         );
       })
       // ItemCore will overwrite Item's previous Core values while keeping state

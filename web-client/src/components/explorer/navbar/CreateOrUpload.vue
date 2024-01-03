@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useItemStore } from "@/stores/items/manager";
+import { usePathStore } from "@/stores/path";
 
 const itemStore = useItemStore();
+const pathStore = usePathStore();
 
 const handleFileUpload = (e: Event) => {
   const { files } = e.target as HTMLInputElement;
@@ -10,13 +12,18 @@ const handleFileUpload = (e: Event) => {
 </script>
 
 <template>
-  <div class="flex gap-3">
+  <div
+    class="flex gap-3"
+    :class="{
+      'pointer-events-none opacity-50': pathStore.currentRoot != 'drive',
+    }"
+  >
     <div class="dsy-join">
       <input
         v-model.trim="itemStore.newFolderName"
         type="text"
         placeholder="Add a new folder"
-        class="dsy-input dsy-input-primary dsy-join-item w-full bg-base-100/50 outline-none"
+        class="dsy-input dsy-join-item dsy-input-primary w-full bg-base-100/50 outline-none"
         @keyup.enter.stop="itemStore.createFolder"
         spellcheck="false"
         autocomplete="off"

@@ -62,6 +62,7 @@ export const firestoreItemConverter: FirestoreDataConverter<ItemCore, DbItem> =
         id: snapshot.id,
         dateAdded: data.dateAdded.toDate(),
         dateModified: data.dateModified.toDate(),
+        dateDeleted: data.dateDeleted?.toDate(),
       };
     },
     toFirestore: (i: Item) => {
@@ -72,6 +73,7 @@ export const firestoreItemConverter: FirestoreDataConverter<ItemCore, DbItem> =
         dateModified: Timestamp.fromDate(i.dateModified),
         path: i.path,
       };
+      if (i.dateDeleted) dbItem.dateDeleted = Timestamp.fromDate(i.dateDeleted);
       if (i.isFolder) dbItem.isFolder = true;
       if (i.isStarred) dbItem.isStarred = true;
       if (i.size) dbItem.size = i.size;

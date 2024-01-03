@@ -9,6 +9,7 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDocs,
   limit,
@@ -34,6 +35,7 @@ export type DbItem = Overwrite<
   {
     dateAdded: Timestamp;
     dateModified: Timestamp;
+    dateDeleted?: Timestamp;
   }
 >;
 
@@ -158,8 +160,16 @@ export const useItemFirestoreStore = defineStore("item-firestore", () => {
       if (newPath == ("starred" as RootKey)) return this.starItems(items, true);
       const notif = notifStore.createLoading("Moving item(s)...");
       const promises: Promise<void>[] = [];
+      const dateDeleted = newPath.includes("bin" as RootKey)
+        ? new Date()
+        : undefined;
       for (const item of items) {
-        promises.push(updateDoc(getDoc(item), { path: newPath }));
+        const updateData: Partial<ItemCore> = { path: newPath };
+        if (dateDeleted && !item.dateDeleted)
+          updateData.dateDeleted = dateDeleted;
+        else if (!dateDeleted && item.dateDeleted)
+          updateData.dateDeleted = deleteField() as any;
+        promises.push(updateDoc(getDoc(item), updateData));
         const newFullPath = `${newPath ? `${newPath}/` : ""}${item.name}`;
         if (item.isFolder)
           promises.push(updatePaths(getFullPath(item), newFullPath));
@@ -218,13 +228,21 @@ export const useItemFirestoreStore = defineStore("item-firestore", () => {
   async function updatePaths(oldPath: string, newPath: string) {
     const items = await api.getItems(oldPath, true, { once: true }).promise
       .value;
+    const dateDeleted = newPath.includes("bin" as RootKey)
+      ? new Date()
+      : undefined;
     const promises: Promise<void>[] = [];
-    for (const nestedItem of items)
+    for (const nestedItem of items) {
+      const path = nestedItem.path.replace(oldPath, newPath);
+      const updateData: Partial<ItemCore> = { path };
+      if (dateDeleted && !nestedItem.dateDeleted)
+        updateData.dateDeleted = dateDeleted;
+      else if (!dateDeleted && nestedItem.dateDeleted)
+        updateData.dateDeleted = deleteField() as any;
       promises.push(
-        updateDoc(doc(db, dbPath.value, nestedItem.id!), {
-          path: nestedItem.path.replace(oldPath, newPath),
-        }),
+        updateDoc(doc(db, dbPath.value, nestedItem.id!), updateData),
       );
+    }
     await Promise.allSettled(promises);
   }
 
