@@ -184,7 +184,10 @@ const handleMouseDown = (e: MouseEvent | TouchEvent) => {
               v-if="
                 isFileTree &&
                 item.isFolder &&
-                tabsStore.activeTab.expandedPaths?.includes(getFullPath(item))
+                tabsStore.activeTab.expandedPaths?.includes(
+                  getFullPath(item),
+                ) &&
+                itemStore.root != 'starred'
               "
               :path="getFullPath(item)"
               :key="`${item.id}-filetree`"

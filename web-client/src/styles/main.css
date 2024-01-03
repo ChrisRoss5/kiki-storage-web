@@ -84,6 +84,10 @@ a {
       @apply px-1 py-2;
     }
   }
+  .star-active {
+    font-variation-settings: "FILL" 1;
+    @apply text-yellow-300;
+  }
 }
 
 body[dragging-items] .expl-item,

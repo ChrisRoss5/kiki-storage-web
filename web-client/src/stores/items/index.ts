@@ -66,11 +66,12 @@ export function createItemStore(this: ItemStoreBindings) {
       // Unsupported firestore query filters
       .filter((newDbItem) => {
         if (this.id != "search-items") return true;
+        const name = newDbItem.name.toLowerCase();
+        const sName = searchStore.filters.query.toLowerCase();
         return (
-          newDbItem.name
-            .toLowerCase()
-            .startsWith(searchStore.filters.query.toLowerCase()) &&
-          newDbItem.path.startsWith(pathStore.currentRoot)
+          name.startsWith(sName) &&
+          (pathStore.currentRoot != "starred" ||
+            newDbItem.path.startsWith(pathStore.currentRoot))
         );
       })
       // ItemCore will overwrite Item's previous Core values while keeping state
@@ -89,7 +90,12 @@ export function createItemStore(this: ItemStoreBindings) {
   watch(() => dbItems.value?.data, setItems, { deep: true });
   watch(
     path,
-    (newPath) => newPath && setDbItems(firestoreApi.getItems(newPath)), // warn: onServerPrefetch
+    (newPath) => {
+      if (!newPath) return;
+      if (newPath == "starred")
+        return setDbItems(firestoreApi.getStarredItems());
+      return setDbItems(firestoreApi.getItems(newPath));
+    }, // warn: onServerPrefetch
     { immediate: true },
   );
 
@@ -134,7 +140,7 @@ export function createItemStore(this: ItemStoreBindings) {
     firestoreApi.moveItems(items, _path);
   };
   const handleCopy = async (items: Item[], _path?: string) => {
-    console.log(items, _path);  // Todo
+    console.log(items, _path); // Todo
     dialogStore.showError("Copying is not supported yet.");
   };
   const createFolder = async () => {

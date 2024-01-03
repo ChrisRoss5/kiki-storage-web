@@ -44,12 +44,21 @@ watch(
     class="cbx-select dsy-checkbox align-text-bottom"
     @click.stop="null"
   />
-  <img
-    :src="imgSrc"
-    class="w-4 flex-shrink-0 text-xl"
-    :class="{ 'w-full px-3': view == 'grid' }"
-    alt="Icon"
-  />
+  <div class="relative flex-shrink-0">
+    <div
+      v-if="item.isStarred"
+      class="star star-active material-symbols-outlined text-yellow-300"
+      :class="{ grid: view == 'grid' }"
+    >
+      star
+    </div>
+    <img
+      :src="imgSrc"
+      class="w-4"
+      :class="{ 'w-full px-3': view == 'grid' }"
+      alt="Icon"
+    />
+  </div>
   <div
     v-if="item.isRenaming"
     id="rename-container"
@@ -102,6 +111,15 @@ watch(
 </template>
 
 <style>
+.star {
+  position: absolute;
+  left: 100%;
+  top: 100%;
+  transform: scale(0.6) translate(-1.3rem, -1.2rem);
+  &.grid {
+    transform: translate(-1.5rem, -0.7rem);
+  }
+}
 .cbx-select::after {
   content: "";
   inset: 0;

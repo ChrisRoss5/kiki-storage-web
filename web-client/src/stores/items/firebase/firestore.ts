@@ -1,5 +1,5 @@
 import { useNotificationStore } from "@/stores/notification";
-import { roots } from "@/stores/settings/default";
+import { RootKey, roots } from "@/stores/settings/default";
 import { firestoreItemConverter, getFullPath } from "@/utils/item";
 import {
   DocumentData,
@@ -98,6 +98,14 @@ export const useItemFirestoreStore = defineStore("item-firestore", () => {
       if (!nestedOnly && !options) PATH_ITEM_COLLECTIONS[path] = coll;
       return coll;
     },
+    getStarredItems() {
+      return useCollection(
+        query(
+          collection(db, dbPath.value),
+          where("isStarred", "==", true),
+        ).withConverter(firestoreItemConverter),
+      );
+    },
     async getParentItem(path: string) {
       if (path in roots) return null;
       const name = path.split("/").pop()!;
@@ -137,7 +145,7 @@ export const useItemFirestoreStore = defineStore("item-firestore", () => {
       const oldFullPath = getFullPath(item);
       const newFullPath = `${item.path ? `${item.path}/` : ""}${item.newName}`;
       const updateData = { name: item.newName };
-      promises.push(updateDoc(doc(db, dbPath.value, item.id!), updateData));
+      promises.push(updateDoc(getDoc(item), updateData));
       if (item.isFolder) promises.push(updatePaths(oldFullPath, newFullPath));
       updateParentDateModified(item);
       Promise.allSettled(promises).then(() => {
@@ -147,12 +155,11 @@ export const useItemFirestoreStore = defineStore("item-firestore", () => {
     },
     moveItems(items: Item[], newPath: string) {
       /* Todo: move to backend */
+      if (newPath == ("starred" as RootKey)) return this.starItems(items, true);
       const notif = notifStore.createLoading("Moving item(s)...");
       const promises: Promise<void>[] = [];
       for (const item of items) {
-        promises.push(
-          updateDoc(doc(db, dbPath.value, item.id!), { path: newPath }),
-        );
+        promises.push(updateDoc(getDoc(item), { path: newPath }));
         const newFullPath = `${newPath ? `${newPath}/` : ""}${item.name}`;
         if (item.isFolder)
           promises.push(updatePaths(getFullPath(item), newFullPath));
@@ -187,14 +194,19 @@ export const useItemFirestoreStore = defineStore("item-firestore", () => {
     async deleteItemPermanently(item: Item) {
       /* Todo: move to backend */
       if (!item.isFolder) await storageApi.deleteFile(item);
-      await deleteDoc(doc(db, dbPath.value, item.id!));
+      await deleteDoc(getDoc(item));
     },
     async deleteAll() {
       /* Todo: move to backend firestore.recursiveDelete */
       const snap = await getDocs(query(collection(db, dbPath.value)));
       return Promise.allSettled(snap.docs.map((doc) => deleteDoc(doc.ref)));
     },
+    starItems(items: Item[], isStarred: boolean) {
+      for (const item of items) updateDoc(getDoc(item), { isStarred });
+    },
   };
+
+  const getDoc = (item: Item) => doc(db, dbPath.value, item.id!);
 
   function startsWithConstraints(string: string) {
     return [

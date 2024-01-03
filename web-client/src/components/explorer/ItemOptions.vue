@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useClipboardStore } from "@/stores/items/clipboard";
+import { useItemFirestoreStore } from "@/stores/items/firebase/firestore";
 import { useItemStorageStore } from "@/stores/items/firebase/storage";
 import { ItemStore } from "@/stores/items/manager";
 import { useSettingsStore } from "@/stores/settings";
@@ -13,9 +14,13 @@ const itemStorageStore = useItemStorageStore();
 const dialogStore = useShortDialogStore();
 const tabsStore = useTabsStore();
 const clipboardStore = useClipboardStore();
+const { api: firestoreApi } = useItemFirestoreStore();
 
 const isThemeLight = computed(() => settingsStore.settings.theme == "light");
 const firstItem = computed(() => props.itemStore.selectedItems[0]);
+const areSelectedStarred = computed(() =>
+  props.itemStore.selectedItems.some((i) => i.isStarred),
+);
 
 const props = defineProps<{
   itemStore: ItemStore;
@@ -24,12 +29,23 @@ const props = defineProps<{
 
 type Option = {
   icon: string;
+  iconClasses?: string;
   label: string;
   onClick: () => void;
   showCondition?: () => boolean;
 };
 const options = computed<Option[]>(() =>
   [
+    {
+      icon: "star",
+      iconClasses: areSelectedStarred.value ? "star-active" : "",
+      label: areSelectedStarred.value ? "Unstar" : "Star",
+      onClick: () =>
+        firestoreApi.starItems(
+          props.itemStore.selectedItems,
+          !areSelectedStarred.value,
+        ),
+    },
     {
       icon: "open_in_new",
       label: "Open in new tab",
@@ -90,7 +106,7 @@ const options = computed<Option[]>(() =>
       "
     >
       <div
-        v-for="{ icon, label, onClick } in options"
+        v-for="{ icon, iconClasses, label, onClick } in options"
         :key="label"
         class="dsy-tooltip cursor-pointer p-4"
         :class="{
@@ -103,7 +119,9 @@ const options = computed<Option[]>(() =>
         @click="onClick"
         v-wave
       >
-        <span class="material-symbols-outlined leading-4"> {{ icon }} </span>
+        <span class="material-symbols-outlined leading-4" :class="iconClasses">
+          {{ icon }}
+        </span>
       </div>
     </div>
   </Transition>

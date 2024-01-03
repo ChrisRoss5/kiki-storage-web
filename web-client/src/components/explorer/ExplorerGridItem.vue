@@ -8,7 +8,7 @@ import { useTabsStore } from "@/stores/tabs";
 import { formatDate, formatSize } from "@/utils/format";
 import { getFullPath } from "@/utils/item";
 import { useSwipe } from "@vueuse/core";
-import { Ref, inject, ref, watch } from "vue";
+import { Ref, computed, inject, ref, watch } from "vue";
 import { useCurrentUser } from "vuefire";
 import ExplorerGridItemName from "./ExplorerGridItemName.vue";
 import ExpandButton from "./filetree/ExpandButton.vue";
@@ -46,6 +46,10 @@ if (isFileTree && props.item.isFolder) {
     if (isSwiping && direction.value == "right") handleItemOpen(props.item);
   });
 }
+
+const isExpandable = computed(
+  () => isFileTree && props.item.isFolder && props.itemStore.root != "starred",
+);
 
 const handleItemContextMenu = (item: Item, e: MouseEvent) => {
   if (!item.isSelected) handleItemSelect(item, e);
@@ -128,7 +132,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     @drop.stop.prevent="handleDropOnItem(item, $event)"
     @click.stop.prevent="
       $isTouchDevice
-        ? isFileTree && item.isFolder
+        ? isExpandable
           ? (
               ($event.target as HTMLElement).firstElementChild as HTMLElement
             ).click()
@@ -143,15 +147,12 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     @keyup.enter.stop.prevent="handleItemOpen(item)"
     @contextmenu.stop.prevent="handleItemContextMenu(item, $event)"
   >
-    <ExpandButton
-      v-if="isFileTree && item.isFolder"
-      :path="getFullPath(item)"
-    />
+    <ExpandButton v-if="isExpandable" :path="getFullPath(item)" />
     <div
       v-for="columnName in columnOrder"
       :key="columnName"
       :class="{
-        '!pointer-events-auto': item.isRenaming && columnName == 'name' || 1,
+        '!pointer-events-auto': (item.isRenaming && columnName == 'name') || 1,
         'text-right': columnName == 'size',
         'flex min-w-0 items-center gap-3': columnName == 'name',
         'flex-col text-center': view == 'grid',
@@ -179,6 +180,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
     <FolderOptions
       v-if="isFileTree && item.isFolder"
       :path="getFullPath(item)"
+      :hide-collapse="itemStore.root == 'starred'"
     />
   </a>
 </template>
