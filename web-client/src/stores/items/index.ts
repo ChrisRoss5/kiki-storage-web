@@ -27,6 +27,8 @@ export function createItemStore(this: ItemStoreBindings) {
   const user = useCurrentUser();
   const settingsStore = useSettingsStore();
 
+  const isFileTree = this.id.startsWith("tree-items");
+
   const dbItems = ref<_RefFirestore<ItemCore[]>>();
   const items = ref<Item[]>([]);
   const newFolderName = ref("");
@@ -37,7 +39,8 @@ export function createItemStore(this: ItemStoreBindings) {
   const selectedItems = computed(() =>
     items.value.filter(
       (i) =>
-        i.isSelected && (!settingsStore.settings.hideFilesInTree || i.isFolder),
+        i.isSelected &&
+        (!isFileTree || !settingsStore.settings.hideFilesInTree || i.isFolder),
     ),
   );
   const root = computed(() => path.value.split("/")[0] as RootKey);
@@ -62,7 +65,7 @@ export function createItemStore(this: ItemStoreBindings) {
     const newDbItems = dbItems.value?.value;
     if (!newDbItems || itemsPending.value) return;
     const _stores = getAllItemStores();
-    console.log("setItems", this.id, newDbItems, path);
+    // console.log("setItems", this.id, newDbItems, path);
 
     items.value = newDbItems
       // Unsupported firestore query filters
@@ -145,7 +148,8 @@ export function createItemStore(this: ItemStoreBindings) {
     firestoreApi.moveItems(items, _path);
   };
   const handleCopy = async (items: Item[], _path?: string) => {
-    console.log(items, _path); // Todo
+    // console.log(items, _path); // Todo
+    items;
     dialogStore.showError("Copying is not supported yet.");
   };
   const createFolder = async () => {

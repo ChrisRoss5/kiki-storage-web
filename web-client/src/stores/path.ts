@@ -37,6 +37,7 @@ export const usePathStore = defineStore("path", () => {
   watch(
     () => tabsStore.activeTab,
     (activeTab) => {
+      if (!settingsStore.dbSettingsReady || !route.meta.requiresAuth) return;
       if (activeTab.path == currentPath.value) return;
       if (IS_STARTUP) {
         IS_STARTUP = false;

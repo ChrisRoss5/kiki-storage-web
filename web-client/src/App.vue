@@ -14,7 +14,7 @@ watch(user, async (currentUser) => {
   if (!currentUser) {
     if (!route.meta.requiresAuth) return;
     resetStores();
-    return router.push("/login");
+    return router.replace("/login");
   }
   if (typeof route.query.redirect == "string")
     return router.replace(route.query.redirect);

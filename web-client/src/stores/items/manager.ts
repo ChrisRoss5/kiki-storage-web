@@ -2,8 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { ItemStoreBindings, createItemStore } from ".";
 
-const defineItemStore = ({ id, path }: ItemStoreBindings) =>
-  defineStore(id, createItemStore.bind({ id, path }));
+const defineItemStore = (bindings: ItemStoreBindings) =>
+  defineStore(bindings.id, createItemStore.bind(bindings));
 
 type ItemStoreDefinition = ReturnType<typeof defineItemStore>;
 
