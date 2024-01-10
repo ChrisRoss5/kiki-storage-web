@@ -21,6 +21,9 @@ const firstItem = computed(() => props.itemStore.selectedItems[0]);
 const areSelectedStarred = computed(() =>
   props.itemStore.selectedItems.some((i) => i.isStarred),
 );
+const isSingleFolderSelected = computed(
+  () => props.itemStore.selectedItems.length == 1 && !!firstItem.value.isFolder,
+);
 
 const props = defineProps<{
   itemStore: ItemStore;
@@ -46,7 +49,8 @@ const folderOptions = computed<Option[]>(() =>
     {
       icon: "select_all",
       label: "Select all",
-      onClick: () => props.itemStore.createFolder(),
+      onClick: () => props.itemStore.selectAll(),
+      showCondition: () => !!props.itemStore.items.length,
     },
   ].filter((option) => !option.showCondition || option.showCondition()),
 );
@@ -67,8 +71,7 @@ const selectOptions = computed<Option[]>(() =>
       icon: "open_in_new",
       label: "Open in new tab",
       onClick: () => tabsStore.createTab(getFullPath(firstItem.value)),
-      showCondition: () =>
-        props.itemStore.selectedItems.length == 1 && !!firstItem.value.isFolder,
+      showCondition: () => isSingleFolderSelected.value,
     },
     {
       icon: "download",
@@ -126,24 +129,29 @@ const options = computed<Option[]>(() =>
       class="ml-auto flex"
       v-if="!$isTouchDevice || inContextMenu"
     >
-      <div
-        v-for="{ icon, iconClasses, label, onClick } in options"
-        :key="label"
-        class="dsy-tooltip cursor-pointer p-4"
-        :class="{
-          'hover:bg-base-100': isThemeLight,
-          'hover:bg-base-100/50': !isThemeLight && !inContextMenu,
-          'hover:bg-base-content/20': !isThemeLight && inContextMenu,
-          'rounded-box': inContextMenu,
-        }"
-        :data-tip="label"
-        @click="onClick"
-        v-wave
-      >
-        <span class="material-symbols-outlined leading-4" :class="iconClasses">
-          {{ icon }}
-        </span>
-      </div>
+      <TransitionGroup name="simple-group">
+        <div
+          v-for="{ icon, iconClasses, label, onClick } in options"
+          :key="label"
+          class="dsy-tooltip cursor-pointer p-4 transition-transform"
+          :class="{
+            'hover:bg-base-100': isThemeLight,
+            'hover:bg-base-100/50': !isThemeLight && !inContextMenu,
+            'hover:bg-base-content/20': !isThemeLight && inContextMenu,
+            'rounded-box': inContextMenu,
+          }"
+          :data-tip="label"
+          @click="onClick"
+          v-wave
+        >
+          <span
+            class="material-symbols-outlined leading-4"
+            :class="iconClasses"
+          >
+            {{ icon }}
+          </span>
+        </div>
+      </TransitionGroup>
     </div>
   </Transition>
 </template>

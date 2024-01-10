@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-interface Notification {
+export interface SimpleNotification {
   id?: string;
   message: string;
   isLoading?: boolean;
@@ -9,9 +9,9 @@ interface Notification {
 }
 
 export const useNotificationStore = defineStore("notification", () => {
-  const notifications = ref<Notification[]>([]);
+  const notifications = ref<SimpleNotification[]>([]);
 
-  const create = (notification: Notification) => {
+  const create = (notification: SimpleNotification) => {
     notification.id = Math.random().toString();
     notifications.value.unshift(notification);
     if (notification.duration)
@@ -21,7 +21,8 @@ export const useNotificationStore = defineStore("notification", () => {
   const createLoading = (message: string) => {
     return create({ message, isLoading: true });
   };
-  const remove = (notification: Notification) => {
+  const remove = (notification?: SimpleNotification) => {
+    if (!notification) return;
     notifications.value.splice(notifications.value.indexOf(notification), 1);
   };
 

@@ -1,4 +1,4 @@
-import { useNotificationStore } from "@/stores/notification";
+import { SimpleNotification, useNotificationStore } from "@/stores/notification";
 import { RootKey, roots } from "@/stores/settings/default";
 import { firestoreItemConverter, getFullPath } from "@/utils/item";
 import {
@@ -142,7 +142,9 @@ export const useItemFirestoreStore = defineStore("item-firestore", () => {
     },
     renameItem(item: Item) {
       /* Todo: move to backend */
-      const notif = notifStore.createLoading("Renaming item(s)...");
+      let notif: SimpleNotification | undefined;
+      if (item.isFolder)
+        notif = notifStore.createLoading("Renaming items...");
       const promises: Promise<void>[] = [];
       const oldFullPath = getFullPath(item);
       const newFullPath = `${item.path ? `${item.path}/` : ""}${item.newName}`;
@@ -158,7 +160,9 @@ export const useItemFirestoreStore = defineStore("item-firestore", () => {
     moveItems(items: Item[], newPath: string) {
       /* Todo: move to backend */
       if (newPath == ("starred" as RootKey)) return this.starItems(items, true);
-      const notif = notifStore.createLoading("Moving item(s)...");
+      let notif: SimpleNotification | undefined;
+      if (items.length > 1 || items.some((i) => i.isFolder))
+        notif = notifStore.createLoading("Moving items...");
       const promises: Promise<void>[] = [];
       const dateDeleted = newPath.includes("bin" as RootKey)
         ? new Date()
@@ -182,7 +186,9 @@ export const useItemFirestoreStore = defineStore("item-firestore", () => {
     },
     deleteItemsPermanently(items: Item[]) {
       /* Todo: move to backend */
-      const notif = notifStore.createLoading("Deleting item(s)...");
+      let notif: SimpleNotification | undefined;
+      if (items.length > 1 || items.some((i) => i.isFolder))
+        notif = notifStore.createLoading("Deleting items...");
       const promises: Promise<void>[] = [];
       for (const item of items) {
         promises.push(this.deleteItemPermanently(item));

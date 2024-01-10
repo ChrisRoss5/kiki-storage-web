@@ -160,3 +160,17 @@ html:not([data-theme="light"]) {
   opacity: 0;
   transform: translateY(-0.5rem);
 }
+.simple-group-move,
+.simple-group-enter-active,
+.simple-group-leave-active {
+  transition:
+    opacity 300ms,
+    transform 300ms;
+}
+.simple-group-leave-active {
+  display: none;
+}
+.simple-group-enter-from,
+.simple-group-leave-to {
+  opacity: 0;
+}
