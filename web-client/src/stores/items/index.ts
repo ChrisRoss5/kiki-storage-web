@@ -136,6 +136,8 @@ export function createItemStore(this: ItemStoreBindings) {
   };
   const handleMove = async (items: Item[], _path?: string) => {
     _path ??= path.value;
+    if (_path == ("starred" as RootKey))
+      return firestoreApi.starItems(items, true);
     if (_path != ("bin" as RootKey) && (await areItemsInvalid(items, _path)))
       return;
     const folders = items.filter((i) => i.isFolder);

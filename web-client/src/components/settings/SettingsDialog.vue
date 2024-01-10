@@ -2,7 +2,7 @@
 import Dialog from "@/components/Dialog.vue";
 import { $breakpoints } from "@/main";
 import { useSettingsStore } from "@/stores/settings/index";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import Themes from "./Themes.vue";
 
 const props = defineProps<{ show: boolean }>();
@@ -15,12 +15,7 @@ const defaultFontSizeDesktop = "16px";
 const defaultFontSizeMobile = "12px";
 
 const disableTransitions = computed({
-  get: () => {
-    const { disableTransitions } = settingsStore.settings;
-    const method = disableTransitions ? "add" : "remove";
-    document.documentElement.classList[method]("no-transitions");
-    return disableTransitions;
-  },
+  get: () => settingsStore.settings.disableTransitions,
   set: (boolean) => settingsStore.setSetting("disableTransitions", boolean),
 });
 const hideFilesInFileTree = computed({
@@ -28,22 +23,24 @@ const hideFilesInFileTree = computed({
   set: (boolean) => settingsStore.setSetting("hideFilesInTree", boolean),
 });
 const desktopZoom = computed({
-  get: () => {
-    const zoom = settingsStore.settings.desktopZoom;
-    if ($breakpoints.lgAndUp)
-      document.documentElement.style.fontSize = `calc(${defaultFontSizeDesktop} * ${zoom})`;
-    return zoom;
-  },
+  get: () => settingsStore.settings.desktopZoom,
   set: (number) => settingsStore.setSetting("desktopZoom", number),
 });
 const mobileZoom = computed({
-  get: () => {
-    const zoom = settingsStore.settings.mobileZoom;
-    if (!$breakpoints.lgAndUp)
-      document.documentElement.style.fontSize = `calc(${defaultFontSizeMobile} * ${zoom})`;
-    return zoom;
-  },
+  get: () => settingsStore.settings.mobileZoom,
   set: (number) => settingsStore.setSetting("mobileZoom", number),
+});
+watch(disableTransitions, (disableTransitions) => {
+  const method = disableTransitions ? "add" : "remove";
+  document.documentElement.classList[method]("no-transitions");
+});
+watch(desktopZoom, (desktopZoom) => {
+  if ($breakpoints.lgAndUp)
+    document.documentElement.style.fontSize = `calc(${defaultFontSizeDesktop} * ${desktopZoom})`;
+});
+watch(mobileZoom, (mobileZoom) => {
+  if (!$breakpoints.lgAndUp)
+    document.documentElement.style.fontSize = `calc(${defaultFontSizeMobile} * ${mobileZoom})`;
 });
 </script>
 
