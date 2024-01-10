@@ -62,7 +62,11 @@ const blurDropdown = () => (document.activeElement as HTMLElement).blur();
       class="dsy-menu dsy-dropdown-content right-0 z-10 !origin-top-right !scale-150 rounded-box bg-base-100 p-2 text-right shadow-md lg:!scale-100"
     >
       <li v-for="item in items" :key="item.name">
-        <button @click="item.onClick" v-wave class="text-right">
+        <button
+          @click="item.onClick"
+          v-wave
+          class="whitespace-nowrap text-right"
+        >
           {{ item.name }}
           <span class="material-symbols-outlined"> {{ item.icon }} </span>
         </button>

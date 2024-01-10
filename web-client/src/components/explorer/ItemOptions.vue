@@ -34,7 +34,24 @@ type Option = {
   onClick: () => void;
   showCondition?: () => boolean;
 };
-const options = computed<Option[]>(() =>
+
+const folderOptions = computed<Option[]>(() =>
+  [
+    {
+      icon: "content_paste",
+      label: "Paste",
+      onClick: () => clipboardStore.paste(props.itemStore),
+      showCondition: () => clipboardStore.items.length > 0,
+    },
+    {
+      icon: "select_all",
+      label: "Select all",
+      onClick: () => props.itemStore.createFolder(),
+    },
+  ].filter((option) => !option.showCondition || option.showCondition()),
+);
+
+const selectOptions = computed<Option[]>(() =>
   [
     {
       icon: "star",
@@ -94,6 +111,12 @@ const options = computed<Option[]>(() =>
     },
   ].filter((option) => !option.showCondition || option.showCondition()),
 );
+
+const options = computed<Option[]>(() =>
+  props.itemStore.selectedItems.length
+    ? selectOptions.value
+    : folderOptions.value,
+);
 </script>
 
 <template>
@@ -101,9 +124,7 @@ const options = computed<Option[]>(() =>
     <div
       id="item-options"
       class="ml-auto flex"
-      v-if="
-        itemStore.selectedItems.length && (!$isTouchDevice || inContextMenu)
-      "
+      v-if="!$isTouchDevice || inContextMenu"
     >
       <div
         v-for="{ icon, iconClasses, label, onClick } in options"

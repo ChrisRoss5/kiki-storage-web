@@ -47,15 +47,23 @@ const sendPasswordResetEmail = async () => {
   dialogStore.show("Password reset email sent!");
 };
 const deleteAccount = async () => {
+  // Todo: move to backend
   const email = user.value?.email;
   const message1 =
     "This irreversible action will lead to the permanent loss of all your data, " +
     "and please be aware that no backups will be retained. " +
     "Additionally, all shared data will no longer be accessible";
   if (!(await dialogStore.confirm(message1))) return;
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   const message2 =
     "Are you absolutely certain you want to proceed with deleting your account?";
   if (!(await dialogStore.confirm(message2))) return;
+  accountDeleteStatus.value = "Deleting items...";
+  await firestoreApi.deleteAll();
+  accountDeleteStatus.value = "Deleting files...";
+  await storageApi.deleteAll();
+  accountDeleteStatus.value = "Deleting settings...";
+  await settingsStore.deleteAll();
   accountDeleteStatus.value = "Deleting account...";
   try {
     await firebaseAuth.currentUser?.delete();
@@ -66,12 +74,6 @@ const deleteAccount = async () => {
     if (await dialogStore.confirm(message)) firebaseAuth.signOut();
     return emit("close");
   }
-  accountDeleteStatus.value = "Deleting items...";
-  await firestoreApi.deleteAll();
-  accountDeleteStatus.value = "Deleting files...";
-  await storageApi.deleteAll();
-  accountDeleteStatus.value = "Deleting settings...";
-  await settingsStore.deleteAll();
   emit("close");
   dialogStore.show(`Account ${email} deleted.`);
 };

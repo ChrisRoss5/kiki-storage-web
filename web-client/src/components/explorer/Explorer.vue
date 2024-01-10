@@ -41,38 +41,43 @@ const handleFileUpload = (e: Event) => {
       <FileTreeResizer :file-tree-el="fileTreeComp?.fileTreeDiv ?? null" />
       <div class="relative mt-3 flex min-w-0 flex-1 flex-col">
         <LoaderIcon :loading="itemStore.itemsPending" />
-        <!-- cannot use <template> wrapper because of <TransitionGroup> root  -->
-        <div class="flex min-h-0 flex-1 flex-col" v-if="itemStore.items.length">
-          <ExplorerGrid :item-store="itemStore" />
-          <ExplorerFooter :item-store="itemStore" />
-        </div>
-        <label
-          v-else-if="!itemStore.itemsPending && settingsStore.dbSettingsReady"
-          class="flex-center expl-body mb-3 flex-1 flex-col gap-3 overflow-hidden rounded-badge border-2 border-dashed border-base-content p-5 text-center"
-          @drop.stop.prevent="itemStore.handleDrop"
-          @dragover.stop.prevent="setDragOverStyle"
-          @dragleave.stop.prevent="clearDragOverStyle"
-          @dragend.stop.prevent="clearDragOverStyle"
-        >
-          <span class="material-symbols-outlined pointer-events-none">
-            draft
-          </span>
-          <div class="pointer-events-none text-2xl">
-            {{
-              $isTouchDevice
-                ? "Tap to upload files"
-                : "Drop files or create a new folder"
-            }}
+        <template v-if="settingsStore.dbSettingsReady">
+          <!-- cannot use <template> wrapper because of <TransitionGroup> root  -->
+          <div
+            class="flex min-h-0 flex-1 flex-col"
+            v-if="itemStore.items.length"
+          >
+            <ExplorerGrid :item-store="itemStore" />
           </div>
-          <input
-            v-if="$isTouchDevice"
-            type="file"
-            class="hidden"
-            multiple
-            @change="handleFileUpload"
-          />
-        </label>
-        <LoaderIcon v-else-if="settingsStore.dbSettingsReady" :loading="true" />
+          <label
+            v-else-if="!itemStore.itemsPending"
+            class="flex-center expl-body mb-3 flex-1 flex-col gap-3 overflow-hidden rounded-badge border-2 border-dashed border-base-content p-5 text-center"
+            @drop.stop.prevent="itemStore.handleDrop"
+            @dragover.stop.prevent="setDragOverStyle"
+            @dragleave.stop.prevent="clearDragOverStyle"
+            @dragend.stop.prevent="clearDragOverStyle"
+          >
+            <span class="material-symbols-outlined pointer-events-none">
+              draft
+            </span>
+            <div class="pointer-events-none text-2xl">
+              {{
+                $isTouchDevice
+                  ? "Tap to upload files"
+                  : "Drop files or create a new folder"
+              }}
+            </div>
+            <input
+              v-if="$isTouchDevice"
+              type="file"
+              class="hidden"
+              multiple
+              @change="handleFileUpload"
+            />
+          </label>
+          <LoaderIcon v-else :loading="true" />
+          <ExplorerFooter :item-store="itemStore" />
+        </template>
       </div>
     </div>
   </div>

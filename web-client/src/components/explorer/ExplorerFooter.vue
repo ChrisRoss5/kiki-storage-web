@@ -20,7 +20,7 @@ const selectedItemSize = computed(() => {
 
 <template>
   <div
-    class="flex flex-wrap items-center whitespace-nowrap rounded-box rounded-b-none px-1 lg:px-6"
+    class="flex flex-wrap items-center whitespace-nowrap rounded-box rounded-b-none px-1 lg:px-6 mt-auto"
     :class="{
       'bg-base-100/50 shadow-[0_0_50px_0_oklch(var(--p)/30%)]': !isThemeLight,
       'bg-base-300': isThemeLight,
