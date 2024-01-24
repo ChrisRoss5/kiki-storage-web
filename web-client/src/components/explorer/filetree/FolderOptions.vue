@@ -3,7 +3,7 @@ import { usePathStore } from "@/stores/path";
 import { useTabsStore } from "@/stores/tabs";
 import { computed } from "vue";
 
-const props = defineProps<{ path: string, hideCollapse?: boolean }>();
+const props = defineProps<{ path: string; hideCollapse?: boolean }>();
 
 const tabsStore = useTabsStore();
 const pathStore = usePathStore();
@@ -34,8 +34,8 @@ const handleCollapseAll = () => {
         v-if="expandedSubPaths?.length && !hideCollapse"
         class="material-symbols-outlined flex h-full w-6 cursor-pointer items-center transition-opacity hover:bg-base-300 group-hover:opacity-100"
         :class="{
-          'opacity-0': !$isTouchDevice,
-          'opacity-100': $isTouchDevice,
+          'opacity-0': !$inputMechanism.isCoarse,
+          'opacity-100': $inputMechanism.isCoarse,
         }"
         @click.stop.prevent="handleCollapseAll"
         @dblclick.stop="null"

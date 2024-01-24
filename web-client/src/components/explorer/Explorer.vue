@@ -62,13 +62,13 @@ const handleFileUpload = (e: Event) => {
             </span>
             <div class="pointer-events-none text-2xl">
               {{
-                $isTouchDevice
+                $inputMechanism.isCoarse
                   ? "Tap to upload files"
                   : "Drop files or create a new folder"
               }}
             </div>
             <input
-              v-if="$isTouchDevice"
+              v-if="$inputMechanism.isCoarse"
               type="file"
               class="hidden"
               multiple

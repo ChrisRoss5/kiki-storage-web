@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Dialog from "@/components/Dialog.vue";
-import { $isTouchDevice } from "@/main";
+import { $inputMechanism } from "@/main";
 
 const props = defineProps<{ show: boolean }>();
 const emit = defineEmits<(e: "close") => void>();
@@ -17,7 +17,7 @@ const emit = defineEmits<(e: "close") => void>();
     <template #content>
       <div
         class="flex flex-col gap-3"
-        :class="{ 'flex-col-reverse': $isTouchDevice }"
+        :class="{ 'flex-col-reverse': $inputMechanism.isCoarse }"
       >
         <div>
           <strong class="block">Keyboard shortcuts</strong>

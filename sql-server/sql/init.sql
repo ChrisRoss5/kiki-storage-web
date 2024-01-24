@@ -11,14 +11,14 @@ go
 use DropboxClone
 go
 
-select * from Item
+/* select * from Item
 
 delete from Item
 
-TRUNCATE TABLE Item
+truncate table Item
 
 UPDATE Item SET
           path = STUFF(path, 1, 1, 'a0')
           WHERE path LIKE 'a%'
 
-select STUFF(path, 1, 1, 'a0') from Item   WHERE path LIKE 'a%'
+select STUFF(path, 1, 1, 'a0') from Item WHERE path LIKE 'a%' */

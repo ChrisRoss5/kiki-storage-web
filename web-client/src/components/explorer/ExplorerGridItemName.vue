@@ -38,7 +38,7 @@ watch(
 
 <template>
   <input
-    v-if="props.itemStore.selectedItems.length && $isTouchDevice"
+    v-if="props.itemStore.selectedItems.length && $inputMechanism.isCoarse"
     type="checkbox"
     v-model="item.isSelected"
     class="cbx-select dsy-checkbox align-text-bottom"

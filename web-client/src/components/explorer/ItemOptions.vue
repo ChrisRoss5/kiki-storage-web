@@ -127,7 +127,7 @@ const options = computed<Option[]>(() =>
     <div
       id="item-options"
       class="ml-auto flex"
-      v-if="!$isTouchDevice || inContextMenu"
+      v-if="!$inputMechanism.isCoarse || inContextMenu"
     >
       <TransitionGroup name="simple-group">
         <div

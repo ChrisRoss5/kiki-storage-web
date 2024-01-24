@@ -4,11 +4,11 @@ import { usePathStore } from "@/stores/path";
 import { roots } from "@/stores/settings/default";
 import { useTabsStore } from "@/stores/tabs";
 import { clearDragOverStyle, setDragOverStyle } from "@/utils/style";
+import { useSwipe } from "@vueuse/core";
 import { inject, onMounted, provide, ref, watch } from "vue";
 import ExpandButton from "./ExpandButton.vue";
 import FileTreeGrid from "./FileTreeGrid.vue";
 import FolderOptions from "./FolderOptions.vue";
-import { useSwipe } from "@vueuse/core";
 
 provide("isFileTree", true);
 const isThemeLight = inject<boolean>("isThemeLight")!;
@@ -64,7 +64,7 @@ onMounted(() => {
           @dragleave.stop.prevent="clearDragOverStyle"
           @dragend.stop.prevent="clearDragOverStyle"
           @click.stop.prevent="
-            $isTouchDevice
+            $inputMechanism.isCoarse
               ? (
                   ($event.target as HTMLElement)
                     .firstElementChild as HTMLElement

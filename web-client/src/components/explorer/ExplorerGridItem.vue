@@ -126,12 +126,12 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
       'is-cut': item.isCut,
     }"
     tabindex="0"
-    :draggable="!$isTouchDevice && item.isSelected"
-    @dragstart="!$isTouchDevice && handleDragStart(item, $event)"
-    @dragend="!$isTouchDevice && handleDragStop()"
+    :draggable="!$inputMechanism.isCoarse && item.isSelected"
+    @dragstart="!$inputMechanism.isCoarse && handleDragStart(item, $event)"
+    @dragend="!$inputMechanism.isCoarse && handleDragStop()"
     @drop.stop.prevent="handleDropOnItem(item, $event)"
     @click.stop.prevent="
-      $isTouchDevice
+      $inputMechanism.isCoarse
         ? isExpandable
           ? (
               ($event.target as HTMLElement).firstElementChild as HTMLElement
@@ -139,7 +139,7 @@ const handleDropOnItem = (item: Item, e: DragEvent) => {
           : handleItemOpen(item)
         : handleItemSelect(item, $event)
     "
-    @dblclick.stop.prevent="!$isTouchDevice && handleItemOpen(item)"
+    @dblclick.stop.prevent="!$inputMechanism.isCoarse && handleItemOpen(item)"
     @auxclick.middle.stop.prevent="
       item.isFolder && tabsStore.createTab(getFullPath(item))
     "

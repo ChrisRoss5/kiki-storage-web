@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ItemOptions from "@/components/explorer/ItemOptions.vue";
-import { $isTouchDevice } from "@/main";
+import { $inputMechanism } from "@/main";
 import { useContextMenuStore } from "@/stores/context-menu";
 import { useSettingsStore } from "@/stores/settings";
 import getDefaultSettings, { columnNames } from "@/stores/settings/default";
@@ -32,7 +32,7 @@ watch(
       y = innerHeight - offsetHeight - 20;
 
     // This will overlap the touch to disable scrolling for selection rect to work properly
-    if ($isTouchDevice) [x, y] = [x - 10, y - 10];
+    if ($inputMechanism) [x, y] = [x - 10, y - 10];
 
     el.style.top = `${y}px`;
     el.style.left = `${x}px`;

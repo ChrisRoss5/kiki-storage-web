@@ -18,16 +18,17 @@ export const $breakpoints = reactive({
   lgAndUp: useMediaQuery("(min-width: 1024px)"),
 });
 
-export const $isTouchDevice =
-  "ontouchstart" in window || navigator.maxTouchPoints > 0;
+export const $inputMechanism = reactive({
+  isCoarse: useMediaQuery("(pointer: coarse)"),
+});
 
 app.config.globalProperties.$breakpoints = $breakpoints;
-app.config.globalProperties.$isTouchDevice = $isTouchDevice;
+app.config.globalProperties.$inputMechanism = $inputMechanism;
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
     $breakpoints: typeof $breakpoints;
-    $isTouchDevice: boolean;
+    $inputMechanism: typeof $inputMechanism;
   }
 }
 
