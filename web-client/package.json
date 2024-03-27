@@ -23,6 +23,7 @@
     "vuefire": "^3.1.17"
   },
   "devDependencies": {
+    "@playwright/test": "^1.42.1",
     "@types/node": "^20.8.7",
     "@types/uuid": "^9.0.7",
     "@vitejs/plugin-vue": "^4.2.3",

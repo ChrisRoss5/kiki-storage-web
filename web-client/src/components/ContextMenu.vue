@@ -62,7 +62,7 @@ const handleColumnChange = (key: keyof ItemCore) => {
 <template>
   <div
     id="context-menu"
-    class="fixed z-50 touch-none select-none rounded-box bg-base-200 shadow-md"
+    class="fixed z-[99] touch-none select-none rounded-box bg-base-200 shadow-md"
     ref="ctxmenuDiv"
     @click.stop="null"
     @contextmenu.stop.prevent="contextMenuStore.hide"

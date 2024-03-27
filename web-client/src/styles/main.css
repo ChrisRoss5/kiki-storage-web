@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* class: supports-[not_(grid-template-columns:subgrid)] */
+@supports not (grid-template-columns: subgrid) {
+  #unsupported-subgrid {
+    display: flex !important;
+  }
+}
+
 * {
   outline-color: oklch(var(--p));
 }
@@ -48,6 +55,7 @@ a {
   vertical-align: middle;
   user-select: none;
 }
+
 @layer utilities {
   .flex-center {
     @apply flex items-center justify-center;

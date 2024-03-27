@@ -17,6 +17,29 @@
   </head>
   <body class="m-0">
     <div id="app" class="h-screen lg:!h-screen landscape:h-[155vh]"></div>
+    <div
+      id="unsupported-subgrid"
+      style="display: none"
+      class="fixed inset-0 z-[999] items-center justify-center bg-base-100 text-center"
+    >
+      <div>
+        <span
+          class="material-symbols-outlined mb-5 block !text-5xl text-red-400"
+        >
+          error
+        </span>
+        Your browser is incompatible with the app. <br />
+        Please update your browser to the latest version and try again.
+        <br /><br />
+        <a href="https://caniuse.com/?search=subgrid" target="_blank">
+          Reason:
+          <span class="text-red-400">
+            CSS Subgrid not supported.
+            <span class="material-symbols-outlined"> open_in_new </span>
+          </span>
+        </a>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
