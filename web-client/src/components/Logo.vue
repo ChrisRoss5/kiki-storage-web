@@ -4,9 +4,15 @@ defineProps<{ isLogin?: boolean }>(); // because theme is unknown
 
 <template>
   <RouterLink to="/" class="flex-center text-2xl" tabindex="-1">
-    <img alt="Logo" class="mr-3 h-14" src="/logo.png" />
+    <img
+      alt="Logo"
+      class="mr h-14 drop-shadow-lg"
+      :class="{ 'mr-3 py-1': !isLogin }"
+      src="/logo.png"
+    />
     <div>
-      Dropbox Clone
+      Kiki Storage
+      <!-- Dropbox Clone
       <div
         class="ml-1 text-right text-xs"
         :class="{
@@ -15,7 +21,7 @@ defineProps<{ isLogin?: boolean }>(); // because theme is unknown
         }"
       >
         ...but nothing like it
-      </div>
+      </div> -->
     </div>
   </RouterLink>
 </template>
