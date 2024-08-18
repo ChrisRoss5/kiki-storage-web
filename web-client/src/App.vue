@@ -20,8 +20,8 @@ watch(user, async (currentUser) => {
     return router.replace(route.query.redirect);
 });
 </script>
-
 <template>
+
   <Home class="h-full" />
   <Transition name="fade">
     <Login v-if="$route.name == 'login'" class="absolute inset-0 z-10" />

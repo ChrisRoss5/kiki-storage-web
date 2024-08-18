@@ -72,7 +72,7 @@ export const usePathStore = defineStore("path", () => {
     { immediate: true },
   );
 
-  const isPathValid = async (path: string) => {
+  const isPathValid = (path: string) => {
     const prevPath = currentPath.value;
     const idx = path.indexOf("/");
     const _root = path.slice(0, idx > 0 ? idx : undefined);

@@ -142,7 +142,7 @@ export function createItemStore(this: ItemStoreBindings) {
       return;
     const folders = items.filter((i) => i.isFolder);
     const msg = "You can't move a folder into itself or its own subfolder.";
-    if (folders.some((f) => _path!.startsWith(getFullPath(f))))
+    if (folders.some((f) => _path.startsWith(getFullPath(f))))
       return dialogStore.showError(msg);
     items = items.filter(
       (i) => !folders.some((f) => i.path.startsWith(getFullPath(f))),
