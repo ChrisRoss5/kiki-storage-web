@@ -32,6 +32,12 @@ declare module "@vue/runtime-core" {
   }
 }
 
+declare global {
+  interface Window { useFirebaseFunctions: boolean; }
+}
+
+window.useFirebaseFunctions = true;
+
 app
   .use(VueFire, {
     firebaseApp,

@@ -75,7 +75,7 @@ export function createItemStore(this: ItemStoreBindings) {
         const name = newDbItem.name.toLowerCase();
         const sName = searchStore.filters.query.toLowerCase();
         return (
-          name.startsWith(sName) &&
+          name.includes(sName) &&
           (newDbItem.path.startsWith(pathStore.currentRoot) ||
             (pathStore.currentRoot == "starred" &&
               newDbItem.isStarred &&
@@ -127,7 +127,7 @@ export function createItemStore(this: ItemStoreBindings) {
       try {
         const { items, uid } = JSON.parse(itemsDragDataStr) as ItemsDragData;
         if (uid != user.value?.uid)
-          return dialogStore.showError("You can't move someone else's items.");
+          return dialogStore.showError("You can't move someone else's items yet.");
         e.ctrlKey ? handleCopy(items, _path) : handleMove(items, _path);
       } catch {
         location.reload(); // Can only happen if user is unauthorized after too long

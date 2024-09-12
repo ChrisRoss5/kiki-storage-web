@@ -59,6 +59,8 @@ const emit = defineEmits<(e: "close") => void>();
           </ul>
           <strong class="mt-4 block">Click controls</strong>
           <ul>
+            <li><kbd>Double-click</kbd> a document to preview it.</li>
+            <li><kbd>Double-click</kbd> a map to open it.</li>
             <li><kbd>Double-click</kbd> a tab to toggle window full-screen.</li>
             <li><kbd>Middle-click</kbd> a tab to close it.</li>
             <li><kbd>Middle-click</kbd> a folder to open it in a new tab.</li>

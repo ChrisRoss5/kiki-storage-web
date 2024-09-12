@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Dialog from "@/components/Dialog.vue";
 import { firebaseAuth } from "@/firebase";
+import { useFunctionsStore } from "@/stores/firebase-functions";
 import { useItemFirestoreStore } from "@/stores/items/firebase/firestore";
 import { useItemStorageStore } from "@/stores/items/firebase/storage";
 import { useSettingsStore } from "@/stores/settings";
@@ -16,12 +17,12 @@ const user = useCurrentUser();
 const dialogStore = useShortDialogStore();
 const { api: firestoreApi } = useItemFirestoreStore();
 const { api: storageApi } = useItemStorageStore();
+const { api: functionsApi } = useFunctionsStore();
 const settingsStore = useSettingsStore();
 
 const sendingVerificationEmail = ref(false);
 const sendingPasswordResetEmail = ref(false);
 const accountDeleteStatus = ref("");
-//const totalUsage = ref(0); // todo: implement and test delete acc
 
 watch(
   () => props.show,
@@ -47,35 +48,52 @@ const sendPasswordResetEmail = async () => {
   dialogStore.show("Password reset email sent!");
 };
 const deleteAccount = async () => {
-  // Todo: move to backend
   const email = user.value?.email;
+  if (!await confirmDeleteAccount()) return;
+  if (window.useFirebaseFunctions) {
+    accountDeleteStatus.value =
+      "Deleting items, files, settings and account...";
+    try {
+      await functionsApi.deleteAccount();
+      await firebaseAuth.signOut();
+    } catch {
+      return reauthenticate();
+    }
+  } else {
+    accountDeleteStatus.value = "Deleting items...";
+    await firestoreApi.deleteAll();
+    accountDeleteStatus.value = "Deleting files...";
+    await storageApi.deleteAll();
+    accountDeleteStatus.value = "Deleting settings...";
+    await settingsStore.deleteAll();
+    accountDeleteStatus.value = "Deleting account...";
+    try {
+      await firebaseAuth.currentUser?.delete();
+    } catch {
+      return reauthenticate();
+    }
+  }
+  emit("close");
+  dialogStore.show(`Account ${email} deleted.`);
+};
+const confirmDeleteAccount = async () => {
   const message1 =
     "This irreversible action will lead to the permanent loss of all your data, " +
     "and please be aware that no backups will be retained. " +
     "Additionally, all shared data will no longer be accessible";
-  if (!(await dialogStore.confirm(message1))) return;
+  if (!(await dialogStore.confirm(message1))) return false;
   await new Promise((resolve) => setTimeout(resolve, 1000));
   const message2 =
     "Are you absolutely certain you want to proceed with deleting your account?";
-  if (!(await dialogStore.confirm(message2))) return;
-  accountDeleteStatus.value = "Deleting items...";
-  await firestoreApi.deleteAll();
-  accountDeleteStatus.value = "Deleting files...";
-  await storageApi.deleteAll();
-  accountDeleteStatus.value = "Deleting settings...";
-  await settingsStore.deleteAll();
-  accountDeleteStatus.value = "Deleting account...";
-  try {
-    await firebaseAuth.currentUser?.delete();
-  } catch {
-    const message =
-      "You must reauthenticate before deleting your account. " +
-      "Would you like to reauthenticate now?";
-    if (await dialogStore.confirm(message)) firebaseAuth.signOut();
-    return emit("close");
-  }
-  emit("close");
-  dialogStore.show(`Account ${email} deleted.`);
+  if (!(await dialogStore.confirm(message2))) return false;
+  return true;
+};
+const reauthenticate = async () => {
+  const message =
+    "You must reauthenticate before deleting your account. " +
+    "Would you like to reauthenticate now?";
+  if (await dialogStore.confirm(message)) firebaseAuth.signOut();
+  return emit("close");
 };
 </script>
 
@@ -83,9 +101,11 @@ const deleteAccount = async () => {
   <Dialog :show="props.show" :closeOutside="true" @close="emit('close')">
     <template #header> Account </template>
     <template #content>
-      <div>Signed in as: {{ user?.displayName || user?.email }}</div>
       <div>
-        Email: {{ user?.email }}
+        Signed in as: {{ user?.displayName || user?.email || "Unknown" }}
+      </div>
+      <div>
+        Email: {{ user?.email || "No email" }}
         <span v-if="!user?.emailVerified" class="text-red-500">
           <span class="material-symbols-outlined">warning </span>
           (not verified)

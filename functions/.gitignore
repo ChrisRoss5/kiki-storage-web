@@ -7,3 +7,6 @@ typings/
 
 # Node.js dependency directory
 node_modules/
+
+# https://console.cloud.google.com/iam-admin/serviceaccounts/details/106392989452245016611;edit=true/keys?orgonly=true&project=dropbox-clone-716f7&supportedpurview=organizationId
+service-account.json
