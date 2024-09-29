@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { $pwa } from "@/main";
 import { useClipboardStore } from "@/stores/items/clipboard";
 import { useItemFirestoreStore } from "@/stores/items/firebase/firestore";
 import { useItemStorageStore } from "@/stores/items/firebase/storage";
@@ -77,13 +78,17 @@ const selectOptions = computed<Option[]>(() =>
       icon: "download",
       label: "Download",
       onClick: () => {
-        if (props.itemStore.selectedItems.some((i) => i.isFolder))
-          return dialogStore.showError(
-            "Downloading folders is not supported yet.",
+        if ($pwa.isInstalled) {
+          itemStorageStore.api.downloadItems(props.itemStore.selectedItems);
+        } else {
+          if (props.itemStore.selectedItems.some((i) => i.isFolder))
+            return dialogStore.showError(
+              "Downloading folders is not supported yet.",
+            );
+          props.itemStore.selectedItems.forEach(
+            itemStorageStore.api.downloadFile,
           );
-        props.itemStore.selectedItems.forEach(
-          itemStorageStore.api.downloadFile,
-        );
+        }
       },
     },
     {

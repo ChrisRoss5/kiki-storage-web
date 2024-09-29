@@ -124,15 +124,15 @@ export function createItemStore(this: ItemStoreBindings) {
     clearDragOverStyle(e);
     const itemsDragDataStr = e.dataTransfer?.getData("ItemsDragData");
     if (itemsDragDataStr) {
-      try {
         const { items, uid } = JSON.parse(itemsDragDataStr) as ItemsDragData;
         if (uid != user.value?.uid)
-          return dialogStore.showError("You can't move someone else's items yet.");
+          return dialogStore.showError(
+            "You can't move someone else's items yet.",
+          );
         e.ctrlKey ? handleCopy(items, _path) : handleMove(items, _path);
-      } catch {
-        location.reload(); // Can only happen if user is unauthorized after too long
-      }
-    } else if (e.dataTransfer) createFiles(e.dataTransfer.files, _path);
+    } else if (e.dataTransfer) {
+      createFiles([...e.dataTransfer.files], _path);
+    }
   };
   const handleMove = async (items: Item[], _path?: string) => {
     _path ??= path.value;
@@ -142,7 +142,8 @@ export function createItemStore(this: ItemStoreBindings) {
       return;
     const folders = items.filter((i) => i.isFolder);
     const msg = "You can't move a folder into itself or its own subfolder.";
-    if (folders.some((f) => _path.startsWith(getFullPath(f))))
+    if (folders.some((f) => _path!.startsWith(getFullPath(f))))
+      // vue-tsc bug => _path!
       return dialogStore.showError(msg);
     items = items.filter(
       (i) => !folders.some((f) => i.path.startsWith(getFullPath(f))),
@@ -150,22 +151,28 @@ export function createItemStore(this: ItemStoreBindings) {
     firestoreApi.moveItems(items, _path);
   };
   const handleCopy = async (items: Item[], _path?: string) => {
-    // console.log(items, _path); // Todo
     items;
-    dialogStore.showError("Copying is not supported yet.");
+    dialogStore.showError("Copying is not supported yet."); // Todo
   };
-  const createFolder = async () => {
-    const item = _createFolder(newFolderName.value, path.value);
-    if (isItemInvalid(item)) return;
+  const createFolder = (name?: string, _path?: string, validate = true) => {
+    name ??= newFolderName.value;
+    _path ??= path.value;
+    const item = _createFolder(name, _path);
+    if (validate && isItemInvalid(item)) return false;
     newFolderName.value = "";
     firestoreApi.createItem(item);
+    return true;
   };
-  const createFiles = async (files: FileList, _path?: string) => {
+  const createFiles = async (
+    files: File[],
+    _path?: string,
+    validate = true,
+  ) => {
     _path ??= path.value;
     let newItems = convertFilesToItems(files, _path);
     if (!newItems.length)
       return dialogStore.showError("No valid files were selected.");
-    if (await areItemsInvalid(newItems, _path)) return;
+    if (validate && (await areItemsInvalid(newItems, _path))) return;
     storageApi.createFiles(newItems, files);
   };
   const deleteItems = async () => {

@@ -26,6 +26,8 @@
     "@playwright/test": "^1.42.1",
     "@types/node": "^20.8.7",
     "@types/uuid": "^9.0.7",
+    "@types/wicg-file-system-access": "^2023.10.5",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
     "@vitejs/plugin-vue": "^4.2.3",
     "autoprefixer": "^10.4.16",
     "daisyui": "^4.4.7",
@@ -37,6 +39,7 @@
     "terser": "^5.26.0",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
-    "vue-tsc": "^1.8.5"
+    "vite-plugin-pwa": "^0.20.5",
+    "vue-tsc": "^2.1.6"
   }
 }

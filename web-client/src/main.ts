@@ -4,7 +4,7 @@ import "./styles/main.css"; // do not reorder (keep blank line)!
 import { useMediaQuery } from "@vueuse/core";
 import { createPinia } from "pinia";
 import VWave from "v-wave";
-import { createApp, reactive } from "vue";
+import { createApp, reactive, Ref } from "vue";
 import { plugin as Slicksort } from "vue-slicksort";
 import { VueFire, VueFireAuth } from "vuefire";
 import App from "./App.vue";
@@ -17,26 +17,32 @@ export const $breakpoints = reactive({
   mdAndUp: useMediaQuery("(min-width: 768px)"),
   lgAndUp: useMediaQuery("(min-width: 1024px)"),
 });
-
 export const $inputMechanism = reactive({
   isCoarse: useMediaQuery("(pointer: coarse)"),
+});
+export const $pwa = reactive({
+  isInstalled: useMediaQuery("(display-mode: standalone)"),
 });
 
 app.config.globalProperties.$breakpoints = $breakpoints;
 app.config.globalProperties.$inputMechanism = $inputMechanism;
+app.config.globalProperties.$pwa = $pwa;
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
     $breakpoints: typeof $breakpoints;
     $inputMechanism: typeof $inputMechanism;
+    $pwa: typeof $pwa;
   }
 }
 
 declare global {
-  interface Window { useFirebaseFunctions: boolean; }
+  interface Window {
+    useFirebaseFunctions: boolean;
+  }
 }
 
-window.useFirebaseFunctions = true;
+window.useFirebaseFunctions = false;
 
 app
   .use(VueFire, {

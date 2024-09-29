@@ -1,3 +1,42 @@
+export async function readDirectoryRecursively() {
+  const directoryHandle = await window.showDirectoryPicker();
+  console.log(directoryHandle);
+
+  const result: Record<string, File[]> = {};
+
+  async function traverseDirectory(
+    handle: FileSystemDirectoryHandle,
+    currentPath = "",
+  ) {
+    for await (const [name, entry] of handle.entries()) {
+      const fullPath = currentPath ? `${currentPath}/${name}` : name;
+      if (entry.kind === "directory") {
+        result[fullPath] = [];
+        await traverseDirectory(entry, fullPath);
+      } else {
+        const file = await entry.getFile();
+        const parentDir = currentPath || "";
+        if (!result[parentDir]) {
+          result[parentDir] = [];
+        }
+        result[parentDir].push(file);
+      }
+    }
+  }
+
+  await traverseDirectory(directoryHandle, directoryHandle.name);
+  return result;
+}
+
+export async function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 /* EXPERIMENTAL; UNUSED; NON-STANDARD */
 
 /* export async function getAllFileEntries(

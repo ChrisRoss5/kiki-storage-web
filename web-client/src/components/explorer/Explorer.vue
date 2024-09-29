@@ -24,7 +24,7 @@ provide("isThemeLight", isThemeLight);
 
 const handleFileUpload = (e: Event) => {
   const { files } = e.target as HTMLInputElement;
-  if (files) itemStore.createFiles(files);
+  if (files) itemStore.createFiles([...files]);
 };
 </script>
 

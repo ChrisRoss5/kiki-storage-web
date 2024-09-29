@@ -8,10 +8,12 @@ import {
   ref as storageRef,
 } from "firebase/storage";
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, toRaw } from "vue";
 import { useCurrentUser, useFirebaseStorage, useStorageFile } from "vuefire";
 import { useShortDialogStore } from "../../short-dialog";
 import { useItemFirestoreStore } from "./firestore";
+import { downloadBlob } from "@/utils/file";
+import { getFullPath } from "@/utils/item";
 
 export const useItemStorageStore = defineStore("item-storage", () => {
   const user = useCurrentUser();
@@ -23,9 +25,9 @@ export const useItemStorageStore = defineStore("item-storage", () => {
   const itemsUploading = ref<Item[]>([]);
 
   const api = {
-    createFiles(items: Item[], files: FileList) {
+    createFiles(items: Item[], files: File[]) {
       for (let i = 0; i < files.length; i++) {
-        const file = files.item(i)!;
+        const file = files[i];
         const item = items[i];
         const firestoreDoc = itemsFirestoreStore.api.createItemDoc();
         const _storageRef = storageRef(
@@ -70,12 +72,50 @@ export const useItemStorageStore = defineStore("item-storage", () => {
     async downloadFile(item: Item) {
       const _storageRef = storageRef(storage, storagePath.value + item.id!);
       const blob = await getBlob(_storageRef);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${item.name}${item.type ? `.${item.type}` : ""}`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const filename = `${item.name}${item.type ? `.${item.type}` : ""}`;
+      downloadBlob(blob, filename);
+    },
+    async downloadItems(items: Item[]) {
+      const directoryHandle = await window.showDirectoryPicker();
+      const allItems: Item[] = [];
+      const itemPromises = [...items].map(async (item) => {
+        if (item.isFolder) {
+          const subitems = [
+            ...(await itemsFirestoreStore.api.getItems(getFullPath(item), true)
+              .promise.value),
+          ];
+          subitems.forEach(
+            (i) => (i.path = i.path.replace(item.path + "/", "")),
+          );
+          allItems.push(...subitems);
+        }
+        item.path = "";
+        allItems.push(item);
+      });
+     await Promise.all(itemPromises);
+      const writePromises = allItems
+        .filter((i) => !i.isFolder)
+        .map(async (item) => {
+          const pathSegments = item.path.split("/");
+          let currentDirectoryHandle = directoryHandle;
+          for (let i = 0; i < pathSegments.length - 1; i++) {
+            const segment = pathSegments[i];
+            currentDirectoryHandle =
+              await currentDirectoryHandle.getDirectoryHandle(segment, {
+                create: true,
+              });
+          }
+          const fullName = `${item.name}${item.type ? `.${item.type}` : ""}`;
+          const fileHandle = await currentDirectoryHandle.getFileHandle(
+            fullName,
+            { create: true },
+          );
+          const writableStream = await fileHandle.createWritable();
+          const _storageRef = storageRef(storage, storagePath.value + item.id!);
+          await writableStream.write(await getBlob(_storageRef));
+          await writableStream.close();
+        });
+      await Promise.all(writePromises);
     },
     async deleteAll() {
       const listRef = storageRef(storage, storagePath.value);

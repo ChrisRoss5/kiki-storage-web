@@ -12,10 +12,9 @@ export function createFolder(name: string, path: string): ItemCore {
   };
 }
 
-export function convertFilesToItems(files: FileList, path: string): ItemCore[] {
+export function convertFilesToItems(files: File[], path: string): ItemCore[] {
   const newItems: ItemCore[] = [];
   for (const file of files) {
-    if (!file.size) continue;
     const split = file.name.split(".");
     newItems.push({
       name: split.length > 1 ? split.slice(0, -1).join(".") : file.name,
