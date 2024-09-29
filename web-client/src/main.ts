@@ -4,7 +4,7 @@ import "./styles/main.css"; // do not reorder (keep blank line)!
 import { useMediaQuery } from "@vueuse/core";
 import { createPinia } from "pinia";
 import VWave from "v-wave";
-import { createApp, reactive, Ref } from "vue";
+import { createApp, reactive } from "vue";
 import { plugin as Slicksort } from "vue-slicksort";
 import { VueFire, VueFireAuth } from "vuefire";
 import App from "./App.vue";

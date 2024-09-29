@@ -1,6 +1,8 @@
 // https://firebase.google.com/docs/storage/web/download-files
 // gsutil cors set storage-cors-config.json gs://dropbox-clone-716f7.appspot.com
 
+import { downloadBlob } from "@/utils/file";
+import { getFullPath } from "@/utils/item";
 import {
   deleteObject,
   getBlob,
@@ -8,12 +10,10 @@ import {
   ref as storageRef,
 } from "firebase/storage";
 import { defineStore } from "pinia";
-import { computed, ref, toRaw } from "vue";
+import { computed, ref } from "vue";
 import { useCurrentUser, useFirebaseStorage, useStorageFile } from "vuefire";
 import { useShortDialogStore } from "../../short-dialog";
 import { useItemFirestoreStore } from "./firestore";
-import { downloadBlob } from "@/utils/file";
-import { getFullPath } from "@/utils/item";
 
 export const useItemStorageStore = defineStore("item-storage", () => {
   const user = useCurrentUser();
@@ -92,7 +92,7 @@ export const useItemStorageStore = defineStore("item-storage", () => {
         item.path = "";
         allItems.push(item);
       });
-     await Promise.all(itemPromises);
+      await Promise.all(itemPromises);
       const writePromises = allItems
         .filter((i) => !i.isFolder)
         .map(async (item) => {
