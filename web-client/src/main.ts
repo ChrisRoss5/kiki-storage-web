@@ -39,6 +39,7 @@ declare module "@vue/runtime-core" {
 declare global {
   interface Window {
     useFirebaseFunctions: boolean;
+    google: any;
   }
 }
 
