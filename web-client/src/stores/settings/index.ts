@@ -1,7 +1,7 @@
 import { mergeDeep } from "@/utils";
 import { ref as dbRef, remove, set, update } from "firebase/database";
 import { defineStore } from "pinia";
-import { computed, watch } from "vue";
+import { computed, nextTick, watch } from "vue";
 import { useCurrentUser, useDatabase, useDatabaseObject } from "vuefire";
 import { useShortDialogStore } from "../short-dialog";
 import getDefaultSettings from "./default";
@@ -24,9 +24,15 @@ export const useSettingsStore = defineStore("settings", () => {
 
   watch(
     () => settings.value.theme,
-    (theme) => {
+    async (theme) => {
       document.documentElement.dataset.theme = theme;
       localStorage.setItem("theme", theme);
+      await nextTick();
+      const metaThemeEl = document.querySelector("#meta-theme")!;
+      const computedStyle = getComputedStyle(document.documentElement);
+      const metaThemeColor = `oklch(${computedStyle.getPropertyValue("--b1")}`;
+      metaThemeEl.setAttribute("content", metaThemeColor);
+      localStorage.setItem("theme-color-b1", metaThemeColor);
     },
   );
 

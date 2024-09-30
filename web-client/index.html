@@ -10,10 +10,15 @@
     />
     <title>Kiki Storage</title>
     <meta name="description" content="Cloud Storage with tabs!" />
+    <meta name="theme-color" id="meta-theme" />
     <script>
       /* Just to prevent a potential flicker */
-      document.documentElement.dataset.theme =
-        localStorage.getItem("theme") ?? "light";
+      const theme = localStorage.getItem("theme") ?? "light";
+      document.documentElement.dataset.theme = theme;
+      /* Here as well */
+      const themeColorB1 = localStorage.getItem("theme-color-b1") ?? "white";
+      const metaThemeEl = document.querySelector("#meta-theme");
+      metaThemeEl.setAttribute("content", themeColorB1);
     </script>
   </head>
   <body class="m-0">

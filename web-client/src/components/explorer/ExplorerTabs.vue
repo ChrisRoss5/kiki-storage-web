@@ -53,6 +53,7 @@ doesn't transition the margin nor gap.  */
 
 <template>
   <SlickList
+    id="tabs"
     ref="slickListComp"
     class="hidden-scrollbar flex -translate-x-2 select-none overflow-x-auto px-5 pt-3"
     :class="{
