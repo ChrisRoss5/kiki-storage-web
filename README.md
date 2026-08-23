@@ -1,4 +1,43 @@
-# TODO
+# Kiki Storage (web)
+
+College project (Final thesis): A cloud storage app focused on front-end, utilizing Firebase to its maximum extent for a real-time, highly customizable cloud file explorer.
+
+Live: https://storage.k1k1.dev (Cloudflare Pages, not Firebase Hosting)
+
+Android sibling: [kiki-storage-android](https://github.com/ChrisRoss5/kiki-storage-android)
+
+## Run
+
+```
+cd web-client
+npm i
+npm run dev
+```
+
+`npm run build` runs `vue-tsc && vite build`. `npm run dev-host` binds Vite on the LAN.
+
+## Layout
+
+| Path | Role |
+|---|---|
+| `web-client/` | Vue 3 + Vite + Pinia + VueFire + Tailwind/DaisyUI explorer (PWA) |
+| `functions/` | Cloud Functions: `emptyBins` (HTTP, 30-day recycle), `deleteAccount` (callable) |
+| `sql-server/` | Unused SQL Server + Prisma experiment |
+| `firebase.json`, `firestore.rules`, `storage.rules`, `database.rules.json` | Firebase project `dropbox-clone-716f7` |
+
+Auth, Firestore, Realtime Database, Storage, and Functions stay on Firebase. Only the frontend moved to Cloudflare.
+
+## Functions
+
+```
+cd functions
+npm i
+npm run build
+firebase emulators:start --only functions
+firebase deploy --only functions
+```
+
+Node 18. `emptyBins` is an HTTP function that deletes Firestore/Storage items with `dateDeleted` older than 30 days. `deleteAccount` is a callable.
 
 ---
 
